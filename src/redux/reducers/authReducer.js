@@ -1,5 +1,3 @@
-import { LOGIN_SUCCESS, LOGIN_FAILURE, LOGOUT } from "../actions/authActions";
-
 const initialState = {
     isLoggedIn: false,
     email: "",
