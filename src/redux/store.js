@@ -1,4 +1,4 @@
-import { combineReducers, configureStore } from "@reduxjs/toolkit";
+import { combineReducers } from "@reduxjs/toolkit";
 import authReducer from "./reducers/authReducer";
 import orderReducer from "./reducers/orderReducer";
 
@@ -7,6 +7,4 @@ const rootReducer = combineReducers({
     order: orderReducer,
 });
 
-const store = configureStore(rootReducer);
-
-export default store;
+export default rootReducer;

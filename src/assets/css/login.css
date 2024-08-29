@@ -1,0 +1,116 @@
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f6f3ea; /* Light background color */
+    color: black;
+}
+
+/* Styling for the login form box */
+.login-form {
+    width: 400px;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: white;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Styling for the login form header */
+.login-form h2 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    color: #F15822;
+}
+
+/* Form styling to stack inputs vertically */
+.login-form form {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Input fields styling */
+.login-form form input {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Login button styling */
+.login-button {
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #F15822;
+    color: white;
+    cursor: pointer;
+    width: 100%;
+}
+
+.login-button:hover {
+    background-color: #f87140;
+}
+
+/* Social login section styling */
+.social-login {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.social-login p {
+    font-size: 15px;
+    color: black;
+}
+
+/* Social buttons container */
+.social-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+/* Individual social button styling */
+.social-buttons button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 30%;
+    background-color: white;
+}
+
+.google-button {
+    color: #db4437; /* Google Red */
+}
+
+.facebook-button {
+    color: #4267b2; /* Facebook Blue */
+}
+
+.microsoft-button {
+    color: #00a4ef; /* Microsoft Blue */
+}
+
+/* Adding margin to icon for social buttons */
+.social-buttons button svg {
+    margin-right: 10px;
+}
+
+/* Forgot password link styling */
+.form-footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.form-footer a {
+    font-size: 15px;
+    color: #F15822;
+    cursor: pointer;
+}
