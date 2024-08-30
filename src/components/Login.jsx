@@ -1,77 +1,138 @@
-// /src/components/Login.js
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../redux/actions/authActions";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGoogle, faFacebook, faMicrosoft } from '@fortawesome/free-brands-svg-icons';
-import "ag-grid-community/styles/ag-grid.css"; 
-import "ag-grid-community/styles/ag-theme-quartz.css"; 
-import "../assets/css/login.css"; 
+import { useNavigate } from 'react-router-dom'; 
+import {
+  Box,
+  Button,
+  Input,
+  FormControl,
+  FormLabel,
+  Heading,
+  Text,
+  Link,
+  VStack,
+  HStack,
+  Divider,
+  Center,
+  Spacer
+} from "@chakra-ui/react";
 
-const Login = () => {
+const Login = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
+  const navigate = useNavigate(); 
 
   const handleLogin = () => {
     dispatch(login(email, password));
   };
 
-  const handleGoogleSignIn = () => {
-    window.location.href = "your-google-oauth-url";
+  const handleSocialSignIn = (url) => {
+    window.location.href = url;
   };
 
-  const handleFacebookSignIn = () => {
-    window.location.href = "your-facebook-oauth-url";
-  };
-
-  const handleMicrosoftSignIn = () => {
-    window.location.href = "your-microsoft-oauth-url";
-  };
+  useEffect(() => {
+    if (auth.isAuthenticated) {
+      navigate('/dashboard'); 
+    }
+  },[auth.isAuthenticated, navigate]);
 
   return (
-    <div className="login-container">
-      <div className="login-form">
-        <h2>Login</h2>
-        {auth.error && <p style={{ color: "red" }}>{auth.error}</p>}
-        <form>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button className="login-button" onClick={handleLogin}>Login</button>
-        </form>
+    <Box
+      minH="100vh"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      bg="#2B2D30"
+      color="white"
+    >
+      <Box
+        w="400px"
+        p="8"
+        bg="#232428"
+        borderRadius="md"
+        boxShadow="lg"
+        textAlign="center"
+      >
+        <Heading as="h2" size="lg" mb="6" color="#fa6501">
+          Login
+        </Heading>
+        {auth.error && <Text color="red.500" mb="4">{auth.error}</Text>}
+        <VStack spacing="4">
+          <FormControl id="email">
+            <FormLabel color="#fa6501">Email</FormLabel>
+            <Input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </FormControl>
+          <FormControl id="password">
+            <FormLabel color="#fa6501">Password</FormLabel>
+            <Input
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </FormControl>
+          <Button
+            colorScheme="orange"
+            width="100%"
+            onClick={handleLogin}
+            mt="4"
+            background="#fa6501"
+          >
+            Login
+          </Button>
+        </VStack>
 
         {/* Social Sign-In Section */}
-        <div className="social-login">
-          <p>__ Or sign in with __</p>
-          <div className="social-buttons">
-            <button className="google-button" onClick={handleGoogleSignIn}>
-              <FontAwesomeIcon icon={faGoogle} /> Google
-            </button>
-            <button className="facebook-button" onClick={handleFacebookSignIn}>
-              <FontAwesomeIcon icon={faFacebook} /> Facebook
-            </button>
-            <button className="microsoft-button" onClick={handleMicrosoftSignIn}>
-              <FontAwesomeIcon icon={faMicrosoft} /> Microsoft
-            </button>
-          </div>
-        </div>
+        <Center mt="4">
+          <Divider width="40%" />
+          <Text mx="2">Or</Text>
+          <Divider width="40%" />
+        </Center>
+        <Text mt="4">Sign in with:</Text>
+        <HStack spacing="4" justify="center" mt="2">
+          <Button
+            colorScheme="gray"
+            onClick={() => handleSocialSignIn("your-google-oauth-url")}
+          >
+            <FontAwesomeIcon icon={faGoogle} /> 
+            <Spacer mr="1"/>
+            Google
+          </Button>
+          <Button
+            colorScheme="gray"
+            onClick={() => handleSocialSignIn("your-facebook-oauth-url")}
+          >
+            <FontAwesomeIcon icon={faFacebook} /> 
+            <Spacer mr="1"/>
+            Facebook
+          </Button>
+          <Button
+            colorScheme="gray"
+            onClick={() => handleSocialSignIn("your-microsoft-oauth-url")}
+          >
+            <FontAwesomeIcon icon={faMicrosoft} /> 
+            <Spacer mr="1"/>
+            Microsoft
+          </Button>
+        </HStack>
 
-        <div className="form-footer">
-          <a href="/forgot-password">Forgot Password?</a>
-        </div>
-      </div>
-    </div>
+        <Box mt="6">
+          <Link href="/forgot-password" color="#fa6501">
+            Forgot Password?
+          </Link>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 

@@ -1,18 +1,29 @@
-import { AgGridReact } from 'ag-grid-react'; 
-import "ag-grid-community/styles/ag-grid.css"; 
-import "ag-grid-community/styles/ag-theme-quartz.css"; 
-import './App.css'
+import React, { useState } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Login from './components/Login';
+import Nav from './components/Nav';
+import './App.css';
 
 function App() {
-  const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <Login/>,
+  const MainLayout = () => {
+    return (
+      <div>
+        <Nav />
+      </div>
+    );
   }
+  const router = createBrowserRouter([
+    {
+      path: '/',
+      element: <Login />,
+    }, 
+    {
+      path: '/dashboard',
+      element: <MainLayout />
+    }
   ]);
+
   return <RouterProvider router={router} />;
 }
 
-export default App
+export default App;
