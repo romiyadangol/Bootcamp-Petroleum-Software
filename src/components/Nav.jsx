@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Flex, Button, Link as ChakraLink, useColorMode, useColorModeValue, Spacer, HStack, Image, VStack, IconButton } from '@chakra-ui/react';
 import { MoonIcon, SunIcon } from '@chakra-ui/icons';
-import { Link as RouterLink, Outlet } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-regular-svg-icons';
 import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
@@ -28,17 +28,17 @@ return (
         boxSize="40px"
         mr={4}
       />
-      <Box fontWeight="bold" color="orange.400" fontSize="20px">
+      <Box fontWeight="bold" fontSize="20px">
         Dashboard</Box>
 
       <Spacer />
 
       <HStack as="nav" spacing={10}>
-      <ChakraLink as={RouterLink} to="/" _hover={{ textDecoration: 'none', color: 'orange.500' }} color="orange.400" fontSize="20px">Home</ChakraLink>
-      <ChakraLink as={RouterLink} to="/assets" _hover={{ textDecoration: 'none', color: 'orange.500' }} color="orange.400" fontSize="20px">Assets</ChakraLink>
-      <ChakraLink as={RouterLink} to="/products" _hover={{ textDecoration: 'none', color: 'orange.500' }} color="orange.400" fontSize="20px">Products</ChakraLink>
-      <ChakraLink as={RouterLink} to="/customers" _hover={{ textDecoration: 'none', color: 'orange.500' }} color="orange.400" fontSize="20px">Customers</ChakraLink>
-      <ChakraLink as={RouterLink} to="/drivers" _hover={{ textDecoration: 'none', color: 'orange.500' }} color="orange.400" fontSize="20px">Drivers</ChakraLink>
+      <ChakraLink as={RouterLink} to="/dashboard/home" _hover={{ textDecoration: 'none' }} fontSize="18px">Home</ChakraLink>
+      <ChakraLink as={RouterLink} to="/dashboard/assets" _hover={{ textDecoration: 'none' }} fontSize="18px">Assets</ChakraLink>
+      <ChakraLink as={RouterLink} to="/dashboard/products" _hover={{ textDecoration: 'none' }} fontSize="18px">Products</ChakraLink>
+      <ChakraLink as={RouterLink} to="/dashboard/customers" _hover={{ textDecoration: 'none' }} fontSize="18px">Customers</ChakraLink>
+      <ChakraLink as={RouterLink} to="/dashboard/drivers" _hover={{ textDecoration: 'none' }} fontSize="18px">Drivers</ChakraLink>
       </HStack>
 
       <Spacer />
@@ -69,11 +69,11 @@ return (
           <VStack align="stretch" spacing={2} p={2}>
             <Flex align="center" px={2}>
               <FontAwesomeIcon icon={faUser} />
-              <ChakraLink as={RouterLink} to="/edit-profile" ml={2} _hover={{ color: 'orange.500' }}>Profile</ChakraLink>
+              <ChakraLink as={RouterLink} to="/edit-profile" ml={2} _hover={{ color: 'orange.500' }} fontSize="20px">Profile</ChakraLink>
             </Flex>
             <Flex align="center" px={2}>
               <FontAwesomeIcon icon={faSignOutAlt} />
-              <ChakraLink as={RouterLink} to="/logout" ml={2} _hover={{ color: 'orange.500' }}>Logout</ChakraLink>
+              <ChakraLink as={RouterLink} to="/logout" ml={2} _hover={{ color: 'orange.500' }} fontSize="20px">Logout</ChakraLink>
             </Flex>
           </VStack>
           </Box>
@@ -85,7 +85,6 @@ return (
       </Button>   
     </Flex>
   </Box>
-  <Outlet />
 </>
 );
 }

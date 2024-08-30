@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom';
 import Login from './components/Login';
 import Nav from './components/Nav';
 import './App.css';
+import ProductList from './components/ProductList';
 
 function App() {
   const MainLayout = () => {
     return (
       <div>
         <Nav />
+        <Outlet/>
       </div>
     );
   }
@@ -19,7 +21,13 @@ function App() {
     }, 
     {
       path: '/dashboard',
-      element: <MainLayout />
+      element: <MainLayout />,
+      children: [
+        {
+          path: 'products',
+          element: <ProductList />,
+        }
+      ]
     }
   ]);
 
