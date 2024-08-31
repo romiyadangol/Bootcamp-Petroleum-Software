@@ -17,30 +17,33 @@ import {
   HStack,
   Divider,
   Center,
-  Spacer
+  Spacer,
+  Select
 } from "@chakra-ui/react";
 
-const Login = ({ onLoginSuccess }) => {
+const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [organization, setOrganization] = useState("");
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
   const navigate = useNavigate(); 
 
   const handleLogin = () => {
-    dispatch(login(email, password));
+    dispatch(login(email, password, organization));
   };
 
   const handleSocialSignIn = (url) => {
     window.location.href = url;
   };
 
-  useEffect(() => {
-    if (auth.isAuthenticated) {
+  useEffect(() => { 
+    console.log('Auth state:', auth); 
+    if (auth.isLoggedIn) { 
       navigate('/dashboard'); 
     }
-  },[auth.isAuthenticated, navigate]);
-
+  }, [auth.isLoggedIn, navigate]); 
+  
   return (
     <Box
       minH="100vh"
@@ -63,6 +66,18 @@ const Login = ({ onLoginSuccess }) => {
         </Heading>
         {auth.error && <Text color="red.500" mb="4">{auth.error}</Text>}
         <VStack spacing="4">
+          <FormControl id="organization">
+            <FormLabel color="#fa6501">Organization</FormLabel>
+            <Select
+              placeholder="Select your organization"
+              value={organization}
+              onChange={(e) => setOrganization(e.target.value)}
+            >
+              <option value="petroleum">Petroleum</option>
+              <option value="technology">Technology</option>
+              <option value="finance">Finance</option>
+            </Select>
+          </FormControl>
           <FormControl id="email">
             <FormLabel color="#fa6501">Email</FormLabel>
             <Input

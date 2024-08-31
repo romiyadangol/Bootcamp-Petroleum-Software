@@ -4,6 +4,7 @@ import Login from './components/Login';
 import Nav from './components/Nav';
 import './App.css';
 import ProductList from './components/ProductList';
+import UserLists from './components/UserLists';
 
 function App() {
   const MainLayout = () => {
@@ -26,6 +27,10 @@ function App() {
         {
           path: 'products',
           element: <ProductList />,
+        },
+        {
+          path: 'users',
+          element: <UserLists/>
         }
       ]
     }
