@@ -3,9 +3,9 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 import { useMemo, useState } from 'react'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCirclePlus} from '@fortawesome/free-solid-svg-icons';
+import { faCirclePlus, faTrash} from '@fortawesome/free-solid-svg-icons';
 import UserForm from  '../users/UserForm';
-import { useColorModeValue } from '@chakra-ui/react';
+import { filter, useColorModeValue } from '@chakra-ui/react';
 
 
 export default function UserLists() {
@@ -51,12 +51,44 @@ export default function UserLists() {
     editable: true,
   }), []);
 
+  const statusCellRenderer = (params) => {
+    const status = params.value === 'Active' ? 'success' : 'danger';
+    const dotStyle = {
+      display: 'inline-block',
+      width: '10px',
+      height: '10px',
+      borderRadius: '50%',
+      marginRight: '8px',
+      backgroundColor: status === 'success' ? 'green' : 'red',
+    };
+    return (
+      <span>
+        <span style={dotStyle}></span>
+        <span className={`badge rounded-pill bg-${status}`}>{params.value}</span>
+      </span>
+    );
+  };
+
+  const ActionCellRenderer = (params) => (
+    <button 
+      style={{ color: 'white', border: 'none', borderRadius: '5px', padding: '5px' }}
+      onClick={() => handleDelete(params.data.unique_id)}
+    >
+      <FontAwesomeIcon icon={faTrash} />
+    </button>
+  );
+
   const [colDefs, setColDefs] = useState([
     { headerName: "Name", field: "name" },
     { headerName: "Phone", field: "phone" },
     { headerName: "Email", field: "email" },
-    { headerName: "Role", field: "role" },
-    { headerName: "Status", field: "status" },
+    { headerName: "Role", field: "role", cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['dispatcher', 'accounting', 'admin'] } },
+    { headerName: "Status", field: "status", cellRenderer: statusCellRenderer , cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Active', 'Inactive'] } },
+    {
+      headerName: "Actions",
+      cellRenderer: ActionCellRenderer,
+      width: 100
+    }
   ]);
 
   const filteredRowData = rowData.filter((item) => {
