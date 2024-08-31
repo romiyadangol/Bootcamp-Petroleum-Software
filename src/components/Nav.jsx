@@ -34,7 +34,7 @@ return (
       <Spacer />
 
       <HStack as="nav" spacing={10}>
-      <ChakraLink as={RouterLink} to="/dashboard/assets" _hover={{ textDecoration: 'none' }} fontSize="18px">Assets</ChakraLink>
+      <ChakraLink as={RouterLink} to="/dashboard/asset" _hover={{ textDecoration: 'none' }} fontSize="18px">Assets</ChakraLink>
       <ChakraLink as={RouterLink} to="/dashboard/products" _hover={{ textDecoration: 'none' }} fontSize="18px">Products</ChakraLink>
       <ChakraLink as={RouterLink} to="/dashboard/users" _hover={{ textDecoration: 'none' }} fontSize="18px">Users</ChakraLink>
       <ChakraLink as={RouterLink} to="/dashboard/drivers" _hover={{ textDecoration: 'none' }} fontSize="18px">Drivers</ChakraLink>

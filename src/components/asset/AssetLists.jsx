@@ -4,40 +4,42 @@ import "ag-grid-community/styles/ag-theme-quartz.css";
 import { useMemo, useState } from 'react'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCirclePlus} from '@fortawesome/free-solid-svg-icons';
-import UserForm from  './UserForm';
+import AssetForm from  '../asset/AssetForm';
+import { useColorModeValue } from '@chakra-ui/react';
 
-export default function UserLists() {
+
+export default function AssetLists() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [user, setUser] = useState({
+  const [asset, setAsset] = useState({
     name: '',
     phone: '',
     email: '',
-    role: '',
+    address: '',
     status: ''
   });
 
   const [rowData, setRowData] = useState([
-    { name: 'User 1', phone: '1234567890', email: 'user1@gmail.com', role: 'dispatcher,admin', status: 'Active' },
-    { name: 'User 2', phone: '1234567890', email: 'user2@gmail.com', role: 'accounting', status: 'InActive' },
+    { name: 'Ram', phone: '1234567890', email: 'user1@gmail.com', address: 'Dallas, Texas', status: 'Active' },
+    { name: 'Hari', phone: '1234567890', email: 'user2@gmail.com', address: 'Kathmandu, Nepal', status: 'InActive' },
   ]);
 
   const handleSave = () => {
-    const newUser = {
-    ...user,
-    status: user.status === 'true'
+    const newAsset = {
+    ...asset,
+    status: asset.status === 'true' ? 'Active' : 'Inactive',
   };
 
   setRowData(prevRowData => {
-    const updatedRowData = [...prevRowData, newUser];
+    const updatedRowData = [...prevRowData, newAsset];
     return updatedRowData;
   });
 
-  setUser({
+  setAsset({
     name: '',
     phone: '',
     email: '',
-    role: '',
+    address: '',
     status: ''
     });
     setShowModal(false);
@@ -53,31 +55,36 @@ export default function UserLists() {
     { headerName: "Name", field: "name" },
     { headerName: "Phone", field: "phone" },
     { headerName: "Email", field: "email" },
-    { headerName: "Role", field: "role" },
+    { headerName: "Address", field: "address" },
     { headerName: "Status", field: "status" },
   ]);
 
   const filteredRowData = rowData.filter((item) => {
-    return item.name.toLowerCase().includes(searchQuery.toLowerCase()) || item.phone.toLowerCase().includes(searchQuery.toLowerCase()) || item.email.toLowerCase().includes(searchQuery.toLowerCase()) || item.role.toLowerCase().includes(searchQuery.toLowerCase()) || item.role.toLowerCase().includes(searchQuery.toLowerCase()) || item.status.toString().toLowerCase().includes(searchQuery.toLowerCase());
+    return item.name.toLowerCase().includes(searchQuery.toLowerCase()) || item.phone.toLowerCase().includes(searchQuery.toLowerCase()) || item.email.toLowerCase().includes(searchQuery.toLowerCase()) || item.address.toLowerCase().includes(searchQuery.toLowerCase()) || item.status.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
+  const theme = useColorModeValue('ag-theme-quartz', 'ag-theme-quartz-dark');
+
+  const inputbg = useColorModeValue('#EDF2F7', '#121212');
+  const buttonbg = useColorModeValue('#EDF2F7', '#121212');
+
   return (
-    <div className='ag-theme-quartz-dark' style={{ height: 700 }}>
+    <div className={theme} style={{ height: 700 }}>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15, justifyContent: 'space-between' }}>
-        <h2 style={{ fontSize: 25, fontWeight: 'bold', padding: 15 }}>User List</h2>
+        <h2 style={{ fontSize: 25, fontWeight: 'bold', padding: 15 }}>Asset List</h2>
         <div>
           <input 
             type="text" 
-            placeholder="Search" 
-            style={{ marginRight: 10, padding: 10, width: 400, borderRadius: 5, background: '#171923' }}
+            placeholder="Search..." 
+            style={{ marginRight: 10, padding: 12, width: 400, borderRadius: 5, background: inputbg, border: `1px solid {inputbg}`, fontSize: 16  }}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           <button 
-            style={{ border: '1px solid #171923', padding: 9, borderRadius: 5, background: '#171923', fontWeight: 'bold', width: 200 }} 
+            style={{ border: `1px solid {buttonbg}`, padding: 12, borderRadius: 5, background: buttonbg, fontWeight: 'bold', width: 200, fontSize: 16 }} 
             onClick={() => setShowModal(true)}
           >
-          <FontAwesomeIcon icon={faCirclePlus} color='orange' />&nbsp; Create New User
+          <FontAwesomeIcon icon={faCirclePlus} color='orange' />&nbsp; Create New Asset
           </button>
         </div>
       </div>
@@ -92,9 +99,9 @@ export default function UserLists() {
       />
       {showModal && (
         <div>
-          <UserForm 
-          user={user}
-          onChange={(e) => setUser({ ...user, [e.target.name]: e.target.value })}
+          <AssetForm 
+          asset={asset}
+          onChange={(e) => setAsset({ ...asset, [e.target.name]: e.target.value })}
           onSave={handleSave}
           onClose={() => setShowModal(false)}
         />
