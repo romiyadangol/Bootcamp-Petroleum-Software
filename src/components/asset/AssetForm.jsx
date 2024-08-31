@@ -1,3 +1,5 @@
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-quartz.css";
 import { v4 as uuidv4 } from 'uuid';
 import { Button, FormControl, FormLabel, Input, Select, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter } from "@chakra-ui/react";
 
@@ -28,7 +30,7 @@ const assetNames = {
   ],
 };
 
-const AssetForm = ({ asset, onChange, onSave, onClose, onDelete }) => {
+const AssetForm = ({ asset, onChange, onSave, onClose }) => {
   const handleGenerateUniqueId = () => {
     const newUniqueId = uuidv4();
     onChange({ target: { name: 'unique_id', value: newUniqueId } });
@@ -38,65 +40,69 @@ const AssetForm = ({ asset, onChange, onSave, onClose, onDelete }) => {
     <>
       <Modal isOpen={true} onClose={onClose} style={{backgroundColor: "transparent"}} >
         <ModalOverlay />
-        <ModalContent style={{maxWidth: "80%", maxHeight: "90%"}}>
-          <ModalHeader>{asset.unique_id ? "Edit Asset" : "Create New Asset"}</ModalHeader>
+        <ModalContent style={{maxWidth: "800px"}}>
+          <ModalHeader>Asset Details</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <FormControl>
-              <FormLabel>Asset Type</FormLabel>
-              <Select name="asset_type" value={asset.asset_type} onChange={onChange}>
-                <option value="">Select Asset Type</option>
-                <option value="tank">Tank</option>
-                <option value="tank-wagon">Tank Wagon</option>
-                <option value="truck">Truck</option>
-                <option value="trailer">Trailer</option>
-              </Select>
-            </FormControl>
-            <FormControl>
-              <FormLabel>Name</FormLabel>
-              <Select
-                name="name"
-                value={asset.name}
-                onChange={onChange}
-                placeholder="Select Asset Name"
-                isDisabled={!asset.asset_type}
-              >
-                {asset.asset_type && assetNames[asset.asset_type].map(name => (
-                  <option key={name} value={name}>{name}</option>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl>
-              <FormLabel>Unique ID</FormLabel>
-              <Input
-                name="unique_id"
-                value={asset.unique_id}
-                onChange={onChange}
-                readOnly
-              />
-              <Button onClick={handleGenerateUniqueId} mt={2}>Generate Unique ID</Button>
-            </FormControl>
-            <FormControl>
-              <FormLabel>Status</FormLabel>
-              <Select name="status" value={asset.status} onChange={onChange}>
-                <option value="">Select Status</option>
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-              </Select>
-            </FormControl>
+            <form>
+              <FormControl mb={4}>
+                <FormLabel>Asset_Type:</FormLabel>
+                <Select
+                  name="asset_type"
+                  value={asset.asset_type}
+                  onChange={onChange}
+                >
+                  <option value="">Select Asset Type</option>
+                  <option value="tank">tank</option>
+                  <option value="tank-wagon">tank-wagon</option>
+                  <option value="truck">truck</option>
+                  <option value="trailer">trailer</option>
+                </Select>  
+              </FormControl>
+
+              <FormControl mb={4}>
+                <FormLabel>Asset_Name:</FormLabel>
+                <Select
+                  name="name"
+                  value={asset.name}
+                  onChange={onChange}
+                  disabled={!asset.asset_type}
+                >
+                  <option value="">Select Asset Name</option>
+                  {asset.asset_type && assetNames[asset.asset_type].map((name, index) => (
+                    <option key={index} value={name}>{name}</option>
+                  ))}
+                </Select>  
+              </FormControl>
+
+              <FormControl mb={4}>
+                <FormLabel>Unique ID:</FormLabel>
+                <Input
+                  type="text"
+                  value={asset.unique_id || ''}
+                  readOnly
+                />
+                <Button mt={2} onClick={handleGenerateUniqueId}>Generate Unique ID</Button>
+              </FormControl>
+
+              <FormControl mb={4}>
+                <FormLabel>Status:</FormLabel>
+                <Select
+                  name="status"
+                  value={asset.status} 
+                  onChange={(e) => onChange({ target: { name: 'status', value: e.target.value } })}
+                >
+                  <option value="">Select Status</option>
+                  <option value="true">Active</option>
+                  <option value="false">Inactive</option>
+                </Select>
+              </FormControl>
+            </form>
           </ModalBody>
+
           <ModalFooter>
-            {asset.unique_id && (
-              <Button colorScheme="red" onClick={() => onDelete(asset.unique_id)} mr={3}>
-                Delete
-              </Button>
-            )}
-            <Button colorScheme="blue" onClick={onSave}>
-              Save
-            </Button>
-            <Button colorScheme="gray" onClick={onClose}>
-              Close
-            </Button>
+            <Button colorScheme="blue" mr={3} onClick={onSave}>Save</Button>
+            <Button colorScheme="red" onClick={onClose}>Cancel</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
