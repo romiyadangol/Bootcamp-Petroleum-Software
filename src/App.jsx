@@ -7,6 +7,7 @@ import ProductList from './components/products/ProductList';
 import UserLists from './components/users/UserLists';
 import DriverLists from './components/drivers/DriverLists';
 import AssetLists from './components/asset/AssetLists';
+import DeliveryList from './components/delivery/DeliveryList';
 
 function App() {
   const MainLayout = () => {
@@ -41,6 +42,10 @@ function App() {
         {
           path: 'asset',
           element: <AssetLists/>
+        },
+        {
+          path: 'delivery',
+          element: <DeliveryList/>
         }
       ]
     }

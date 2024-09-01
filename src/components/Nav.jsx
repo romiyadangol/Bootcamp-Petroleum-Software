@@ -38,6 +38,7 @@ return (
       <ChakraLink as={RouterLink} to="/dashboard/products" _hover={{ textDecoration: 'none' }} fontSize="18px">Products</ChakraLink>
       <ChakraLink as={RouterLink} to="/dashboard/users" _hover={{ textDecoration: 'none' }} fontSize="18px">Users</ChakraLink>
       <ChakraLink as={RouterLink} to="/dashboard/drivers" _hover={{ textDecoration: 'none' }} fontSize="18px">Drivers</ChakraLink>
+      <ChakraLink as={RouterLink} to="/dashboard/delivery" _hover={{ textDecoration: 'none' }} fontSize="18px">Delivery</ChakraLink>
       </HStack>
 
       <Spacer />
