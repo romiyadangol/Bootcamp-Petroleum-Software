@@ -4,40 +4,41 @@ import "ag-grid-community/styles/ag-theme-quartz.css";
 import { useMemo, useState } from 'react'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCirclePlus, faTrash} from '@fortawesome/free-solid-svg-icons';
-import DriverForm from  '../drivers/DriverForm';
+import CustomerForm from  '../customers/CustomerForm';
 import { useColorModeValue } from '@chakra-ui/react';
 import { toast, Zoom  } from 'react-toastify';
 import Toastify from '../Toastify';
 
-export default function DriverLists() {
+export default function CustomerLists() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [hoveredRowIndex, setHoveredRowIndex] = useState(null);
-  const [driver, setDriver] = useState({
+  const [customer, setCustomer] = useState({
     name: '',
     phone: '',
     email: '',
     address: '',
-    status: ''
+    status: '',
+    city: '',
+    zip: '',
   });
 
   const [rowData, setRowData] = useState([
-    { name: 'Ram', phone: '1234567890', email: 'user1@gmail.com', address: 'Dallas, Texas', status: 'Active' },
-    { name: 'Hari', phone: '1234567890', email: 'user2@gmail.com', address: 'Kathmandu, Nepal', status: 'InActive' },
+    { name: 'Ram', phone: '1234567890', email: 'user1@gmail.com', address: 'Dallas, Texas', status: 'Active', city: 'Dallas', zip: '75001' },
+    { name: 'Hari', phone: '1234567890', email: 'user2@gmail.com', address: 'Kathmandu, Nepal', status: 'InActive', city: 'Kathmandu', zip: '44600' },
   ]);
 
   const handleSave = () => {
-    const newDriver = {
-    ...driver,
-    status: driver.status === 'true' ? 'Active' : 'Inactive',
+    const newCustomer = {
+    ...Customer,
+    status: customer.status === 'true' ? 'Active' : 'Inactive',
     };
 
     setRowData(prevRowData => {
-      const updatedRowData = [...prevRowData, newDriver];
+      const updatedRowData = [...prevRowData, newCustomer];
       return updatedRowData;
     });
 
-    toast.success('Driver Created', {
+    toast.success('Customer Created', {
       position: "bottom-right",
       autoClose: 5000,
       hideProgressBar: false,
@@ -49,25 +50,17 @@ export default function DriverLists() {
       transition: Zoom,
     });
 
-    setDriver({
+    setCustomer({
       name: '',
       phone: '',
       email: '',
       address: '',
-      status: ''
+      status: '',
+      city: '',
+      zip: '',
       });
       setShowModal(false);
   };
-
-
-  const handleRowMouseEnter = (rowIndex) => {
-    setHoveredRowIndex(rowIndex);
-  };
-
-  const handleRowMouseLeave = () => {
-    setHoveredRowIndex(null);
-  };
-
 
   const defaultColDef = useMemo(() => ({
     sortable: true,
@@ -98,7 +91,7 @@ export default function DriverLists() {
     setRowData(prevRowData => prevRowData.filter(item => 
         item.name !== name || 
         item.phone !== phone || 
-        item.email !== email
+        item.email !== email 
     ));
   };
 
@@ -113,11 +106,13 @@ export default function DriverLists() {
 
 
   const [colDefs, setColDefs] = useState([
-    { headerName: "Name", field: "name" , cellRenderer: EditableCellRenderer},
-    { headerName: "Phone", field: "phone", cellRenderer: EditableCellRenderer },
-    { headerName: "Email", field: "email", cellRenderer: EditableCellRenderer },
-    { headerName: "Address", field: "address", cellRenderer: EditableCellRenderer },
+    { headerName: "Name", field: "name" },
+    { headerName: "Phone", field: "phone" },
+    { headerName: "Email", field: "email" },
+    { headerName: "Address", field: "address" },
     { headerName: "Status", field: "status", cellRenderer: statusCellRenderer, cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Active', 'Inactive'] } },
+    { headerName: "City", field: "city" },
+    { headerName: "Zip", field: "zip" },
     {
       headerName: "Actions",
       cellRenderer: ActionCellRenderer,
@@ -126,7 +121,7 @@ export default function DriverLists() {
   ]);
 
   const filteredRowData = rowData.filter((item) => {
-    return item.name.toLowerCase().includes(searchQuery.toLowerCase()) || item.phone.toLowerCase().includes(searchQuery.toLowerCase()) || item.email.toLowerCase().includes(searchQuery.toLowerCase()) || item.address.toLowerCase().includes(searchQuery.toLowerCase()) || item.status.toLowerCase().includes(searchQuery.toLowerCase());
+    return item.name.toLowerCase().includes(searchQuery.toLowerCase()) || item.phone.toLowerCase().includes(searchQuery.toLowerCase()) || item.email.toLowerCase().includes(searchQuery.toLowerCase()) || item.address.toLowerCase().includes(searchQuery.toLowerCase()) || item.status.toLowerCase().includes(searchQuery.toLowerCase()) || item.city.toLowerCase().includes(searchQuery.toLowerCase()) || item.zip.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   const theme = useColorModeValue('ag-theme-quartz', 'ag-theme-quartz-dark');
@@ -137,7 +132,7 @@ export default function DriverLists() {
   return (
     <div className={theme} style={{ height: 700 }}>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15, justifyContent: 'space-between' }}>
-        <h2 style={{ fontSize: 25, fontWeight: 'bold', padding: 15 }}>Driver List</h2>
+        <h2 style={{ fontSize: 25, fontWeight: 'bold', padding: 15 }}>Customer List</h2>
         <div>
           <input 
             type="text" 
@@ -147,10 +142,10 @@ export default function DriverLists() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           <button 
-            style={{ border: `1px solid {buttonbg}`, padding: 12, borderRadius: 5, background: buttonbg, fontWeight: 'bold', width: 200, fontSize: 16 }} 
+            style={{ border: `1px solid {buttonbg}`, padding: 12, borderRadius: 5, background: buttonbg, fontWeight: 'bold', width: 250, fontSize: 16 }} 
             onClick={() => setShowModal(true)}
           >
-          <FontAwesomeIcon icon={faCirclePlus} color='orange' />&nbsp; Create New Driver
+          <FontAwesomeIcon icon={faCirclePlus} color='orange' />&nbsp; Create New Customer
           </button>
         </div>
       </div>
@@ -162,14 +157,12 @@ export default function DriverLists() {
         pagination={true}
         paginationPageSize={10}
         paginationPageSizeSelector={[10, 20, 30]}
-        onRowMouseEnter={e => handleRowMouseEnter(e.rowIndex)}
-        onRowMouseLeave={handleRowMouseLeave}
       />
       {showModal && (
         <div>
-          <DriverForm 
-          driver={driver}
-          onChange={(e) => setDriver({ ...driver, [e.target.name]: e.target.value })}
+          <CustomerForm 
+          customer={customer}
+          onChange={(e) => setCustomer({ ...customer, [e.target.name]: e.target.value })}
           onSave={handleSave}
           onClose={() => setShowModal(false)}
         />

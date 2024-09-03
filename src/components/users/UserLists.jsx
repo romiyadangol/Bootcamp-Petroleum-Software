@@ -5,12 +5,15 @@ import { useMemo, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCirclePlus, faTrash} from '@fortawesome/free-solid-svg-icons';
 import UserForm from  '../users/UserForm';
-import { filter, useColorModeValue } from '@chakra-ui/react';
-
+import { useColorModeValue } from '@chakra-ui/react';
+import { toast, Zoom } from 'react-toastify';
+import Toastify from '../Toastify';
+import EditableCellRenderer from '../EditableCellRenderer';
 
 export default function UserLists() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [hoveredRowIndex, setHoveredRowIndex] = useState(null);
   const [user, setUser] = useState({
     name: '',
     phone: '',
@@ -28,19 +31,32 @@ export default function UserLists() {
     const newUser = {
     ...user,
     status: user.status === 'true' ? 'Active' : 'Inactive',
-  };
+    id: rowData.length + 1,
+    };
 
-  setRowData(prevRowData => {
-    const updatedRowData = [...prevRowData, newUser];
-    return updatedRowData;
-  });
+    setRowData(prevRowData => {
+      const updatedRowData = [...prevRowData, newUser];
+      return updatedRowData;
+    });
 
-  setUser({
-    name: '',
-    phone: '',
-    email: '',
-    role: '',
-    status: ''
+    toast.success('User Created', {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+      transition: Zoom,
+    });
+
+    setUser({
+      name: '',
+      phone: '',
+      email: '',
+      role: '',
+      status: ''
     });
     setShowModal(false);
   };
@@ -68,21 +84,29 @@ export default function UserLists() {
       </span>
     );
   };
-
+  const handleDelete = (name, phone, email) => {
+    setRowData(prevRowData => prevRowData.filter(item => 
+      item.name !== name || 
+      item.phone !== phone || 
+      item.email !== email
+    ));
+  };
+  
   const ActionCellRenderer = (params) => (
     <button 
       style={{ color: 'white', border: 'none', borderRadius: '5px', padding: '5px' }}
-      onClick={() => handleDelete(params.data.unique_id)}
+      onClick={() => handleDelete(params.data.name, params.data.phone, params.data.email)}
     >
       <FontAwesomeIcon icon={faTrash} />
     </button>
   );
+  
 
   const [colDefs, setColDefs] = useState([
-    { headerName: "Name", field: "name" },
-    { headerName: "Phone", field: "phone" },
-    { headerName: "Email", field: "email" },
-    { headerName: "Role", field: "role", cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['dispatcher', 'accounting', 'admin'] } },
+    { headerName: "Name", field: "name", cellRenderer: EditableCellRenderer },
+    { headerName: "Phone", field: "phone", cellRenderer: EditableCellRenderer  },
+    { headerName: "Email", field: "email", cellRenderer: EditableCellRenderer  },
+    { headerName: "Role", field: "role", cellRenderer: EditableCellRenderer , cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['dispatcher', 'accounting', 'admin'] } },
     { headerName: "Status", field: "status", cellRenderer: statusCellRenderer , cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Active', 'Inactive'] } },
     {
       headerName: "Actions",
@@ -128,6 +152,8 @@ export default function UserLists() {
         pagination={true}
         paginationPageSize={10}
         paginationPageSizeSelector={[10, 20, 30]}
+        onRowMouseEnter={e => handleRowMouseEnter(e.rowIndex)}
+        onRowMouseLeave={handleRowMouseLeave}
       />
       {showModal && (
         <div>
@@ -139,6 +165,7 @@ export default function UserLists() {
         />
         </div>
       )}
+      <Toastify/>
     </div>
   );
 }

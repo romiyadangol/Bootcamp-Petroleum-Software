@@ -6,10 +6,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCirclePlus, faTrash} from '@fortawesome/free-solid-svg-icons';
 import ProductForm from  '../products/ProductForm';
 import { useColorModeValue } from '@chakra-ui/react';
+import { toast, Zoom  } from 'react-toastify';
+import Toastify from '../Toastify';
+import EditableCellRenderer from '../EditableCellRenderer';
 
 export default function ProductList() {
     const [searchQuery, setSearchQuery] = useState('');
     const [showModal, setShowModal] = useState(false);
+    const [hoveredRowIndex, setHoveredRowIndex] = useState(null);
     const [product, setProduct] = useState({
         name: '',
         category: '',
@@ -43,7 +47,19 @@ export default function ProductList() {
             const updatedRowData = [...prevRowData, newProduct];
             return updatedRowData;
         });
-    
+
+        toast.success('Product Created', {
+            position: "bottom-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+            transition: Zoom,
+        });
+      
         setProduct({
             name: '',
             category: '',
@@ -52,6 +68,15 @@ export default function ProductList() {
         });
         setShowModal(false);
     };
+
+    const handleRowMouseEnter = (rowIndex) => {
+      setHoveredRowIndex(rowIndex);
+    };
+  
+    const handleRowMouseLeave = () => {
+      setHoveredRowIndex(null);
+    };
+  
 
     const defaultColDef = useMemo(() => ({
         sortable: true,
@@ -77,20 +102,28 @@ export default function ProductList() {
         );
       };
 
+    const handleDelete = (name, category, unit) => {
+        setRowData(prevRowData => prevRowData.filter(item => 
+            item.name !== name || 
+            item.category !== category || 
+            item.unit !== unit
+        ));
+    };
+    
     const ActionCellRenderer = (params) => (
-      <button 
-        style={{ color: 'white', border: 'none', borderRadius: '5px', padding: '5px' }}
-        onClick={() => handleDelete(params.data.unique_id)}
-      >
-        <FontAwesomeIcon icon={faTrash} />
-      </button>
+        <button 
+            style={{ color: 'white', border: 'none', borderRadius: '5px', padding: '5px' }}
+            onClick={() => handleDelete(params.data.name, params.data.category, params.data.unit)}
+        >
+            <FontAwesomeIcon icon={faTrash} color={trashIcon} />
+        </button>
     );
 
     const [colDefs, setColDefs] = useState([
-        { headerName: "Name", field: "name" },
-        { headerName: "Category", field: "category" , cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Fuel', 'Oil'] } },
+        { headerName: "Name", field: "name", cellRenderer: EditableCellRenderer },
+        { headerName: "Category", field: "category", cellRenderer: EditableCellRenderer  ,  cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Fuel', 'Oil'] } },
         { headerName: "Status", field: "status", cellRenderer: statusCellRenderer, cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Active', 'Inactive'] } },
-        { headerName: "Unit", field: "unit", cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Gallon', 'Litre'] } },
+        { headerName: "Unit", field: "unit", cellRenderer: EditableCellRenderer , cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Gallon', 'Litre'] } },
         {
             headerName: "Actions",
             cellRenderer: ActionCellRenderer,
@@ -106,45 +139,50 @@ export default function ProductList() {
 
     const inputbg = useColorModeValue('#EDF2F7', '#121212');
     const buttonbg = useColorModeValue('#EDF2F7', '#121212');
+    const trashIcon = useColorModeValue('#364859', '#F1F3F4');
+
     return (
         <div className={theme} style={{ height: 700 }}>
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15, justifyContent: 'space-between' }}>
-                <h2 style={{ fontSize: 25, fontWeight: 'bold', padding: 15 }}>Product List</h2>
-                <div>
-                    <input 
-                        type="text" 
-                        placeholder="Search..." 
-                        style={{ marginRight: 10, padding: 12, width: 400, borderRadius: 5, background: inputbg, border: `1px solid {inputbg}`, fontSize: 16  }}
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                    <button 
-                        style={{ border: `1px solid {buttonbg}` , padding: 12, borderRadius: 5, background: buttonbg, fontWeight: 'bold', width: 200, fontSize: 16 }} 
-                        onClick={() => setShowModal(true)}
-                    >
-                        <FontAwesomeIcon icon={faCirclePlus} color='orange' />&nbsp; Create New Product
-                    </button>
-                </div>
-            </div>
-            <AgGridReact
-                rowData={filteredRowData}
-                columnDefs={colDefs}
-                defaultColDef={defaultColDef}
-                rowSelection='multiple'
-                pagination={true}
-                paginationPageSize={10}
-                paginationPageSizeSelector={[10, 20, 30]}
-            />
-            {showModal && (
-                <div>
-                    <ProductForm 
-                        product={product}
-                        onChange={(e) => setProduct({ ...product, [e.target.name]: e.target.value })}
-                        onSave={handleSave}
-                        onClose={() => setShowModal(false)}
-                    />
-                </div>
-            )}
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15, justifyContent: 'space-between' }}>
+            <h2 style={{ fontSize: 25, fontWeight: 'bold', padding: 15 }}>Product List</h2>
+              <div>
+                <input 
+                  type="text" 
+                  placeholder="Search..." 
+                  style={{ marginRight: 10, padding: 12, width: 400, borderRadius: 5, background: inputbg, border: `1px solid {inputbg}`, fontSize: 16  }}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <button 
+                  style={{ border: `1px solid {buttonbg}` , padding: 12, borderRadius: 5, background: buttonbg, fontWeight: 'bold', width: 200, fontSize: 16 }} 
+                  onClick={() => setShowModal(true)}
+                >
+                  <FontAwesomeIcon icon={faCirclePlus} color='orange' />&nbsp; Create New Product
+                </button>
+              </div>
+          </div>
+          <AgGridReact
+              rowData={filteredRowData}
+              columnDefs={colDefs}
+              defaultColDef={defaultColDef}
+              rowSelection='multiple'
+              pagination={true}
+              paginationPageSize={10}
+              paginationPageSizeSelector={[10, 20, 30]}
+              onRowMouseEnter={e => handleRowMouseEnter(e.rowIndex)}
+              onRowMouseLeave={handleRowMouseLeave}
+          />
+          {showModal && (
+            <div>
+              <ProductForm 
+                product={product}
+                onChange={(e) => setProduct({ ...product, [e.target.name]: e.target.value })}
+                onSave={handleSave}
+                onClose={() => setShowModal(false)}
+              />
+              </div>
+          )}
+          <Toastify/>
         </div>
     );
 }

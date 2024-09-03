@@ -6,10 +6,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCirclePlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import AssetForm from '../asset/AssetForm';
 import { useColorModeValue } from '@chakra-ui/react';
+import { toast, Zoom  } from 'react-toastify';
+import Toastify from '../Toastify';
+import EditableCellRenderer from '../EditableCellRenderer';
 
 export default function AssetLists() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [hoveredRowIndex, setHoveredRowIndex] = useState(null);
   const [asset, setAsset] = useState({
     asset_type: '',
     name: '',
@@ -36,6 +40,18 @@ export default function AssetLists() {
       return updatedRowData;
     });
 
+    toast.success('Assets Created', {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+      transition: Zoom,
+    });
+
     setAsset({
       asset_type: '',
       name: '',
@@ -47,6 +63,14 @@ export default function AssetLists() {
 
   const handleDelete = (unique_id) => {
     setRowData(prevRowData => prevRowData.filter(asset => asset.unique_id !== unique_id));
+  };
+
+  const handleRowMouseEnter = (rowIndex) => {
+    setHoveredRowIndex(rowIndex);
+  };
+
+  const handleRowMouseLeave = () => {
+    setHoveredRowIndex(null);
   };
 
   const defaultColDef = useMemo(() => ({
@@ -83,8 +107,8 @@ export default function AssetLists() {
   );
 
   const [colDefs, setColDefs] = useState([
-    { headerName: "Asset Type", field: "asset_type", cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['tank', 'tank-wagon', 'truck', 'trailer'] } },
-    { headerName: "Name", field: "name" },
+    { headerName: "Asset Type", field: "asset_type", cellRenderer: EditableCellRenderer },
+    { headerName: "Name", field: "name", cellRenderer: EditableCellRenderer },
     { headerName: "Unique ID", field: "unique_id" },
     { headerName: "Status", field: "status", cellRenderer: statusCellRenderer, cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Active', 'Inactive'] } },
     {
@@ -130,6 +154,8 @@ export default function AssetLists() {
         pagination={true}
         paginationPageSize={10}
         paginationPageSizeSelector={[10, 20, 30]}
+        onRowMouseEnter={e => handleRowMouseEnter(e.rowIndex)}
+        onRowMouseLeave={handleRowMouseLeave}
       />
       {showModal && (
         <div>
@@ -142,6 +168,7 @@ export default function AssetLists() {
           />
         </div>
       )}
+      <Toastify/>
     </div>
   );
 }

@@ -8,6 +8,8 @@ import UserLists from './components/users/UserLists';
 import DriverLists from './components/drivers/DriverLists';
 import AssetLists from './components/asset/AssetLists';
 import DeliveryList from './components/delivery/DeliveryList';
+import CustomerLists from './components/customers/CustomerLists';
+import Logout from './components/Logout';
 
 function App() {
   const MainLayout = () => {
@@ -23,6 +25,10 @@ function App() {
       path: '/',
       element: <Login />,
     }, 
+    {
+      path: '/logout',
+      element: <Logout/>
+    },
     {
       path: '/dashboard',
       element: <MainLayout />,
@@ -42,6 +48,10 @@ function App() {
         {
           path: 'asset',
           element: <AssetLists/>
+        },
+        {
+          path: 'customers',
+          element: <CustomerLists/>
         },
         {
           path: 'delivery',
