@@ -8,11 +8,14 @@ import DriverForm from  '../drivers/DriverForm';
 import { useColorModeValue } from '@chakra-ui/react';
 import { toast, Zoom  } from 'react-toastify';
 import Toastify from '../Toastify';
+import { useDispatch, useSelector } from 'react-redux';
+import { addDriver, deleteDriver } from '../../redux/actions/driverActions';
 
 export default function DriverLists() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [hoveredRowIndex, setHoveredRowIndex] = useState(null);
+  const dispatch = useDispatch();
   const [driver, setDriver] = useState({
     name: '',
     phone: '',
@@ -21,21 +24,14 @@ export default function DriverLists() {
     status: ''
   });
 
-  const [rowData, setRowData] = useState([
-    { name: 'Ram', phone: '1234567890', email: 'user1@gmail.com', address: 'Dallas, Texas', status: 'Active' },
-    { name: 'Hari', phone: '1234567890', email: 'user2@gmail.com', address: 'Kathmandu, Nepal', status: 'InActive' },
-  ]);
+  const rowData = useSelector(state => state.driver || []);
 
   const handleSave = () => {
     const newDriver = {
     ...driver,
     status: driver.status === 'true' ? 'Active' : 'Inactive',
     };
-
-    setRowData(prevRowData => {
-      const updatedRowData = [...prevRowData, newDriver];
-      return updatedRowData;
-    });
+    dispatch(addDriver(newDriver));
 
     toast.success('Driver Created', {
       position: "bottom-right",
@@ -95,17 +91,13 @@ export default function DriverLists() {
   };
 
   const handleDelete = (name, phone, email) => {
-    setRowData(prevRowData => prevRowData.filter(item => 
-        item.name !== name || 
-        item.phone !== phone || 
-        item.email !== email
-    ));
+   dispatch(deleteDriver(name, phone, email));
   };
 
   const ActionCellRenderer = (params) => (
       <button 
           style={{ color: 'white', border: 'none', borderRadius: '5px', padding: '5px' }}
-          onClick={() => handleDelete(params.data.name, params.data.phone, params.data.email)}
+          onClick={() => handleDelete(params.data)}
       >
           <FontAwesomeIcon icon={faTrash} />
       </button>

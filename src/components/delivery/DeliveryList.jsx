@@ -9,11 +9,14 @@
   import { toast, Zoom  } from 'react-toastify';
   import Toastify from '../Toastify';
   import EditableCellRenderer from '../EditableCellRenderer';
+import { useDispatch, useSelector } from 'react-redux';
+import { addDelivery, deleteDelivery } from '../../redux/actions/deliveryActions';
 
   export default function DeliveryList() {
     const [searchQuery, setSearchQuery] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [hoveredRowIndex, setHoveredRowIndex] = useState(null);
+    const dispatch = useDispatch();
     const [delivery, setDelivery] = useState({
       pricing: '',
       status: '',
@@ -27,10 +30,7 @@
       zip: '',
     });
 
-    const [rowData, setRowData] = useState([
-      { pricing: '$1000', status: 'Active', created_at: '2024-09-01', type: 'Fuel', planned_at: '2024-09-05', customer: 'user 1', address: '123 Main St', state: 'CA', city: 'Los Angeles', zip: '90001' },
-      { pricing: '$2000', status: 'Inactive', created_at: '2024-09-02', type: 'Oil', planned_at: '2024-09-06', customer: 'user 2', address: '456 Oak Ave', state: 'NY', city: 'New York', zip: '10001' },
-    ]);
+    const rowData = useSelector(state => state.delivery || []);
 
     const handleSave = () => {
       console.log('Before update:', rowData); 
@@ -38,12 +38,7 @@
         ...delivery,
         status: delivery.status === 'true' ? 'Active' : 'Inactive',
       };
-
-      setRowData(prevRowData => {
-        const updatedRowData = [...prevRowData, newDelivery];
-        console.log('Updated rowData:', updatedRowData);
-        return updatedRowData;
-      });
+      dispatch(addDelivery(newDelivery));
 
       toast.success('Created Order', {
         position: "bottom-right",
@@ -105,15 +100,13 @@
     };
 
     const handleDelete = (pricing, customer) => {
-      setRowData(prevRowData => prevRowData.filter(item => 
-        item.pricing !== pricing || item.customer !== customer
-      ));
+      dispatch(deleteDelivery(pricing, customer));
     };
     
     const ActionCellRenderer = (params) => (
       <button 
         style={{ color: 'white', border: 'none', borderRadius: '5px', padding: '5px' }}
-        onClick={() => handleDelete(params.data.pricing, params.data.customer)}
+        onClick={() => handleDelete(params.data)}
       >
         <FontAwesomeIcon icon={faTrash} />
       </button>

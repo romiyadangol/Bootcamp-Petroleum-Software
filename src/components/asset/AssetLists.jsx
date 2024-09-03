@@ -9,11 +9,14 @@ import { useColorModeValue } from '@chakra-ui/react';
 import { toast, Zoom  } from 'react-toastify';
 import Toastify from '../Toastify';
 import EditableCellRenderer from '../EditableCellRenderer';
+import { useDispatch, useSelector } from 'react-redux';
+import { addAsset, deleteAsset } from '../../redux/actions/assetActions';
 
 export default function AssetLists() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [hoveredRowIndex, setHoveredRowIndex] = useState(null);
+  const dispatch = useDispatch();
   const [asset, setAsset] = useState({
     asset_type: '',
     name: '',
@@ -21,24 +24,15 @@ export default function AssetLists() {
     status: ''
   });
 
-  const [rowData, setRowData] = useState([
-    { asset_type: 'tank', name: 'Petroleum Storage Tank 1', unique_id: 'ba3af9bb-4871-4e49-879a-3a641db40912', status: 'Active' },
-    { asset_type: 'tank-wagon', name: 'Crude Oil Tanker Wagon', unique_id: '0fdf9944-0370-4d0f-a348-d1941dedde20', status: 'Inactive' },
-    { asset_type: 'truck', name: 'Fuel Delivery Truck 300', unique_id: 'f3b3b3b3-3b3b-3b3b-3b3b-3b3b3b3b3b3b', status: 'Active' },
-    { asset_type: 'trailer', name: 'Fuel Tank Trailer T100', unique_id: 'c3c3c3c3-c3c3-c3c3-c3c3-c3c3c3c3c3c3', status: 'Inactive' },
-    { asset_type: 'tank', name: 'Fuel Oil Tank A', unique_id: 'a3a3a3a3-a3a3-a3a3-a3a3-a3a3a3a3a3a3', status: 'Active' },
-  ]);
+  const rowData = useSelector(state => state.asset || []);
+  console.log('rowData', rowData);
 
   const handleSave = () => {
     const newAsset = {
       ...asset,
       status: asset.status === 'true' ? 'Active' : 'Inactive',
     };
-
-    setRowData(prevRowData => {
-      const updatedRowData = [...prevRowData, newAsset];
-      return updatedRowData;
-    });
+    dispatch(addAsset(newAsset));
 
     toast.success('Assets Created', {
       position: "bottom-right",
@@ -62,7 +56,7 @@ export default function AssetLists() {
   };
 
   const handleDelete = (unique_id) => {
-    setRowData(prevRowData => prevRowData.filter(asset => asset.unique_id !== unique_id));
+    dispatch(deleteAsset(unique_id));
   };
 
   const handleRowMouseEnter = (rowIndex) => {
@@ -119,8 +113,12 @@ export default function AssetLists() {
   ]);
 
   const filteredRowData = rowData.filter((item) => {
-    return item.asset_type.toLowerCase().includes(searchQuery.toLowerCase()) || item.name.toLowerCase().includes(searchQuery.toLowerCase()) || item.unique_id.toLowerCase().includes(searchQuery.toLowerCase()) || item.status.toLowerCase().includes(searchQuery.toLowerCase());
+    return item.asset_type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           item.unique_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           item.status.toLowerCase().includes(searchQuery.toLowerCase());
   });
+  
 
   const theme = useColorModeValue('ag-theme-quartz', 'ag-theme-quartz-dark');
   const inputbg = useColorModeValue('#EDF2F7', '#121212');

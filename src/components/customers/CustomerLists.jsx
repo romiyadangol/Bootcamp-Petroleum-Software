@@ -8,10 +8,13 @@ import CustomerForm from  '../customers/CustomerForm';
 import { useColorModeValue } from '@chakra-ui/react';
 import { toast, Zoom  } from 'react-toastify';
 import Toastify from '../Toastify';
+import { useDispatch, useSelector } from 'react-redux';
+import { addCustomer, deleteCustomer } from '../../redux/actions/customerActions';
 
 export default function CustomerLists() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const dispatch = useDispatch();
   const [customer, setCustomer] = useState({
     name: '',
     phone: '',
@@ -22,21 +25,14 @@ export default function CustomerLists() {
     zip: '',
   });
 
-  const [rowData, setRowData] = useState([
-    { name: 'Ram', phone: '1234567890', email: 'user1@gmail.com', address: 'Dallas, Texas', status: 'Active', city: 'Dallas', zip: '75001' },
-    { name: 'Hari', phone: '1234567890', email: 'user2@gmail.com', address: 'Kathmandu, Nepal', status: 'InActive', city: 'Kathmandu', zip: '44600' },
-  ]);
+  const rowData = useSelector(state => state.customer || []);
 
   const handleSave = () => {
     const newCustomer = {
     ...Customer,
     status: customer.status === 'true' ? 'Active' : 'Inactive',
     };
-
-    setRowData(prevRowData => {
-      const updatedRowData = [...prevRowData, newCustomer];
-      return updatedRowData;
-    });
+    dispatch(addCustomer(newCustomer));
 
     toast.success('Customer Created', {
       position: "bottom-right",
@@ -88,17 +84,13 @@ export default function CustomerLists() {
   };
 
   const handleDelete = (name, phone, email) => {
-    setRowData(prevRowData => prevRowData.filter(item => 
-        item.name !== name || 
-        item.phone !== phone || 
-        item.email !== email 
-    ));
+    dispatch(deleteCustomer(name, phone, email));
   };
 
   const ActionCellRenderer = (params) => (
       <button 
           style={{ color: 'white', border: 'none', borderRadius: '5px', padding: '5px' }}
-          onClick={() => handleDelete(params.data.name, params.data.phone, params.data.email)}
+          onClick={() => handleDelete(params.data)}
       >
           <FontAwesomeIcon icon={faTrash} />
       </button>

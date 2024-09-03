@@ -9,11 +9,14 @@ import { useColorModeValue } from '@chakra-ui/react';
 import { toast, Zoom } from 'react-toastify';
 import Toastify from '../Toastify';
 import EditableCellRenderer from '../EditableCellRenderer';
+import { useDispatch, useSelector } from 'react-redux';
+import { addUser, deleteUser } from '../../redux/actions/userActions';
 
 export default function UserLists() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [hoveredRowIndex, setHoveredRowIndex] = useState(null);
+  const dispatch = useDispatch();
   const [user, setUser] = useState({
     name: '',
     phone: '',
@@ -22,10 +25,7 @@ export default function UserLists() {
     status: ''
   });
 
-  const [rowData, setRowData] = useState([
-    { name: 'User 1', phone: '1234567890', email: 'user1@gmail.com', role: 'dispatcher,admin', status: 'Active' },
-    { name: 'User 2', phone: '1234567890', email: 'user2@gmail.com', role: 'accounting', status: 'InActive' },
-  ]);
+  const rowData = useSelector(state => state.user || []);
 
   const handleSave = () => {
     const newUser = {
@@ -33,11 +33,7 @@ export default function UserLists() {
     status: user.status === 'true' ? 'Active' : 'Inactive',
     id: rowData.length + 1,
     };
-
-    setRowData(prevRowData => {
-      const updatedRowData = [...prevRowData, newUser];
-      return updatedRowData;
-    });
+    dispatch(addUser(newUser));
 
     toast.success('User Created', {
       position: "bottom-right",
@@ -85,17 +81,20 @@ export default function UserLists() {
     );
   };
   const handleDelete = (name, phone, email) => {
-    setRowData(prevRowData => prevRowData.filter(item => 
-      item.name !== name || 
-      item.phone !== phone || 
-      item.email !== email
-    ));
+    dispatch(deleteUser(name, phone, email));
+  };
+  const handleRowMouseEnter = (rowIndex) => {
+    setHoveredRowIndex(rowIndex);
+  };
+
+  const handleRowMouseLeave = () => {
+    setHoveredRowIndex(null);
   };
   
   const ActionCellRenderer = (params) => (
     <button 
       style={{ color: 'white', border: 'none', borderRadius: '5px', padding: '5px' }}
-      onClick={() => handleDelete(params.data.name, params.data.phone, params.data.email)}
+      onClick={() => handleDelete(params.data)}
     >
       <FontAwesomeIcon icon={faTrash} />
     </button>

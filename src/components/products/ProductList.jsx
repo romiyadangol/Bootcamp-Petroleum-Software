@@ -9,45 +9,32 @@ import { useColorModeValue } from '@chakra-ui/react';
 import { toast, Zoom  } from 'react-toastify';
 import Toastify from '../Toastify';
 import EditableCellRenderer from '../EditableCellRenderer';
+import { useSelector } from 'react-redux';
+import { addProduct, deleteProduct } from '../../redux/actions/productActions';
+import { useDispatch } from 'react-redux';
 
 export default function ProductList() {
     const [searchQuery, setSearchQuery] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [hoveredRowIndex, setHoveredRowIndex] = useState(null);
+    const dispatch = useDispatch();
     const [product, setProduct] = useState({
+        id: '',
         name: '',
         category: '',
         status: '',
         unit: ''
     });
 
-    const [rowData, setRowData] = useState([
-        { name: 'Petrol', category: 'Fuel', status: 'Active', unit: 'Gallon' },
-        { name: 'Diesel', category: 'Fuel', status: 'Active', unit: 'Litre' },
-        { name: 'Engine Oil', category: 'Oil', status: 'Active', unit: 'Litre' },
-        { name: 'Gear Oil', category: 'Oil', status: 'Inactive', unit: 'Litre' },
-        { name: 'Brake Oil', category: 'Oil', status: 'Active', unit: 'Litre' },
-        { name: 'Coolant', category: 'Oil', status: 'Inactive', unit: 'Litre' },
-        { name: 'Power Steering Oil', category: 'Oil', status: 'Active', unit: 'Litre' },
-        { name: 'Transmission Oil', category: 'Oil', status: 'Active', unit: 'Litre' },
-        { name: 'Hydraulic Oil', category: 'Oil', status: 'Inactive', unit: 'Litre' },
-        { name: 'Grease', category: 'Oil', status: 'Active', unit: 'Litre' },
-        { name: 'Washer Fluid', category: 'Oil', status: 'Inactive', unit: 'Litre' },
-        { name: 'Battery Water', category: 'Oil', status: 'Active', unit: 'Litre' },
-        { name: 'Distilled Water', category: 'Oil', status: 'Inactive', unit: 'Litre' },
-    ]);
+    const rowData = useSelector(state => state.product || []);
 
     const handleSave = () => {
         const newProduct = {
             ...product,
             status: product.status === 'true' ? 'Active' : 'Inactive',
         };
+        dispatch(addProduct(newProduct));
     
-        setRowData(prevRowData => {
-            const updatedRowData = [...prevRowData, newProduct];
-            return updatedRowData;
-        });
-
         toast.success('Product Created', {
             position: "bottom-right",
             autoClose: 5000,
@@ -61,6 +48,7 @@ export default function ProductList() {
         });
       
         setProduct({
+            id: '',
             name: '',
             category: '',
             status: '',
@@ -102,18 +90,14 @@ export default function ProductList() {
         );
       };
 
-    const handleDelete = (name, category, unit) => {
-        setRowData(prevRowData => prevRowData.filter(item => 
-            item.name !== name || 
-            item.category !== category || 
-            item.unit !== unit
-        ));
+    const handleDelete = (name,category,unit) => {
+      dispatch(deleteProduct(name,category,unit));
     };
     
     const ActionCellRenderer = (params) => (
         <button 
             style={{ color: 'white', border: 'none', borderRadius: '5px', padding: '5px' }}
-            onClick={() => handleDelete(params.data.name, params.data.category, params.data.unit)}
+            onClick={() => handleDelete(params.data)}
         >
             <FontAwesomeIcon icon={faTrash} color={trashIcon} />
         </button>
