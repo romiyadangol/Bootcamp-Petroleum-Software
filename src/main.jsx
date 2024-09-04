@@ -7,9 +7,13 @@ import './index.css';
 import { Provider } from 'react-redux';
 import { ChakraProvider } from '@chakra-ui/react';
 import { ApolloProvider } from '@apollo/client';
-import client from './apollo/Client.js';
+import client from './apollo/client.js';
+import { thunk } from 'redux-thunk';
 
-const store = configureStore({ reducer: rootReducer });
+const store = configureStore({
+  reducer: rootReducer,
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(thunk),
+});
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

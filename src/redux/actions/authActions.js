@@ -1,23 +1,34 @@
-export const login = (email, password) => {
-    return(dispatch) => {
-        if (email === "test@gmail.com" && password === "password") {
-            dispatch ({
-                type: "LOGIN_SUCCESS",
-                payload: { email, role: "admin" }
-            });
-        }
-        else {
-            dispatch ({
-                type: "LOGIN_FAILURE",
-                payload: { error: "Invalid email or password" },
-            });
-        }
-    };
-};
+export const LOGIN_REQUEST = 'LOGIN_REQUEST';
+export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
+export const LOGIN_FAILURE = 'LOGIN_FAILURE';
 
-export const logout = () => {
-    
-    return {
-        type: "LOGOUT",
-    };
-};
+export const LOGOUT_REQUEST = 'LOGOUT_REQUEST';
+export const LOGOUT_SUCCESS = 'LOGOUT_SUCCESS';
+export const LOGOUT_FAILURE = 'LOGOUT_FAILURE';
+
+export const loginUser = () => ({
+    type: LOGIN_REQUEST,
+});
+
+export const loginUserSuccess = (user) => ({
+    type: LOGIN_SUCCESS,
+    payload: user,
+});
+
+export const loginUserFailure = (error) => ({
+    type: LOGIN_FAILURE,
+    payload: error,
+});
+
+export const logoutUser = () => ({
+    type: LOGOUT_REQUEST,
+});
+
+export const logoutUserSuccess = () => ({
+    type: LOGOUT_SUCCESS,
+});
+
+export const logoutUserFailure = (error) => ({
+    type: LOGOUT_FAILURE,
+    payload: error,
+});

@@ -10,7 +10,9 @@ import { toast, Zoom  } from 'react-toastify';
 import Toastify from '../Toastify';
 import EditableCellRenderer from '../EditableCellRenderer';
 import { useDispatch, useSelector } from 'react-redux';
-import { addAsset, deleteAsset } from '../../redux/actions/assetActions';
+import { GET_ASSETS } from '../../graphql/queries/getAssets';
+import { addAsset, deleteAsset, fetchAssetsRequest, fetchAssetsFailure, fetchAssetsSuccess } from '../../redux/actions/assetActions';
+import { useQuery } from '@apollo/client';
 
 export default function AssetLists() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -20,13 +22,25 @@ export default function AssetLists() {
   const [asset, setAsset] = useState({
     asset_type: '',
     name: '',
-    unique_id: '',
-    status: ''
+    id: '',
+    status: 'Inactive'
   });
+  const {data, loading, error, refetch} = useQuery(GET_ASSETS);
+  if (loading) {
+    dispatch(fetchAssetsRequest());
+  }
 
-  const rowData = useSelector(state => state.asset || []);
-  console.log('rowData', rowData);
+  if (data) {
+    dispatch(fetchAssetsSuccess(data.getAssets.assets));
+  }
 
+  if (error) {
+    dispatch(fetchAssetsFailure(error.message));
+  }
+
+
+  const rowData = useSelector(state => state.asset.assets || []);
+  
   const handleSave = () => {
     const newAsset = {
       ...asset,
@@ -52,11 +66,12 @@ export default function AssetLists() {
       unique_id: '',
       status: ''
     });
+    refetch();
     setShowModal(false);
   };
 
-  const handleDelete = (unique_id) => {
-    dispatch(deleteAsset(unique_id));
+  const handleDelete = (id) => {
+    dispatch(deleteAsset(id));
   };
 
   const handleRowMouseEnter = (rowIndex) => {
@@ -102,8 +117,8 @@ export default function AssetLists() {
 
   const [colDefs, setColDefs] = useState([
     { headerName: "Asset Type", field: "asset_type", cellRenderer: EditableCellRenderer },
-    { headerName: "Name", field: "name", cellRenderer: EditableCellRenderer },
-    { headerName: "Unique ID", field: "unique_id" },
+    { headerName: "Asset ID", field: "asset_id", cellRenderer: EditableCellRenderer },
+    // { headerName: "Name", field: "name", cellRenderer: EditableCellRenderer },
     { headerName: "Status", field: "status", cellRenderer: statusCellRenderer, cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Active', 'Inactive'] } },
     {
       headerName: "Actions",
@@ -114,8 +129,8 @@ export default function AssetLists() {
 
   const filteredRowData = rowData.filter((item) => {
     return item.asset_type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-           item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-           item.unique_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          //  item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           item.asset_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
            item.status.toLowerCase().includes(searchQuery.toLowerCase());
   });
   
@@ -129,15 +144,15 @@ export default function AssetLists() {
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15, justifyContent: 'space-between' }}>
         <h2 style={{ fontSize: 25, fontWeight: 'bold', padding: 15 }}>Asset List</h2>
         <div>
-          <input 
-            type="text" 
-            placeholder="Search..." 
-            style={{ marginRight: 10, padding: 12, width: 400, borderRadius: 5, background: inputbg, border: `1px solid ${inputbg}`, fontSize: 16  }}
+          <input
+            type="text"
+            placeholder="Search..."
+            style={{ marginRight: 10, padding: 12, width: 400, borderRadius: 5, background: inputbg, border: `1px solid ${inputbg}`, fontSize: 16 }}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <button 
-            style={{ border: `1px solid ${buttonbg}`, padding: 12, borderRadius: 5, background: buttonbg, fontWeight: 'bold', width: 200, fontSize: 16 }} 
+          <button
+            style={{ border: `1px solid ${buttonbg}`, padding: 12, borderRadius: 5, background: buttonbg, fontWeight: 'bold', width: 200, fontSize: 16 }}
             onClick={() => setShowModal(true)}
           >
             <FontAwesomeIcon icon={faCirclePlus} color='orange' />&nbsp; Create New Asset
@@ -156,17 +171,17 @@ export default function AssetLists() {
         onRowMouseLeave={handleRowMouseLeave}
       />
       {showModal && (
-        <div>
-          <AssetForm 
-            asset={asset}
-            onChange={(e) => setAsset({ ...asset, [e.target.name]: e.target.value })}
-            onSave={handleSave}
-            onClose={() => setShowModal(false)}
-            onDelete={handleDelete}
-          />
-        </div>
+      <div>
+        <AssetForm
+          asset={asset}
+          onChange={(e) => setAsset({ ...asset, [e.target.name]: e.target.value })}
+          onSave={handleSave}
+          onClose={() => setShowModal(false)}
+          onDelete={handleDelete}
+        />
+      </div>
       )}
-      <Toastify/>
+      <Toastify />
     </div>
-  );
-}
+  )
+}  

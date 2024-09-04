@@ -1,6 +1,6 @@
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
-import { v4 as uuidv4 } from 'uuid';
+// import { v4 as uuidv4 } from 'uuid';
 import { Button, FormControl, FormLabel, Input, Select, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter } from "@chakra-ui/react";
 
 const assetNames = {
@@ -31,10 +31,10 @@ const assetNames = {
 };
 
 const AssetForm = ({ asset, onChange, onSave, onClose }) => {
-  const handleGenerateUniqueId = () => {
-    const newUniqueId = uuidv4();
-    onChange({ target: { name: 'unique_id', value: newUniqueId } });
-  };
+  // const handleGenerateUniqueId = () => {
+  //   const newUniqueId = uuidv4();
+  //   onChange({ target: { name: 'unique_id', value: newUniqueId } });
+  // };
 
   return (
     <>
@@ -75,7 +75,7 @@ const AssetForm = ({ asset, onChange, onSave, onClose }) => {
                 </Select>  
               </FormControl>
 
-              <FormControl mb={4}>
+              {/* <FormControl mb={4}>
                 <FormLabel>Unique ID:</FormLabel>
                 <Input
                   type="text"
@@ -83,7 +83,7 @@ const AssetForm = ({ asset, onChange, onSave, onClose }) => {
                   readOnly
                 />
                 <Button mt={2} onClick={handleGenerateUniqueId}>Generate Unique ID</Button>
-              </FormControl>
+              </FormControl> */}
 
               <FormControl mb={4}>
                 <FormLabel>Status:</FormLabel>

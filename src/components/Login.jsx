@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "../redux/actions/authActions";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGoogle, faFacebook, faMicrosoft } from '@fortawesome/free-brands-svg-icons';
+import { loginUser, loginUserSuccess, loginUserFailure } from "../redux/actions/authActions";
 import { useNavigate } from 'react-router-dom'; 
+import { useMutation } from '@apollo/client';
+import { LOGIN_USER } from '../graphql/mutation/login';
+import SecureLS from 'secure-ls';
 import {
   Box,
   Button,
@@ -14,36 +15,67 @@ import {
   Text,
   Link,
   VStack,
-  HStack,
-  Divider,
-  Center,
-  Spacer,
-  Select
 } from "@chakra-ui/react";
+import { storeToken } from "../helper/storage";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [organization, setOrganization] = useState("");
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
+  const ls = new SecureLS({ encodingType: 'aes' });
+
+  const [login, { data, error, loading }] = useMutation(LOGIN_USER, {
+    onCompleted: (data) => {
+      if (data.userSession) {
+        const { user, token, errors } = data.userSession;
+        if (errors && errors.length > 0) {
+          dispatch(loginUserFailure(errors));
+          console.error('Login errors:', errors);
+          return;
+        }
+        if (token) {
+          try {
+            storeToken(token);
+            console.log('Token stored:', ls.get('authToken'));
+          } catch (e) {
+            console.error('Error storing token:', e);
+          }
+          dispatch(loginUserSuccess(user));
+          setEmail("");
+          setPassword("");
+          navigate('/dashboard');
+        }
+      } else {
+        console.error('No userSession data found');
+      }
+    },
+    onError: (err) => {
+      dispatch(loginUserFailure(err.message));
+      console.error('Login error:', err);
+    }
+  });
+  
 
   const handleLogin = () => {
-    dispatch(login(email, password, organization));
-  };
-
-  const handleSocialSignIn = (url) => {
-    window.location.href = url;
+    dispatch(loginUser()); 
+    login({
+      variables: {
+        sessionInfo: {
+          email,
+          password,
+        }
+      }
+    });
   };
 
   useEffect(() => { 
-    console.log('Auth state:', auth); 
-    if (auth.isLoggedIn) { 
+    if (auth.user) { 
       navigate('/dashboard'); 
     }
-  }, [auth.isLoggedIn, navigate]); 
-  
+  }, [auth.user, navigate]);
+
   return (
     <Box
       minH="100vh"
@@ -66,18 +98,19 @@ const Login = () => {
         </Heading>
         {auth.error && <Text color="red.500" mb="4">{auth.error}</Text>}
         <VStack spacing="4">
-          <FormControl id="organization">
+          {/* <FormControl id="organization">
             <FormLabel color="#fa6501">Organization</FormLabel>
             <Select
               placeholder="Select your organization"
               value={organization}
+              color="gray"
               onChange={(e) => setOrganization(e.target.value)}
             >
               <option value="petroleum">Petroleum</option>
               <option value="technology">Technology</option>
               <option value="finance">Finance</option>
             </Select>
-          </FormControl>
+          </FormControl> */}
           <FormControl id="email">
             <FormLabel color="#fa6501">Email</FormLabel>
             <Input
@@ -102,44 +135,11 @@ const Login = () => {
             onClick={handleLogin}
             mt="4"
             background="#fa6501"
+            isLoading={loading}
           >
             Login
           </Button>
         </VStack>
-
-        {/* Social Sign-In Section */}
-        <Center mt="4">
-          <Divider width="40%" />
-          <Text mx="2">Or</Text>
-          <Divider width="40%" />
-        </Center>
-        <Text mt="4">Sign in with:</Text>
-        <HStack spacing="4" justify="center" mt="2">
-          <Button
-            colorScheme="gray"
-            onClick={() => handleSocialSignIn("your-google-oauth-url")}
-          >
-            <FontAwesomeIcon icon={faGoogle} /> 
-            <Spacer mr="1"/>
-            Google
-          </Button>
-          <Button
-            colorScheme="gray"
-            onClick={() => handleSocialSignIn("your-facebook-oauth-url")}
-          >
-            <FontAwesomeIcon icon={faFacebook} /> 
-            <Spacer mr="1"/>
-            Facebook
-          </Button>
-          <Button
-            colorScheme="gray"
-            onClick={() => handleSocialSignIn("your-microsoft-oauth-url")}
-          >
-            <FontAwesomeIcon icon={faMicrosoft} /> 
-            <Spacer mr="1"/>
-            Microsoft
-          </Button>
-        </HStack>
 
         <Box mt="6">
           <Link href="/forgot-password" color="#fa6501">

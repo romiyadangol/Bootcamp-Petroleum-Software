@@ -1,27 +1,25 @@
 import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
-import  SecureLS  from 'secure-ls';
-
-const ls = new SecureLS({ encodingType: 'aes' });
-
-const token = ls.get('authToken');
+import { getToken } from  '../helper/storage.js';
 
 const httpLink = createHttpLink({
-  uri: 'https://your-backend-url/graphql', 
+  uri: 'https://1356-110-44-126-21.ngrok-free.app/graphql',
 });
 
 const authLink = setContext((_, { headers }) => {
+  const token = getToken(); 
+  
   return {
     headers: {
       ...headers,
-      authorization: token ? `Bearer ${token}` : "",
-    }
-  }
+      authorization: token ? `Bearer ${token}` : '',
+    },
+  };
 });
 
-const Client = new ApolloClient({
+const client = new ApolloClient({
   link: authLink.concat(httpLink),
   cache: new InMemoryCache(),
 });
 
-export default Client;
+export default client;
