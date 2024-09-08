@@ -1,4 +1,4 @@
-import { ADD_ASSET, DELETE_ASSET, FETCH_ASSETS_REQUEST, FETCH_ASSETS_SUCCESS, FETCH_ASSETS_FAILURE } from '../actions/assetActions';
+import { ADD_ASSET, DELETE_ASSET, UPDATE_ASSET, FETCH_ASSETS_REQUEST, FETCH_ASSETS_SUCCESS, FETCH_ASSETS_FAILURE } from '../actions/assetActions';
 
 const initialState = {
   assets: [],
@@ -34,6 +34,11 @@ const assetReducer = (state = initialState, action) => {
       return {
         ...state,
         assets: state.assets.filter(asset => asset.id !== action.payload), // Assuming 'id' is used to identify assets
+      };
+    case UPDATE_ASSET:
+      return {
+        ...state,
+        assets: state.assets.map(asset => asset.id === action.payload.id? action.payload : asset)
       };
     default:
       return state;

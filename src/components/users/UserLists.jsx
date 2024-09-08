@@ -8,7 +8,6 @@ import UserForm from  '../users/UserForm';
 import { useColorModeValue } from '@chakra-ui/react';
 import { toast, Zoom } from 'react-toastify';
 import Toastify from '../Toastify';
-import EditableCellRenderer from '../EditableCellRenderer';
 import { useDispatch, useSelector } from 'react-redux';
 import { addUser, deleteUser } from '../../redux/actions/userActions';
 
@@ -83,13 +82,6 @@ export default function UserLists() {
   const handleDelete = (name, phone, email) => {
     dispatch(deleteUser(name, phone, email));
   };
-  const handleRowMouseEnter = (rowIndex) => {
-    setHoveredRowIndex(rowIndex);
-  };
-
-  const handleRowMouseLeave = () => {
-    setHoveredRowIndex(null);
-  };
   
   const ActionCellRenderer = (params) => (
     <button 
@@ -102,10 +94,10 @@ export default function UserLists() {
   
 
   const [colDefs, setColDefs] = useState([
-    { headerName: "Name", field: "name", cellRenderer: EditableCellRenderer },
-    { headerName: "Phone", field: "phone", cellRenderer: EditableCellRenderer  },
-    { headerName: "Email", field: "email", cellRenderer: EditableCellRenderer  },
-    { headerName: "Role", field: "role", cellRenderer: EditableCellRenderer , cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['dispatcher', 'accounting', 'admin'] } },
+    { headerName: "Name", field: "name"},
+    { headerName: "Phone", field: "phone"},
+    { headerName: "Email", field: "email"},
+    { headerName: "Role", field: "role" , cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['dispatcher', 'accounting', 'admin'] } },
     { headerName: "Status", field: "status", cellRenderer: statusCellRenderer , cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Active', 'Inactive'] } },
     {
       headerName: "Actions",
@@ -151,8 +143,7 @@ export default function UserLists() {
         pagination={true}
         paginationPageSize={10}
         paginationPageSizeSelector={[10, 20, 30]}
-        onRowMouseEnter={e => handleRowMouseEnter(e.rowIndex)}
-        onRowMouseLeave={handleRowMouseLeave}
+   
       />
       {showModal && (
         <div>

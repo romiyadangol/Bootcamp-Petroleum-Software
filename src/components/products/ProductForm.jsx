@@ -1,13 +1,27 @@
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 import { Button, FormControl, FormLabel, Input, Select, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter } from "@chakra-ui/react";
+import { FIND_PRODUCTS } from "../../graphql/queries/products/findProducts";
+import { useQuery } from '@apollo/client';
 
 const ProductForm = ({ product, onChange, onSave, onClose }) => {
+  const { data, loading, error } = useQuery(FIND_PRODUCTS);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error.message}</p>;
+
+  // const products = data?.findProducts?.products || [];
+
+  const hardcodedCategories = ['petrol', 'diesel', 'luburicants', 'lpg'];
+  const hardcodedStatuses = ['available', 'out_of_stock'];
+  const hardcodedUnits = ['liters', 'gallons'];
+  
+
   return (
     <>
-      <Modal isOpen={true} onClose={onClose} style={{backgroundColor: "transparent"}} >
+      <Modal isOpen={true} onClose={onClose} style={{ backgroundColor: "transparent" }}>
         <ModalOverlay />
-        <ModalContent style={{maxWidth: "800px"}}>
+        <ModalContent style={{ maxWidth: "800px" }}>
           <ModalHeader>Product Details</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
@@ -17,7 +31,7 @@ const ProductForm = ({ product, onChange, onSave, onClose }) => {
                 <Input
                   type="text"
                   name="name"
-                  value={product.name}
+                  value={product.name || ''}
                   onChange={onChange}
                 />
               </FormControl>
@@ -25,39 +39,48 @@ const ProductForm = ({ product, onChange, onSave, onClose }) => {
               <FormControl mb={4}>
                 <FormLabel>Category:</FormLabel>
                 <Select
-                  name="category"
-                  value={product.category}
+                  name="productCategory"
+                  value={product.productCategory || ''}
                   onChange={onChange}
                 >
                   <option value="">Select Category</option>
-                  <option value="Fuel">Fuel</option>
-                  <option value="Oil">Oil</option>
-                </Select>  
+                  {hardcodedCategories.map((category, index) => (
+                    <option key={index} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </Select>
               </FormControl>
 
               <FormControl mb={4}>
                 <FormLabel>Status:</FormLabel>
                 <Select
-                  name="status"
-                  value={product.status} 
-                  onChange={(e) => onChange({ target: { name: 'status', value: e.target.value } })}
+                  name="productStatus"
+                  value={product.productStatus || ''}
+                  onChange={onChange}
                 >
                   <option value="">Select Status</option>
-                  <option value="true">Active</option>
-                  <option value="false">Inactive</option>
+                  {hardcodedStatuses.map((status, index) => (
+                    <option key={index} value={status}>
+                      {status}
+                    </option>
+                  ))}
                 </Select>
               </FormControl>
 
               <FormControl mb={4}>
                 <FormLabel>Unit:</FormLabel>
                 <Select
-                  name="unit"
-                  value={product.unit}
+                  name="productUnit"
+                  value={product.productUnit || ''}
                   onChange={onChange}
                 >
                   <option value="">Select Unit</option>
-                  <option value="Gallon">Gallon</option>
-                  <option value="Litre">Litre</option>
+                  {hardcodedUnits.map((unit, index) => (
+                    <option key={index} value={unit}>
+                      {unit}
+                    </option>
+                  ))}
                 </Select>
               </FormControl>
             </form>

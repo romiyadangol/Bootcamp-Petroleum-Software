@@ -19,7 +19,7 @@ const authReducer = (state = initialState, action) => {
         case LOGIN_SUCCESS:
             return {
                 ...state,
-                user: action.payload, // Store the logged-in user
+                user: action.payload, 
                 loading: false,
                 error: null
             };

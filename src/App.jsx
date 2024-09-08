@@ -10,6 +10,7 @@ import AssetLists from './components/asset/AssetLists';
 import DeliveryList from './components/delivery/DeliveryList';
 import CustomerLists from './components/customers/CustomerLists';
 import Logout from './components/Logout';
+import Dashboard from './components/Dashboard';
 
 function App() {
   const MainLayout = () => {
@@ -33,6 +34,10 @@ function App() {
       path: '/dashboard',
       element: <MainLayout />,
       children: [
+        {
+          index: true,  
+          element: <Dashboard />
+        },
         {
           path: 'products',
           element: <ProductList/>

@@ -51,16 +51,13 @@ const DeliveryForm = ({ delivery, onChange, onSave, onClose }) => {
           <ModalHeader>Delivery Details</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Box p={4} background="gray.800" color="white">
+            <Box p={4} background="gray.800" color="white" >
               <Flex justifyContent="space-between" alignItems="center">
-                <Text fontSize="xl" fontWeight="bold" color={step === 1 ? "orange.400" : "white"}>
+                <Text fontSize="xl" fontWeight="bold" marginLeft={100} color={step === 1 ? "orange.400" : "white"}>
                   1. Select Customer
                 </Text>
-                <Text fontSize="xl" fontWeight="bold" color={step === 2 ? "orange.400" : "white"}>
+                <Text fontSize="xl" fontWeight="bold" marginRight={120} color={step === 2 ? "orange.400" : "white"}>
                   2. Create Orders
-                </Text>
-                <Text fontSize="md" fontWeight="bold" color="white">
-                  {moment().format('MMMM Do YYYY, h:mm:ss a')}              
                 </Text>
               </Flex>
             </Box>

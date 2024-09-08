@@ -1,23 +1,22 @@
 import { AgGridReact } from 'ag-grid-react';
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCirclePlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import AssetForm from '../asset/AssetForm';
 import { useColorModeValue } from '@chakra-ui/react';
 import { toast, Zoom  } from 'react-toastify';
 import Toastify from '../Toastify';
-import EditableCellRenderer from '../EditableCellRenderer';
 import { useDispatch, useSelector } from 'react-redux';
-import { GET_ASSETS } from '../../graphql/queries/getAssets';
-import { addAsset, deleteAsset, fetchAssetsRequest, fetchAssetsFailure, fetchAssetsSuccess } from '../../redux/actions/assetActions';
-import { useQuery } from '@apollo/client';
+import { GET_ASSETS } from '../../graphql/queries/assets/getAssets';
+import { addAsset, deleteAsset, fetchAssetsRequest, fetchAssetsFailure, fetchAssetsSuccess, UPDATE_ASSET, DELETE_ASSET, updateAsset } from '../../redux/actions/assetActions';
+import { useMutation, useQuery } from '@apollo/client';
+import { CREATE_ASSET } from '../../graphql/mutation/assets/createAsset';
 
 export default function AssetLists() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [hoveredRowIndex, setHoveredRowIndex] = useState(null);
   const dispatch = useDispatch();
   const [asset, setAsset] = useState({
     asset_type: '',
@@ -25,62 +24,154 @@ export default function AssetLists() {
     id: '',
     status: 'Inactive'
   });
+
   const {data, loading, error, refetch} = useQuery(GET_ASSETS);
-  if (loading) {
-    dispatch(fetchAssetsRequest());
-  }
+  
+  const [createAsset] = useMutation(CREATE_ASSET, {
+    onCompleted: () => {
+      toast.success('Product Created', {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Zoom,
+      });
+      refetch(); 
+      setShowModal(false);
+    },
+    onError: (error) => {
+      toast.error(`Error: ${error.message}`, {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Zoom,
+      });
+    }
+  })
 
-  if (data) {
-    dispatch(fetchAssetsSuccess(data.getAssets.assets));
-  }
+  const [updateAssetMutation] = useMutation(UPDATE_ASSET, {
+    onCompleted: () => {
+        toast.success('Product Updated', {
+            position: "bottom-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+            transition: Zoom,
+        });
+        refetch(); 
+        setShowModal(false);
+    },
+    onError: (error) => {
+        toast.error(`Error: ${error.message}`, {
+            position: "bottom-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+            transition: Zoom,
+        });
+    }
+});
 
-  if (error) {
-    dispatch(fetchAssetsFailure(error.message));
-  }
+const [deleteAssetMutation] = useMutation(DELETE_ASSET, {
+    onCompleted: () => {
+        toast.success('Product Deleted', {
+            position: "bottom-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+            transition: Zoom,
+        });
+        refetch(); 
+    },
+    onError: (error) => {
+        toast.error(`Error: ${error.message}`, {
+            position: "bottom-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+            transition: Zoom,
+        });
+    }
+});
+  
+  useEffect(() => {
+    if (loading) {
+      dispatch(fetchAssetsRequest());
+    }
+  
+    if (data) {
+      dispatch(fetchAssetsSuccess(data.getAssets.assets));
+    }
+  
+    if (error) {
+      dispatch(fetchAssetsFailure(error.message));
+    }
+  },[data,loading,error,dispatch])
 
 
   const rowData = useSelector(state => state.asset.assets || []);
   
   const handleSave = () => {
-    const newAsset = {
-      ...asset,
-      status: asset.status === 'true' ? 'Active' : 'Inactive',
-    };
-    dispatch(addAsset(newAsset));
-
-    toast.success('Assets Created', {
-      position: "bottom-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "dark",
-      transition: Zoom,
-    });
-
-    setAsset({
-      asset_type: '',
-      name: '',
-      unique_id: '',
-      status: ''
-    });
-    refetch();
-    setShowModal(false);
-  };
-
-  const handleDelete = (id) => {
-    dispatch(deleteAsset(id));
-  };
-
-  const handleRowMouseEnter = (rowIndex) => {
-    setHoveredRowIndex(rowIndex);
-  };
-
-  const handleRowMouseLeave = () => {
-    setHoveredRowIndex(null);
-  };
+    if (mode === 'edit') {
+      updateAssetMutation({
+        variables: {
+          assetInfo: {
+            id: asset.id,
+            name: asset.name,
+            assetCategory: asset.assetCategory,
+            assetStatus: asset.assetStatus,
+          }
+        },
+        onCompleted: (data) => {
+          dispatch(updateAsset(data.updateAsset.Asset));
+          refetch();
+          toast.success('Asset Updated');
+          setShowModal(false);
+        }
+      });
+    }
+    else {
+      createAsset({
+        variables: {
+          assetInfo: {
+            id: asset.id,
+            assetCategory: asset.assetCategory,
+            assetStatus: asset.assetStatus
+          }
+        },
+        onCompleted: (data) => {
+          dispatch(addAsset(data.createAsset.Asset));
+          refetch();
+          toast.success('Asset Created');
+          setShowModal(false); 
+      }
+      })
+    }
 
   const defaultColDef = useMemo(() => ({
     sortable: true,
@@ -106,20 +197,45 @@ export default function AssetLists() {
     );
   };
 
+  const handleDelete = (id) => {
+    deleteAssetMutation({ 
+        variables: { id } ,
+        onCompleted: (data) => {
+            dispatch(deleteAsset(id));
+            refetch();
+            toast.success('Asset Deleted');
+        }
+    });
+  };
+
+  const handleEdit = (asset) => {
+      setAsset(asset);
+      setMode('edit'); 
+      setShowModal(true);
+  };
+
   const ActionCellRenderer = (params) => (
+    <>
+    <button
+      style={{ color: 'white', border: 'none', borderRadius: '5px', padding: '5px' }}
+      onClick={() => handleEdit(params.data)}
+    >
+      <FontAwesomeIcon icon={faEdit} color='orange' />
+    </button>
     <button 
       style={{ color: 'white', border: 'none', borderRadius: '5px', padding: '5px' }}
-      onClick={() => handleDelete(params.data.unique_id)}
+      onClick={() => handleDelete(params.data.id)}
     >
       <FontAwesomeIcon icon={faTrash} />
     </button>
+    </>
   );
 
   const [colDefs, setColDefs] = useState([
-    { headerName: "Asset Type", field: "asset_type", cellRenderer: EditableCellRenderer },
-    { headerName: "Asset ID", field: "asset_id", cellRenderer: EditableCellRenderer },
+    { headerName: "Asset Type", field: "assetCategory"},
+    { headerName: "Asset ID", field: "id"},
     // { headerName: "Name", field: "name", cellRenderer: EditableCellRenderer },
-    { headerName: "Status", field: "status", cellRenderer: statusCellRenderer, cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Active', 'Inactive'] } },
+    { headerName: "Status", field: "status", cellRenderer: statusCellRenderer },
     {
       headerName: "Actions",
       cellRenderer: ActionCellRenderer,
@@ -128,9 +244,8 @@ export default function AssetLists() {
   ]);
 
   const filteredRowData = rowData.filter((item) => {
-    return item.asset_type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          //  item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-           item.asset_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    return item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           item.assetCategory.toLowerCase().includes(searchQuery.toLowerCase()) ||
            item.status.toLowerCase().includes(searchQuery.toLowerCase());
   });
   
@@ -153,7 +268,15 @@ export default function AssetLists() {
           />
           <button
             style={{ border: `1px solid ${buttonbg}`, padding: 12, borderRadius: 5, background: buttonbg, fontWeight: 'bold', width: 200, fontSize: 16 }}
-            onClick={() => setShowModal(true)}
+            onClick={() => {
+              setAsset({
+                id: '',
+                name: '',
+                assetCategory: '',
+                createdAt: '',
+                updatedAt: '',
+              })
+            }}
           >
             <FontAwesomeIcon icon={faCirclePlus} color='orange' />&nbsp; Create New Asset
           </button>
@@ -167,8 +290,7 @@ export default function AssetLists() {
         pagination={true}
         paginationPageSize={10}
         paginationPageSizeSelector={[10, 20, 30]}
-        onRowMouseEnter={e => handleRowMouseEnter(e.rowIndex)}
-        onRowMouseLeave={handleRowMouseLeave}
+     
       />
       {showModal && (
       <div>
@@ -185,3 +307,4 @@ export default function AssetLists() {
     </div>
   )
 }  
+}

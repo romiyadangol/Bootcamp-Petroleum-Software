@@ -10,7 +10,6 @@ import { toast, Zoom  } from 'react-toastify';
 import Toastify from '../Toastify';
 import { useDispatch, useSelector } from 'react-redux';
 import { addDriver, deleteDriver } from '../../redux/actions/driverActions';
-import EditableCellRenderer from '../EditableCellRenderer';
 
 export default function DriverLists() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -57,15 +56,6 @@ export default function DriverLists() {
   };
 
 
-  const handleRowMouseEnter = (rowIndex) => {
-    setHoveredRowIndex(rowIndex);
-  };
-
-  const handleRowMouseLeave = () => {
-    setHoveredRowIndex(null);
-  };
-
-
   const defaultColDef = useMemo(() => ({
     sortable: true,
     flex: 1,
@@ -106,10 +96,10 @@ export default function DriverLists() {
 
 
   const [colDefs, setColDefs] = useState([
-    { headerName: "Name", field: "name" , cellRenderer: EditableCellRenderer},
-    { headerName: "Phone", field: "phone", cellRenderer: EditableCellRenderer },
-    { headerName: "Email", field: "email", cellRenderer: EditableCellRenderer },
-    { headerName: "Address", field: "address", cellRenderer: EditableCellRenderer },
+    { headerName: "Name", field: "name" },
+    { headerName: "Phone", field: "phone" },
+    { headerName: "Email", field: "email"},
+    { headerName: "Address", field: "address"},
     { headerName: "Status", field: "status", cellRenderer: statusCellRenderer, cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Active', 'Inactive'] } },
     {
       headerName: "Actions",
@@ -155,8 +145,7 @@ export default function DriverLists() {
         pagination={true}
         paginationPageSize={10}
         paginationPageSizeSelector={[10, 20, 30]}
-        onRowMouseEnter={e => handleRowMouseEnter(e.rowIndex)}
-        onRowMouseLeave={handleRowMouseLeave}
+     
       />
       {showModal && (
         <div>

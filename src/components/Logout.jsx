@@ -13,7 +13,6 @@ const Logout = () => {
     const navigate = useNavigate();
     const ls = new SecureLS({ encodingType: 'aes' });
 
-
     const [logout, { error, loading }] = useMutation(LOGOUT_USER, {
         onCompleted: () => {
             try {

@@ -8,7 +8,6 @@
   import { useColorModeValue } from '@chakra-ui/react';
   import { toast, Zoom  } from 'react-toastify';
   import Toastify from '../Toastify';
-  import EditableCellRenderer from '../EditableCellRenderer';
 import { useDispatch, useSelector } from 'react-redux';
 import { addDelivery, deleteDelivery } from '../../redux/actions/deliveryActions';
 
@@ -67,14 +66,6 @@ import { addDelivery, deleteDelivery } from '../../redux/actions/deliveryActions
       setShowModal(false);
     };
 
-    const handleRowMouseEnter = (rowIndex) => {
-      setHoveredRowIndex(rowIndex);
-    };
-  
-    const handleRowMouseLeave = () => {
-      setHoveredRowIndex(null);
-    };
-
     const defaultColDef = useMemo(() => ({
       sortable: true,
       flex: 1,
@@ -114,22 +105,22 @@ import { addDelivery, deleteDelivery } from '../../redux/actions/deliveryActions
     
 
     const [colDefs, setColDefs] = useState([
-      { headerName: "Pricing", field: "pricing", cellRenderer: EditableCellRenderer },
-      { headerName: "Status", field: "status", cellRenderer: statusCellRenderer, cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Active', 'Inactive'] } },
-      { headerName: "Created At", field: "created_at",cellRenderer: EditableCellRenderer, cellEditor: 'agDateCellEditor', cellEditorParams: { 
+      { headerName: "Pricing", field: "pricing"},
+      { headerName: "Status", field: "status", cellRenderer: statusCellRenderer},
+      { headerName: "Created At", field: "created_at", cellEditor: 'agDateCellEditor', cellEditorParams: { 
         min: '2000-01-01',
         min: '2019-12-31',
       }},
-      { headerName: "Type", field: "type" ,cellRenderer: EditableCellRenderer},
-      { headerName: "Planned At", field: "planned_at",cellRenderer: EditableCellRenderer, cellEditor: 'agDateCellEditor', cellEditorParams: {
+      { headerName: "Type", field: "type"},
+      { headerName: "Planned At", field: "planned_at",cellEditor: 'agDateCellEditor', cellEditorParams: {
         min: '2000-01-01',
         min: '2019-12-31',
       }},
-      { headerName: "Customer", field: "customer",cellRenderer: EditableCellRenderer },
-      { headerName: "Address", field: "address",cellRenderer: EditableCellRenderer },
-      { headerName: "State", field: "state" ,cellRenderer: EditableCellRenderer},
-      { headerName: "City", field: "city" ,cellRenderer: EditableCellRenderer},
-      { headerName: "Zip", field: "zip",cellRenderer: EditableCellRenderer },
+      { headerName: "Customer", field: "customer" },
+      { headerName: "Address", field: "address"},
+      { headerName: "State", field: "state"},
+      { headerName: "City", field: "city" },
+      { headerName: "Zip", field: "zip" },
       {
         headerName: "Actions",
         cellRenderer: ActionCellRenderer,
@@ -184,8 +175,7 @@ import { addDelivery, deleteDelivery } from '../../redux/actions/deliveryActions
           pagination={true}
           paginationPageSize={10}
           paginationPageSizeSelector={[10, 20, 30]}
-          onRowMouseEnter={e => handleRowMouseEnter(e.rowIndex)}
-          onRowMouseLeave={handleRowMouseLeave}
+        
         />
         {showModal && (
           <div>

@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
-import { Box, Flex, Button, Link as ChakraLink, useColorMode, useColorModeValue, Spacer, HStack, Image, VStack } from '@chakra-ui/react';
+import { Box, Flex, Button, Link as ChakraLink, useColorMode, useColorModeValue, Spacer, HStack, Image, VStack, textDecoration } from '@chakra-ui/react';
 import { MoonIcon, SunIcon } from '@chakra-ui/icons';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-regular-svg-icons';
 import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import logo from '../assets/images/logo.png';
+import UserAvatar from './UserAvatar';
 
 export default function Nav() {
   const [showDropdown, setShowDropdown] = useState(false);
   const { colorMode, toggleColorMode } = useColorMode();
   const bg = useColorModeValue('gray.100', 'gray.900');
   const color = useColorModeValue('black', 'white');
-  const profilePicture = "https://randomuser.me/api/portraits/men/19.jpg";
   const navigate = useNavigate();
 
   const toggleDropdown = () => {
@@ -33,9 +33,11 @@ export default function Nav() {
             boxSize="40px"
             mr={4}
           />
-          <Box fontWeight="bold" fontSize="20px">
-            Dashboard
-          </Box>
+          <ChakraLink as = {RouterLink} to="/dashboard" _hover={{ textDecoration: 'none'}}>
+            <Box fontWeight="bold" fontSize="20px" cursor='pointer'>
+              Dashboard
+            </Box>
+          </ChakraLink> 
 
           <Spacer />
 
@@ -51,15 +53,8 @@ export default function Nav() {
           <Spacer />
 
           <Box position="relative">
-            <Flex justify="flex-end" p={4}>
-              <Image
-                src={profilePicture}
-                alt="Profile"
-                boxSize="40px"
-                borderRadius="full"
-                cursor="pointer"
-                onClick={toggleDropdown}
-              />
+            <Flex justify="flex-end" p={4} onClick={toggleDropdown} cursor="pointer">
+              <UserAvatar/>
             </Flex>
 
             {showDropdown && (
@@ -76,11 +71,11 @@ export default function Nav() {
                 <VStack align="stretch" spacing={2} p={2}>
                   <Flex align="center" px={2}>
                     <FontAwesomeIcon icon={faUser} />
-                    <ChakraLink as={RouterLink} to="/edit-profile" ml={2} _hover={{ color: 'orange.500' }} fontSize="20px">Profile</ChakraLink>
+                    <ChakraLink as={RouterLink} to="/edit-profile" ml={2} _hover={{ color: 'orange.500' }} fontSize="15px">Profile</ChakraLink>
                   </Flex>
                   <Flex align="center" px={2}>
                     <FontAwesomeIcon icon={faSignOutAlt} />
-                    <ChakraLink as="button" onClick={handleLogout} ml={2} _hover={{ color: 'orange.500' }} fontSize="20px">
+                    <ChakraLink as="button" onClick={handleLogout} ml={2} _hover={{ color: 'orange.500' }} fontSize="15px">
                       Logout
                     </ChakraLink>
                   </Flex>
@@ -94,6 +89,7 @@ export default function Nav() {
           </Button>
         </Flex>
       </Box>
+
     </>
   );
 }
