@@ -41,11 +41,15 @@ const Login = () => {
         return;
       }
 
-      if (token) {
+      if (token, user.roles) {
         try {
-          storeToken(token);
           const secureUser = { id: user.id, name: user.name, email: user.email, roles: user.roles };
-          ls.set('loggedInUser', secureUser); // Securely store user info
+          ls.set('loggedInUser', secureUser); 
+
+          if(user.roles.includes('admin')) {
+            storeToken(token, user.roles);
+          }
+          
           dispatch(loginUserSuccess(user));
           setEmail("");
           setPassword("");

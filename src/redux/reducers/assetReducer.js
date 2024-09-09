@@ -33,7 +33,7 @@ const assetReducer = (state = initialState, action) => {
     case DELETE_ASSET:
       return {
         ...state,
-        assets: state.assets.filter(asset => asset.id !== action.payload), // Assuming 'id' is used to identify assets
+        assets: state.assets.filter(asset => asset.id !== action.payload), 
       };
     case UPDATE_ASSET:
       return {

@@ -1,62 +1,90 @@
-import { AgGridReact } from 'ag-grid-react'; 
-import "ag-grid-community/styles/ag-grid.css"; 
-import "ag-grid-community/styles/ag-theme-quartz.css";
-import { useMemo, useState } from 'react'; 
+import { useEffect, useMemo, useState } from 'react'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCirclePlus, faTrash} from '@fortawesome/free-solid-svg-icons';
 import CustomerForm from  '../customers/CustomerForm';
 import { useColorModeValue } from '@chakra-ui/react';
-import { toast, Zoom  } from 'react-toastify';
+import { toast  } from 'react-toastify';
 import Toastify from '../Toastify';
 import { useDispatch, useSelector } from 'react-redux';
-import { addCustomer, deleteCustomer } from '../../redux/actions/customerActions';
+import { addCustomer, deleteCustomer, fetchCustomersFailure, fetchCustomersRequest, fetchCustomersSuccess } from '../../redux/actions/customerActions';
+import { GET_CUSTOMERS } from '../../graphql/queries/customers/getCustomers';
+import { useCreateCustomerMutation } from '../../hooks/useCustomerMutation';
+import AgGridTable from '../core/AgGridTable';
+import { useQuery } from '@apollo/client';
 
 export default function CustomerLists() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [customer, setCustomer] = useState(null);
+  const [mode, setMode] = useState('create');
   const dispatch = useDispatch();
-  const [customer, setCustomer] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    address: '',
-    status: '',
-    city: '',
-    zip: '',
-  });
 
-  const rowData = useSelector(state => state.customer || []);
+  const {data,loading, error, refetch } = useQuery(GET_CUSTOMERS);
 
+  useEffect(() => {
+    if(loading) {
+      dispatch(fetchCustomersRequest());
+    }
+
+    if(error) {
+      dispatch(fetchCustomersFailure(error.message));
+    }
+
+    if(data) {
+      dispatch(fetchCustomersSuccess(data.getCustomers.customers));
+    }
+  },[data, loading, error, dispatch]);
+
+  const rowData = useSelector(state => state.customer.customers || []);
+
+  //customer mutations
+  const createCustomerMutation = useCreateCustomerMutation(refetch);
+
+
+  // const handleEdit = (customer) => {
+  //   setCustomer(customer);
+  //   setMode('edit');
+  //   setShowModal(true);
+  // }
+
+  // const handleDelete = (id) => {
+  //   dele
+  // }
   const handleSave = () => {
-    const newCustomer = {
-    ...Customer,
-    status: customer.status === 'true' ? 'Active' : 'Inactive',
-    };
-    dispatch(addCustomer(newCustomer));
-
-    toast.success('Customer Created', {
-      position: "bottom-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "dark",
-      transition: Zoom,
-    });
-
-    setCustomer({
-      name: '',
-      phone: '',
-      email: '',
-      address: '',
-      status: '',
-      city: '',
-      zip: '',
+    if (mode === 'create') {
+    //   updateAssetMutation({
+    //     variables: {
+    //       assetInfo: {
+    //         id: asset.id,
+    //         assetId: asset.assetId,
+    //         assetCategory: asset.assetCategory,
+    //         assetStatus: asset.assetStatus,
+    //       }
+    //     },
+    //     onCompleted: (data) => {
+    //       dispatch(updateAsset(data.editAsset.asset));
+    //       refetch();
+    //       toast.success('Asset Updated');
+    //       setShowModal(false);
+    //     }
+    //   });
+    // } else {
+      createCustomerMutation({
+        variables: {
+          customerInfo: {
+            name: customer.name,
+          }
+        },
+        onCompleted: (data) => {
+          dispatch(addCustomer(data.createCustomer.customer));
+          refetch();
+          toast.success('Customer Created');
+          setShowModal(false);
+        }
       });
-      setShowModal(false);
+    }
   };
+
 
   const defaultColDef = useMemo(() => ({
     sortable: true,
@@ -83,33 +111,19 @@ export default function CustomerLists() {
     );
   };
 
-  const handleDelete = (name, phone, email) => {
-    dispatch(deleteCustomer(name, phone, email));
-  };
-
-  const ActionCellRenderer = (params) => (
-      <button 
-          style={{ color: 'white', border: 'none', borderRadius: '5px', padding: '5px' }}
-          onClick={() => handleDelete(params.data)}
-      >
-          <FontAwesomeIcon icon={faTrash} />
-      </button>
-  );
-
-
   const [colDefs, setColDefs] = useState([
     { headerName: "Name", field: "name" },
-    { headerName: "Phone", field: "phone" },
-    { headerName: "Email", field: "email" },
-    { headerName: "Address", field: "address" },
-    { headerName: "Status", field: "status", cellRenderer: statusCellRenderer, cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Active', 'Inactive'] } },
-    { headerName: "City", field: "city" },
-    { headerName: "Zip", field: "zip" },
-    {
-      headerName: "Actions",
-      cellRenderer: ActionCellRenderer,
-      width: 100
-    }
+    // { headerName: "Phone", field: "phone" },
+    // { headerName: "Email", field: "email" },
+    // { headerName: "Address", field: "address" },
+    // { headerName: "Status", field: "status", cellRenderer: statusCellRenderer, cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Active', 'Inactive'] } },
+    // { headerName: "City", field: "city" },
+    // { headerName: "Zip", field: "zip" },
+    // {
+    //   headerName: "Actions",
+    //   cellRenderer: ActionCellRenderer,
+    //   width: 100
+    // }
   ]);
 
   const filteredRowData = rowData.filter((item) => {
@@ -135,20 +149,23 @@ export default function CustomerLists() {
           />
           <button 
             style={{ border: `1px solid {buttonbg}`, padding: 12, borderRadius: 5, background: buttonbg, fontWeight: 'bold', width: 250, fontSize: 16 }} 
-            onClick={() => setShowModal(true)}
+            onClick={() => {
+              setCustomer({
+                id: '',
+                name: '',
+              });
+              setMode('create');
+              setShowModal(true);
+            }}
           >
           <FontAwesomeIcon icon={faCirclePlus} color='orange' />&nbsp; Create New Customer
           </button>
         </div>
       </div>
-      <AgGridReact
+      <AgGridTable
         rowData={filteredRowData}
         columnDefs={colDefs}
         defaultColDef={defaultColDef}
-        rowSelection='multiple'
-        pagination={true}
-        paginationPageSize={10}
-        paginationPageSizeSelector={[10, 20, 30]}
       />
       {showModal && (
         <div>

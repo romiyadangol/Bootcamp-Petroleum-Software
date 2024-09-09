@@ -1,20 +1,45 @@
-import { ADD_CUSTOMER, DELETE_CUSTOMER } from "../actions/customerActions";
+import { ADD_CUSTOMER, DELETE_CUSTOMER, UPDATE_CUSTOMER, FETCH_CUSTOMERS_FAILURE, FETCH_CUSTOMERS_REQUEST, FETCH_CUSTOMERS_SUCCESS } from "../actions/customerActions";
 
-const initialState = [
-    { name: 'Ram', phone: '1234567890', email: 'user1@gmail.com', address: 'Dallas, Texas', status: 'Active', city: 'Dallas', zip: '75001' },
-    { name: 'Hari', phone: '1234567890', email: 'user2@gmail.com', address: 'Kathmandu, Nepal', status: 'InActive', city: 'Kathmandu', zip: '44600' },
-];
+const initialState = {
+    customers: [],
+    loading: false,
+    error: null
+};
 
 const customerReducer = (state = initialState, action) => {
     switch(action.type) {
+        case FETCH_CUSTOMERS_REQUEST:
+            return {
+                ...state,
+                loading: true,
+            };
+        case FETCH_CUSTOMERS_SUCCESS:
+            return {
+                ...state,
+                loading: false,
+                customers: action.payload,
+            };
+        case FETCH_CUSTOMERS_FAILURE:
+            return {
+                ...state,
+                loading: false,
+                error: action.payload,
+            };
         case ADD_CUSTOMER:
-            return [...state, action.payload];
+            return {
+                ...state,
+                customers: [...state.customers, action.payload],
+            };
         case DELETE_CUSTOMER:
-            return state.filter(customer => 
-                !(customer.name === action.payload.name &&
-                customer.category === action.payload.category &&
-                customer.unit === action.payload.unit)
-            );
+            return {
+                ...state,
+                customers: state.customers.filter(customer => customer.id !== action.payload), 
+            };
+        case UPDATE_CUSTOMER:
+            return {
+                ...state,
+                customers: state.customers.map(customer => customer.id === action.payload.id? action.payload : asset)
+            };
         default:
             return state;
     }
