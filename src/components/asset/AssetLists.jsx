@@ -1,165 +1,88 @@
-import { AgGridReact } from 'ag-grid-react';
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-quartz.css";
 import { useEffect, useMemo, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCirclePlus, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faCirclePlus } from '@fortawesome/free-solid-svg-icons';
 import AssetForm from '../asset/AssetForm';
 import { useColorModeValue } from '@chakra-ui/react';
-import { toast, Zoom  } from 'react-toastify';
+import { toast } from 'react-toastify';
 import Toastify from '../Toastify';
 import { useDispatch, useSelector } from 'react-redux';
 import { GET_ASSETS } from '../../graphql/queries/assets/getAssets';
-import { addAsset, deleteAsset, fetchAssetsRequest, fetchAssetsFailure, fetchAssetsSuccess, UPDATE_ASSET, DELETE_ASSET, updateAsset } from '../../redux/actions/assetActions';
-import { useMutation, useQuery } from '@apollo/client';
-import { CREATE_ASSET } from '../../graphql/mutation/assets/createAsset';
+import { addAsset, deleteAsset, fetchAssetsRequest, fetchAssetsFailure, fetchAssetsSuccess, updateAsset } from '../../redux/actions/assetActions';
+import { useQuery } from '@apollo/client';
+import { useCreateAssetMutation, useDeleteAssetMutation, useUpdateAssetMutation } from '../../hooks/useAssetMutation';
+import ActionButtons from '../core/ActionButtons';
+import AgGridTable from '../core/AgGridTable';
 
 export default function AssetLists() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [asset, setAsset] = useState(null);
+  const [mode, setMode] = useState('create');
   const dispatch = useDispatch();
-  const [asset, setAsset] = useState({
-    asset_type: '',
-    name: '',
-    id: '',
-    status: 'Inactive'
-  });
 
-  const {data, loading, error, refetch} = useQuery(GET_ASSETS);
-  
-  const [createAsset] = useMutation(CREATE_ASSET, {
-    onCompleted: () => {
-      toast.success('Product Created', {
-        position: "bottom-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-        transition: Zoom,
-      });
-      refetch(); 
-      setShowModal(false);
-    },
-    onError: (error) => {
-      toast.error(`Error: ${error.message}`, {
-        position: "bottom-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-        transition: Zoom,
-      });
-    }
-  })
+  const { data, loading, error, refetch } = useQuery(GET_ASSETS);
 
-  const [updateAssetMutation] = useMutation(UPDATE_ASSET, {
-    onCompleted: () => {
-        toast.success('Product Updated', {
-            position: "bottom-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "dark",
-            transition: Zoom,
-        });
-        refetch(); 
-        setShowModal(false);
-    },
-    onError: (error) => {
-        toast.error(`Error: ${error.message}`, {
-            position: "bottom-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "dark",
-            transition: Zoom,
-        });
-    }
-});
-
-const [deleteAssetMutation] = useMutation(DELETE_ASSET, {
-    onCompleted: () => {
-        toast.success('Product Deleted', {
-            position: "bottom-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "dark",
-            transition: Zoom,
-        });
-        refetch(); 
-    },
-    onError: (error) => {
-        toast.error(`Error: ${error.message}`, {
-            position: "bottom-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "dark",
-            transition: Zoom,
-        });
-    }
-});
-  
   useEffect(() => {
     if (loading) {
       dispatch(fetchAssetsRequest());
     }
-  
+
     if (data) {
+      console.log('Assets data:', data);
       dispatch(fetchAssetsSuccess(data.getAssets.assets));
     }
-  
+
     if (error) {
       dispatch(fetchAssetsFailure(error.message));
     }
-  },[data,loading,error,dispatch])
-
+  }, [data, loading, error, dispatch]);
 
   const rowData = useSelector(state => state.asset.assets || []);
-  
+
+  const createAssetMutation = useCreateAssetMutation(refetch);
+  const updateAssetMutation = useUpdateAssetMutation(refetch);
+  const deleteAssetMutation = useDeleteAssetMutation(refetch);
+
+  const handleEdit = (asset) => {
+    setAsset(asset);
+    setMode('edit');
+    setShowModal(true);
+  };
+
+  const handleDelete = (id) => {
+    deleteAssetMutation({
+      variables: { id },
+      onCompleted: () => {
+        dispatch(deleteAsset(id));
+        refetch();
+        toast.success('Asset Deleted');
+      }
+    });
+  };
+
   const handleSave = () => {
     if (mode === 'edit') {
       updateAssetMutation({
         variables: {
           assetInfo: {
             id: asset.id,
-            name: asset.name,
+            assetId: asset.assetId,
             assetCategory: asset.assetCategory,
             assetStatus: asset.assetStatus,
           }
         },
         onCompleted: (data) => {
-          dispatch(updateAsset(data.updateAsset.Asset));
+          dispatch(updateAsset(data.editAsset.asset));
           refetch();
           toast.success('Asset Updated');
           setShowModal(false);
         }
       });
-    }
-    else {
-      createAsset({
+    } else {
+      createAssetMutation({
         variables: {
           assetInfo: {
-            id: asset.id,
+            assetId: asset.assetId,
             assetCategory: asset.assetCategory,
             assetStatus: asset.assetStatus
           }
@@ -168,10 +91,11 @@ const [deleteAssetMutation] = useMutation(DELETE_ASSET, {
           dispatch(addAsset(data.createAsset.Asset));
           refetch();
           toast.success('Asset Created');
-          setShowModal(false); 
-      }
-      })
+          setShowModal(false);
+        }
+      });
     }
+  };
 
   const defaultColDef = useMemo(() => ({
     sortable: true,
@@ -180,7 +104,7 @@ const [deleteAssetMutation] = useMutation(DELETE_ASSET, {
   }), []);
 
   const statusCellRenderer = (params) => {
-    const status = params.value === 'Active' ? 'success' : 'danger';
+    const status = params.value === 'active' ? 'success' : 'danger';
     const dotStyle = {
       display: 'inline-block',
       width: '10px',
@@ -197,56 +121,25 @@ const [deleteAssetMutation] = useMutation(DELETE_ASSET, {
     );
   };
 
-  const handleDelete = (id) => {
-    deleteAssetMutation({ 
-        variables: { id } ,
-        onCompleted: (data) => {
-            dispatch(deleteAsset(id));
-            refetch();
-            toast.success('Asset Deleted');
-        }
-    });
-  };
-
-  const handleEdit = (asset) => {
-      setAsset(asset);
-      setMode('edit'); 
-      setShowModal(true);
-  };
-
-  const ActionCellRenderer = (params) => (
-    <>
-    <button
-      style={{ color: 'white', border: 'none', borderRadius: '5px', padding: '5px' }}
-      onClick={() => handleEdit(params.data)}
-    >
-      <FontAwesomeIcon icon={faEdit} color='orange' />
-    </button>
-    <button 
-      style={{ color: 'white', border: 'none', borderRadius: '5px', padding: '5px' }}
-      onClick={() => handleDelete(params.data.id)}
-    >
-      <FontAwesomeIcon icon={faTrash} />
-    </button>
-    </>
-  );
-
   const [colDefs, setColDefs] = useState([
-    { headerName: "Asset Type", field: "assetCategory"},
-    { headerName: "Asset ID", field: "id"},
-    // { headerName: "Name", field: "name", cellRenderer: EditableCellRenderer },
-    { headerName: "Status", field: "status", cellRenderer: statusCellRenderer },
+    { headerName: "Asset Type", field: "assetCategory" },
+    { headerName: "Asset ID", field: "assetId" },
+    { headerName: "Status", field: "assetStatus", cellRenderer: statusCellRenderer },
     {
       headerName: "Actions",
-      cellRenderer: ActionCellRenderer,
-      width: 100
+      cellRenderer: (params) => (
+        <ActionButtons
+          onEdit={() => handleEdit(params.data)}
+          onDelete={() => handleDelete(params.data.id)}
+        />
+      ),
     }
-  ]);
+  ], []);
 
   const filteredRowData = rowData.filter((item) => {
-    return item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-           item.assetCategory.toLowerCase().includes(searchQuery.toLowerCase()) ||
-           item.status.toLowerCase().includes(searchQuery.toLowerCase());
+    return item?.assetId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           item?.assetCategory?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           item?.assetStatus?.toLowerCase().includes(searchQuery.toLowerCase());
   });
   
 
@@ -271,40 +164,32 @@ const [deleteAssetMutation] = useMutation(DELETE_ASSET, {
             onClick={() => {
               setAsset({
                 id: '',
-                name: '',
+                assetId: '',
                 assetCategory: '',
-                createdAt: '',
-                updatedAt: '',
-              })
+                assetStatus: ''
+              });
+              setMode('create');
+              setShowModal(true);
             }}
           >
             <FontAwesomeIcon icon={faCirclePlus} color='orange' />&nbsp; Create New Asset
           </button>
         </div>
       </div>
-      <AgGridReact
+      <AgGridTable
         rowData={filteredRowData}
         columnDefs={colDefs}
         defaultColDef={defaultColDef}
-        rowSelection='multiple'
-        pagination={true}
-        paginationPageSize={10}
-        paginationPageSizeSelector={[10, 20, 30]}
-     
       />
       {showModal && (
-      <div>
         <AssetForm
-          asset={asset}
+          asset={asset || {}}
           onChange={(e) => setAsset({ ...asset, [e.target.name]: e.target.value })}
           onSave={handleSave}
           onClose={() => setShowModal(false)}
-          onDelete={handleDelete}
         />
-      </div>
       )}
       <Toastify />
     </div>
   )
-}  
 }
