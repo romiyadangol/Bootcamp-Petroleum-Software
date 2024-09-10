@@ -1,59 +1,103 @@
-import { AgGridReact } from 'ag-grid-react'; 
-import "ag-grid-community/styles/ag-grid.css"; 
-import "ag-grid-community/styles/ag-theme-quartz.css";
-import { useMemo, useState } from 'react'; 
+
+import { useEffect, useMemo, useState } from 'react'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCirclePlus, faTrash} from '@fortawesome/free-solid-svg-icons';
+import { faCirclePlus } from '@fortawesome/free-solid-svg-icons';
 import DriverForm from  '../drivers/DriverForm';
 import { useColorModeValue } from '@chakra-ui/react';
-import { toast, Zoom  } from 'react-toastify';
+import { toast  } from 'react-toastify';
 import Toastify from '../Toastify';
 import { useDispatch, useSelector } from 'react-redux';
-import { addDriver, deleteDriver } from '../../redux/actions/driverActions';
+import { addDriver, deleteDriver, fetchDriversFailure, fetchDriversRequest, fetchDriversSuccess } from '../../redux/actions/driverActions';
+import { GET_DRIVERS } from '../../graphql/queries/driver/getDrivers';
+import { useCreateDriverMutation, useDeleteDriverMutation, useUpdateDriverMutation } from '../../hooks/useDriverMutation';
+import ActionButtons from '../core/ActionButtons';
+import AgGridTable from '../core/AgGridTable';
+import { useQuery } from '@apollo/client';
 
 export default function DriverLists() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [hoveredRowIndex, setHoveredRowIndex] = useState(null);
+  const [driver, setDriver] = useState(null);
+  const [mode, setMode] = useState('create');
   const dispatch = useDispatch();
-  const [driver, setDriver] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    address: '',
-    status: ''
-  });
 
-  const rowData = useSelector(state => state.driver || []);
+  const { data, loading, error, refetch } = useQuery(GET_DRIVERS);
+
+  useEffect(() => {
+      if (loading) {
+          dispatch(fetchDriversRequest());
+      }
+
+      if (error) {
+          dispatch(fetchDriversFailure(error.message));
+      }
+
+      if (data) {
+          dispatch(fetchDriversSuccess(data.getDrivers.drivers));
+      }
+  }, [data, loading, error, dispatch]);
+
+  const rowData = useSelector(state => state.driver.drivers || []);
+
+  const createDriverMutation = useCreateDriverMutation(refetch);
+  const updateDriverMutation = useUpdateDriverMutation(refetch);
+  const deleteDriverMutation = useDeleteDriverMutation(refetch);
+
+  const handleEdit = (driver) => {
+    setDriver(driver);
+    setMode('edit');
+    setShowModal(true);
+  };
+
+  const handleDelete = (id) => {
+    deleteDriverMutation({
+      variables: { id },
+      onCompleted: () => {
+        dispatch(deleteDriver(id));
+        refetch();
+        toast.success('Driver Deleted');
+      }
+    })
+  }
 
   const handleSave = () => {
-    const newDriver = {
-    ...driver,
-    status: driver.status === 'true' ? 'Active' : 'Inactive',
-    };
-    dispatch(addDriver(newDriver));
-
-    toast.success('Driver Created', {
-      position: "bottom-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "dark",
-      transition: Zoom,
-    });
-
-    setDriver({
-      name: '',
-      phone: '',
-      email: '',
-      address: '',
-      status: ''
-      });
-      setShowModal(false);
-  };
+    if (mode === 'edit') {
+        updateDriverMutation({ 
+            variables: { 
+                driverInfo: {
+                    id: driver.id,
+                    name: driver.name,
+                    phone: driver.phone,
+                    email: driver.email,
+                    status: driver.status
+                }
+            },
+            onCompleted: (data) => {
+                dispatch(updateDriver(data.editDriver.driver));
+                refetch();
+                toast.success('Driver Updated');
+                setShowModal(false);
+            }
+        });
+    } else {
+        createDriverMutation({ 
+            variables: { 
+              driverInfo: {
+                    name: driver.name,
+                    phone: driver.phone,
+                    email: driver.email,
+                    status: driver.status
+                }
+            },
+            onCompleted: (data) => {
+                dispatch(addDriver(data.createDriver.driver));
+                refetch();
+                toast.success('Driver Created');
+                setShowModal(false); 
+            }
+        });
+    }
+};
 
 
   const defaultColDef = useMemo(() => ({
@@ -81,39 +125,30 @@ export default function DriverLists() {
     );
   };
 
-  const handleDelete = (name, phone, email) => {
-   dispatch(deleteDriver(name, phone, email));
-  };
-
-  const ActionCellRenderer = (params) => (
-      <button 
-          style={{ color: 'white', border: 'none', borderRadius: '5px', padding: '5px' }}
-          onClick={() => handleDelete(params.data)}
-      >
-          <FontAwesomeIcon icon={faTrash} />
-      </button>
-  );
-
-
   const [colDefs, setColDefs] = useState([
     { headerName: "Name", field: "name" },
     { headerName: "Phone", field: "phone" },
     { headerName: "Email", field: "email"},
-    { headerName: "Address", field: "address"},
     { headerName: "Status", field: "status", cellRenderer: statusCellRenderer, cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Active', 'Inactive'] } },
     {
       headerName: "Actions",
-      cellRenderer: ActionCellRenderer,
-      width: 100
+      cellRenderer: (params) => (
+        <ActionButtons
+          onEdit={() => handleEdit(params.data)}
+          onDelete={() => handleDelete(params.data.id)}
+        />
+      ),
     }
-  ]);
+  ], []);
 
   const filteredRowData = rowData.filter((item) => {
-    return item.name.toLowerCase().includes(searchQuery.toLowerCase()) || item.phone.toLowerCase().includes(searchQuery.toLowerCase()) || item.email.toLowerCase().includes(searchQuery.toLowerCase()) || item.address.toLowerCase().includes(searchQuery.toLowerCase()) || item.status.toLowerCase().includes(searchQuery.toLowerCase());
+    return item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+          item.phone.toLowerCase().includes(searchQuery.toLowerCase()) || 
+          item.email.toLowerCase().includes(searchQuery.toLowerCase()) || 
+          item.status.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   const theme = useColorModeValue('ag-theme-quartz', 'ag-theme-quartz-dark');
-
   const inputbg = useColorModeValue('#EDF2F7', '#121212');
   const buttonbg = useColorModeValue('#EDF2F7', '#121212');
 
@@ -137,20 +172,15 @@ export default function DriverLists() {
           </button>
         </div>
       </div>
-      <AgGridReact
+      <AgGridTable
         rowData={filteredRowData}
         columnDefs={colDefs}
         defaultColDef={defaultColDef}
-        rowSelection='multiple'
-        pagination={true}
-        paginationPageSize={10}
-        paginationPageSizeSelector={[10, 20, 30]}
-     
       />
       {showModal && (
         <div>
           <DriverForm 
-          driver={driver}
+          driver={driver || {}}
           onChange={(e) => setDriver({ ...driver, [e.target.name]: e.target.value })}
           onSave={handleSave}
           onClose={() => setShowModal(false)}

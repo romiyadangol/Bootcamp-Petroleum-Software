@@ -9,6 +9,7 @@ import DriverLists from './components/drivers/DriverLists';
 import AssetLists from './components/asset/AssetLists';
 import DeliveryList from './components/delivery/DeliveryList';
 import CustomerLists from './components/customers/CustomerLists';
+import CustomerBranchList from './components/customerBranch/CustomerBranchList';
 import Logout from './components/Logout';
 import Dashboard from './components/Dashboard';
 
@@ -57,6 +58,10 @@ function App() {
         {
           path: 'customers',
           element: <CustomerLists/>
+        },
+        {
+          path: 'customersBranch',
+          element: <CustomerBranchList/>
         },
         {
           path: 'delivery',

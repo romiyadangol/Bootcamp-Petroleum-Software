@@ -1,80 +1,14 @@
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-quartz.css";
-import { Button, FormControl, FormLabel, Input, Select, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter } from "@chakra-ui/react";
+import { InputField, SelectField } from "../core/FormFields";
+import ModalWrapper from "../core/ModalWrapper";
 
-const DriverForm = ({ driver, onChange, onSave, onClose }) => {
+export default function DriverForm({ driver, onChange, onSave, onClose }) {
+  const hardcodedStatuses = ['active', 'inactive'];
   return (
-    <>
-      <Modal isOpen={true} onClose={onClose} style={{backgroundColor: "transparent"}} >
-        <ModalOverlay />
-        <ModalContent style={{maxWidth: "800px"}}>
-          <ModalHeader>Driver Details</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <form>
-              <FormControl mb={4}>
-                <FormLabel>Driver:</FormLabel>
-                <Input
-                  type="text"
-                  name="name"
-                  value={driver.name || ''}
-                  onChange={onChange}
-                />
-              </FormControl>
-
-              <FormControl mb={4}>
-                <FormLabel>Phone:</FormLabel>
-                <Input
-                  type="text"
-                  name="phone"
-                  value={driver.phone}
-                  onChange={onChange}
-                />
-              </FormControl>
-
-              <FormControl mb={4}>
-                <FormLabel>Email:</FormLabel>
-                <Input
-                  type="text"
-                  name="email"
-                  value={driver.email}
-                  onChange={onChange}
-                />
-              </FormControl>
-
-              <FormControl mb={4}>
-                <FormLabel>Address:</FormLabel>
-                <Input
-                  type="text"
-                  name="address"
-                  value={driver.address}
-                  onChange={onChange}
-                />
-              </FormControl>
-
-              <FormControl mb={4}>
-                <FormLabel>Status:</FormLabel>
-                <Select
-                  name="status"
-                  value={driver.status} 
-                  onChange={(e) => onChange({ target: { name: 'status', value: e.target.value } })}
-                >
-                  <option value="">Select Status</option>
-                  <option value="true">Active</option>
-                  <option value="false">Inactive</option>
-                </Select>
-              </FormControl>
-            </form>
-          </ModalBody>
-
-          <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={onSave}>Save</Button>
-            <Button colorScheme="red" onClick={onClose}>Cancel</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </>
-  );
-};
-
-export default DriverForm;
+    <ModalWrapper isOpen={true} onClose={onClose} title="Asset Details" onSave={onSave}>
+      <InputField label="Name" name="name" value={driver.name || ''} onChange={onChange}/>
+      <InputField label="Phone" name="phone" value={driver.phone} onChange={onChange}/>
+      <InputField label="Email" name="email" value={driver.email} onChange={onChange}/>
+      <SelectField label="Status" name="status" value={driver.status} onChange={onChange} options={hardcodedStatuses}/>
+    </ModalWrapper>
+  )
+}

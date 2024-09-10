@@ -1,17 +1,53 @@
-const initialState = [
-    { pricing: '$1000', status: 'Active', created_at: '2024-09-01', type: 'Fuel', planned_at: '2024-09-05', customer: 'user 1', address: '123 Main St', state: 'CA', city: 'Los Angeles', zip: '90001' },
-    { pricing: '$2000', status: 'Inactive', created_at: '2024-09-02', type: 'Oil', planned_at: '2024-09-06', customer: 'user 2', address: '456 Oak Ave', state: 'NY', city: 'New York', zip: '10001' },
-];
+import { ADD_DELIVERY, DELETE_DELIVERY, UPDATE_DELIVERY, FETCH_DELIVERIES_REQUEST, FETCH_DELIVERIES_SUCCESS, FETCH_DELIVERIES_ERROR } from '../actions/deliveryActions';
+
+const initialState = {
+    orders: [],
+    loading: false,
+    error: null
+};
 
 const deliveryReducer = (state = initialState, action) => {
     switch(action.type){
-        case 'ADD_DELIVERY':
-            return [...state, action.payload]; 
-        case 'DELETE_DELIVERY':
-            return state.filter(delivery => 
-                !(delivery.pricing === action.payload.pricing &&
-                  delivery.customer === action.payload.customer )
-            );
+        case ADD_DELIVERY:
+            return {
+                ...state,
+                orders: [...state.orders, action.payload]
+            };
+
+        case DELETE_DELIVERY:
+            return {
+                ...state,
+                orders: state.orders.filter(delivery => delivery.id !== action.payload)
+            };
+
+        case UPDATE_DELIVERY:
+            return {
+                ...state,
+                orders: state.orders.map(delivery => delivery.id === action.payload.id ? action.payload : delivery)
+            };
+
+        case FETCH_DELIVERIES_REQUEST:
+            return {
+                ...state,
+                loading: true,
+                error: null,
+            };
+
+        case FETCH_DELIVERIES_SUCCESS:
+            return {
+                ...state,
+                orders: action.payload,
+                loading: false,
+                error: null
+            };
+
+        case FETCH_DELIVERIES_ERROR:
+            return {
+                ...state,
+                loading: false,
+                error: action.payload
+            };
+            
         default:
             return state;
     }

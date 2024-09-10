@@ -149,7 +149,7 @@ export default function ProductList() {
     const theme = useColorModeValue('ag-theme-quartz', 'ag-theme-quartz-dark');
     const inputbg = useColorModeValue('#EDF2F7', '#121212');
     const buttonbg = useColorModeValue('#EDF2F7', '#121212');
-    const trashIcon = useColorModeValue('#364859', '#F1F3F4');
+  
 
     return (
         <div className={theme} style={{ height: 700 }}>

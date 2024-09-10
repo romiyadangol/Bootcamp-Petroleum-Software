@@ -1,20 +1,45 @@
-import { ADD_DRIVER, DELETE_DRIVER } from "../actions/driverActions";
+import { ADD_DRIVER, DELETE_DRIVER, FETCH_DRIVERS_FAILURE, FETCH_DRIVERS_REQUEST, FETCH_DRIVERS_SUCCESS, UPDATE_DRIVER } from "../actions/driverActions";
 
-const initialState = [
-    { name: 'Ram', phone: '1234567890', email: 'user1@gmail.com', address: 'Dallas, Texas', status: 'Active' },
-    { name: 'Hari', phone: '1234567890', email: 'user2@gmail.com', address: 'Kathmandu, Nepal', status: 'InActive' },
-];
+const initialState = {
+    drivers: [],
+    loading: false,
+    error: null,
+};
 
 const driverReducer = (state = initialState, action) => { 
     switch(action.type){
+        case FETCH_DRIVERS_REQUEST:
+            return {
+                ...state,
+                loading: true,
+            };
+        case FETCH_DRIVERS_SUCCESS:
+            return {
+                ...state,
+                loading: false,
+                drivers: action.payload,
+            };
+        case FETCH_DRIVERS_FAILURE:
+            return {
+                ...state,
+                loading: false,
+                error: action.payload,
+            };
         case ADD_DRIVER:
-            return [...state, action.payload]; 
+            return {
+                ...state,
+                drivers: [...state.drivers, action.payload],
+            }
         case DELETE_DRIVER:
-            return state.filter(driver => 
-                !(driver.name === action.payload.name &&
-                  driver.phone === action.payload.phone &&
-                  driver.email === action.payload.email)
-            );
+            return {
+                ...state,
+                drivers: state.drivers.filter(driver => driver.id !== action.payload),
+            }
+        case UPDATE_DRIVER:
+            return {
+                ...state,
+                drivers: state.drivers.map(driver => driver.id === action.payload.id ? action.payload : driver),
+            }
         default:
             return state;
     }
