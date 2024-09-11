@@ -7,17 +7,17 @@ export const FETCH_CUSTOMERS_FAILURE = 'FETCH_CUSTOMERS_FAILURE';
 
 export const addCustomer = (customer) => ({
     type: ADD_CUSTOMER,
-    payload: customer
+    payload: customer,
 });
 
-export const deleteCustomer = (name,category,unit) => ({
+export const deleteCustomer = (id) => ({
     type: DELETE_CUSTOMER,
-    payload: name,category,unit
+    payload: id,
 });
 
 export const updateCustomer = (customer) => ({
     type: UPDATE_CUSTOMER,
-    payload: customer
+    payload: customer,
 }); 
 
 export const fetchCustomersRequest = () => ({

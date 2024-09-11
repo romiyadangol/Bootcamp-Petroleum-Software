@@ -12,6 +12,7 @@ import { GET_ORDERS } from '../../graphql/queries/delivery/getOrders';
 import { useCreateDeliveryMutation, useDeleteDeliveryMutation } from '../../hooks/useDeliveryMutation';
 import ActionButtons from '../core/ActionButtons';
 import AgGridTable from '../core/AgGridTable';
+import { createSelector } from 'reselect';
 
 export default function DeliveryList() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -37,7 +38,13 @@ export default function DeliveryList() {
     }
   },[data, error, loading, dispatch]);
 
-  const rowData = useSelector(state => state.delivery.deliveries || []);
+  const selectDeliveries = createSelector(
+    state => state.delivery.deliveries,
+    deliveries => deliveries || []
+  );
+
+  const rowData = useSelector(selectDeliveries);
+
 
   // delivery mutations
   const createDeliveryMutation = useCreateDeliveryMutation(refetch);

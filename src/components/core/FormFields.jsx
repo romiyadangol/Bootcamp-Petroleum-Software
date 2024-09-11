@@ -1,11 +1,13 @@
 import { FormControl, FormLabel, Input, Select } from "@chakra-ui/react"
 
-export const InputField = ({ label, name, value, onChange }) => (
+export const InputField = ({ label,type, name, value, onChange }) => {
+    console.log(type);
+    return (
     <FormControl>
         <FormLabel>{label}</FormLabel>
-        <Input name={name} value={value || ''} onChange={onChange} />
+        <Input type={type} name={name} value={value || ''} onChange={onChange} />
     </FormControl>
-);
+)};
 
 export const SelectField = ({ label, name, value, onChange, options}) => (
     <FormControl mb={4}>

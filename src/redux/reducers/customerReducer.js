@@ -38,7 +38,7 @@ const customerReducer = (state = initialState, action) => {
         case UPDATE_CUSTOMER:
             return {
                 ...state,
-                customers: state.customers.map(customer => customer.id === action.payload.id? action.payload : asset)
+                customers: state.customers.map(customer => customer.id === action.payload.id? action.payload : customer)
             };
         default:
             return state;

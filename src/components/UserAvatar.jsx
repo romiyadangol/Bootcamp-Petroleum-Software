@@ -1,3 +1,4 @@
+import { color } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import Avatar from 'react-avatar';
 import SecureLS from 'secure-ls';
@@ -37,7 +38,7 @@ const UserAvatar = () => {
   return (
     <div style={{ display: 'flex', alignItems: 'center' }}>
       <Avatar name={initials} round={true} size="40" />
-      <span style={{ marginLeft: '10px', fontSize: '15px' }}>{user.email}</span>
+      <span style={{ marginLeft: '10px', fontSize: '15px', color:"#4C6073" }}>{user.email}</span>
     </div>
   );
 };

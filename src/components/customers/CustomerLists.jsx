@@ -1,16 +1,18 @@
-import { useEffect, useMemo, useState } from 'react'; 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCirclePlus, faTrash} from '@fortawesome/free-solid-svg-icons';
-import CustomerForm from  '../customers/CustomerForm';
-import { useColorModeValue } from '@chakra-ui/react';
-import { toast  } from 'react-toastify';
 import Toastify from '../Toastify';
-import { useDispatch, useSelector } from 'react-redux';
-import { addCustomer, deleteCustomer, fetchCustomersFailure, fetchCustomersRequest, fetchCustomersSuccess } from '../../redux/actions/customerActions';
-import { GET_CUSTOMERS } from '../../graphql/queries/customers/getCustomers';
-import { useCreateCustomerMutation } from '../../hooks/useCustomerMutation';
-import AgGridTable from '../core/AgGridTable';
+import { toast  } from 'react-toastify';
 import { useQuery } from '@apollo/client';
+import AgGridTable from '../core/AgGridTable';
+import ActionButtons from '../core/ActionButtons';
+import { useColorModeValue } from '@chakra-ui/react';
+import { useEffect, useMemo, useState } from 'react'; 
+import CustomerForm from  '../customers/CustomerForm';
+import { useDispatch, useSelector } from 'react-redux';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCirclePlus } from '@fortawesome/free-solid-svg-icons';
+import { GET_CUSTOMERS } from '../../graphql/queries/customers/getCustomers';
+import { useCreateCustomerMutation, useDeleteCustomerMutation, useUpdateCustomerMutation } from '../../hooks/useCustomerMutation';
+import { addCustomer, deleteCustomer, fetchCustomersFailure, fetchCustomersRequest, fetchCustomersSuccess, updateCustomer } from '../../redux/actions/customerActions';
+import { useNavigate } from 'react-router-dom';
 
 export default function CustomerLists() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -18,6 +20,7 @@ export default function CustomerLists() {
   const [customer, setCustomer] = useState(null);
   const [mode, setMode] = useState('create');
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const {data,loading, error, refetch } = useQuery(GET_CUSTOMERS);
 
@@ -39,40 +42,62 @@ export default function CustomerLists() {
 
   //customer mutations
   const createCustomerMutation = useCreateCustomerMutation(refetch);
+  const updateCustomerMutation = useUpdateCustomerMutation(refetch);
+  const deleteCustomerMutation = useDeleteCustomerMutation(refetch);
 
+  const handleRowClicked = (customer) => {
+    console.log(customer);
+    navigate(`/dashboard/customersBranch?customerId=${customer.id}`);
+  }
 
-  // const handleEdit = (customer) => {
-  //   setCustomer(customer);
-  //   setMode('edit');
-  //   setShowModal(true);
-  // }
+  const handleEdit = (customer) => {
+    setCustomer(customer);
+    setMode('edit');
+    setShowModal(true);
+  }
 
-  // const handleDelete = (id) => {
-  //   dele
-  // }
+  const handleDelete = (id) => {
+    deleteCustomerMutation({
+      variables: { id },
+      onCompleted: () => {
+        dispatch(deleteCustomer(id));
+        refetch();
+        toast.success('Customer Deleted');
+      }
+    });
+  }
+
   const handleSave = () => {
-    if (mode === 'create') {
-    //   updateAssetMutation({
-    //     variables: {
-    //       assetInfo: {
-    //         id: asset.id,
-    //         assetId: asset.assetId,
-    //         assetCategory: asset.assetCategory,
-    //         assetStatus: asset.assetStatus,
-    //       }
-    //     },
-    //     onCompleted: (data) => {
-    //       dispatch(updateAsset(data.editAsset.asset));
-    //       refetch();
-    //       toast.success('Asset Updated');
-    //       setShowModal(false);
-    //     }
-    //   });
-    // } else {
+    console.log(customer);
+    if (mode === 'edit') {
+      updateCustomerMutation({
+        variables: {
+          id: customer.id,
+          customerInfo: {
+            name: customer.name,
+            phoneNo: customer.phoneNo,
+            zipcode: +customer.zipcode,
+            email: customer.email,
+            address : customer.address
+          }
+        },
+        onCompleted: (data) => {
+          console.log(data.updateCustomer.customer);
+          dispatch(updateCustomer(data.updateCustomer.customer));
+          refetch();
+          toast.success('Customer Updated');
+          setShowModal(false);
+        }
+      });
+    } else {
       createCustomerMutation({
         variables: {
           customerInfo: {
             name: customer.name,
+            phoneNo: customer.phoneNo,
+            zipcode: +customer.zipcode,
+            email: customer.email,
+            address : customer.address
           }
         },
         onCompleted: (data) => {
@@ -93,41 +118,48 @@ export default function CustomerLists() {
   }), []);
 
 
-  const statusCellRenderer = (params) => {
-    const status = params.value === 'Active' ? 'success' : 'danger';
-    const dotStyle = {
-      display: 'inline-block',
-      width: '10px',
-      height: '10px',
-      borderRadius: '50%',
-      marginRight: '8px',
-      backgroundColor: status === 'success' ? 'green' : 'red',
-    };
-    return (
-      <span>
-        <span style={dotStyle}></span>
-        <span className={`badge rounded-pill bg-${status}`}>{params.value}</span>
-      </span>
-    );
-  };
+  // const statusCellRenderer = (params) => {
+  //   const status = params.value === 'Active' ? 'success' : 'danger';
+  //   const dotStyle = {
+  //     display: 'inline-block',
+  //     width: '10px',
+  //     height: '10px',
+  //     borderRadius: '50%',
+  //     marginRight: '8px',
+  //     backgroundColor: status === 'success' ? 'green' : 'red',
+  //   };
+  //   return (
+  //     <span>
+  //       <span style={dotStyle}></span>
+  //       <span className={`badge rounded-pill bg-${status}`}>{params.value}</span>
+  //     </span>
+  //   );
+  // };
 
   const [colDefs, setColDefs] = useState([
     { headerName: "Name", field: "name" },
-    // { headerName: "Phone", field: "phone" },
-    // { headerName: "Email", field: "email" },
-    // { headerName: "Address", field: "address" },
-    // { headerName: "Status", field: "status", cellRenderer: statusCellRenderer, cellEditor: 'agSelectCellEditor', cellEditorParams: { values: ['Active', 'Inactive'] } },
-    // { headerName: "City", field: "city" },
-    // { headerName: "Zip", field: "zip" },
-    // {
-    //   headerName: "Actions",
-    //   cellRenderer: ActionCellRenderer,
-    //   width: 100
-    // }
-  ]);
+    { headerName: "Phone", field: "phoneNo" },
+    { headerName: "Email", field: "email" },
+    { headerName: "Address", field: "address" },
+    { headerName: "Zip", field: "zipcode" },
+    {
+      headerName: "Actions",
+      cellRenderer: (params) => (
+        <ActionButtons 
+          onEdit={() => handleEdit(params.data)}
+          onDelete={() => handleDelete(params.data.id)}
+        />
+      ),
+      width: 100
+    },
+  ], []);
 
   const filteredRowData = rowData.filter((item) => {
-    return item.name.toLowerCase().includes(searchQuery.toLowerCase()) || item.phone.toLowerCase().includes(searchQuery.toLowerCase()) || item.email.toLowerCase().includes(searchQuery.toLowerCase()) || item.address.toLowerCase().includes(searchQuery.toLowerCase()) || item.status.toLowerCase().includes(searchQuery.toLowerCase()) || item.city.toLowerCase().includes(searchQuery.toLowerCase()) || item.zip.toLowerCase().includes(searchQuery.toLowerCase());
+    return item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    item.phone.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    item.email.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    item.address.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    item.zip.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   const theme = useColorModeValue('ag-theme-quartz', 'ag-theme-quartz-dark');
@@ -143,12 +175,12 @@ export default function CustomerLists() {
           <input 
             type="text" 
             placeholder="Search..." 
-            style={{ marginRight: 10, padding: 12, width: 400, borderRadius: 5, background: inputbg, border: `1px solid {inputbg}`, fontSize: 16  }}
+            style={{ marginRight: 10, padding: 12, width: 400, borderRadius: 5, background: inputbg, border: `1px solid ${inputbg}`, fontSize: 16  }}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           <button 
-            style={{ border: `1px solid {buttonbg}`, padding: 12, borderRadius: 5, background: buttonbg, fontWeight: 'bold', width: 250, fontSize: 16 }} 
+            style={{ border: `1px solid ${buttonbg}`, padding: 12, borderRadius: 5, background: buttonbg, fontWeight: 'bold', width: 250, fontSize: 16 }} 
             onClick={() => {
               setCustomer({
                 id: '',
@@ -166,11 +198,12 @@ export default function CustomerLists() {
         rowData={filteredRowData}
         columnDefs={colDefs}
         defaultColDef={defaultColDef}
+        onRowClicked={(row) => handleRowClicked(row.data)}
       />
       {showModal && (
         <div>
           <CustomerForm 
-          customer={customer}
+          customer={customer || {}}
           onChange={(e) => setCustomer({ ...customer, [e.target.name]: e.target.value })}
           onSave={handleSave}
           onClose={() => setShowModal(false)}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Flex, Button, Link as ChakraLink, useColorMode, useColorModeValue, Spacer, HStack, Image, VStack, textDecoration } from '@chakra-ui/react';
+import { Box, Flex, Button, Link as ChakraLink, useColorMode, useColorModeValue, Spacer, HStack, Image, VStack, textDecoration, Menu, MenuButton, MenuList, MenuItem, MenuGroup, MenuDivider } from '@chakra-ui/react';
 import { MoonIcon, SunIcon } from '@chakra-ui/icons';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -54,35 +54,24 @@ export default function Nav() {
           <Spacer />
 
           <Box position="relative">
-            <Flex justify="flex-end" p={4} onClick={toggleDropdown} cursor="pointer">
-              <UserAvatar/>
-            </Flex>
-
-            {showDropdown && (
-              <Box
-                position="absolute"
-                top="60px"
-                right="10px"
-                bg={bg}
-                boxShadow="md"
-                borderRadius="md"
-                width="150px"
-                zIndex={1}
-              >
-                <VStack align="stretch" spacing={2} p={2}>
-                  <Flex align="center" px={2}>
-                    <FontAwesomeIcon icon={faUser} />
-                    <ChakraLink as={RouterLink} to="/edit-profile" ml={2} _hover={{ color: 'orange.500' }} fontSize="15px">Profile</ChakraLink>
-                  </Flex>
-                  <Flex align="center" px={2}>
-                    <FontAwesomeIcon icon={faSignOutAlt} />
-                    <ChakraLink as="button" onClick={handleLogout} ml={2} _hover={{ color: 'orange.500' }} fontSize="15px">
-                      Logout
-                    </ChakraLink>
-                  </Flex>
-                </VStack>
-              </Box>
-            )}
+            <Menu>
+              <MenuButton as={Button} colorScheme="none">
+                <UserAvatar />
+              </MenuButton>
+              <MenuList>
+                <MenuGroup title="Profile">
+                  <MenuItem as={RouterLink} to="/edit-profile" style={{ fontSize: '19px'}}>
+                    <FontAwesomeIcon icon={faUser} style={{ marginRight: '8px', fontSize: '19px' }} />
+                    Profile
+                  </MenuItem>
+                </MenuGroup>
+                <MenuDivider />
+                <MenuItem as="button" onClick={handleLogout} style={{ fontSize: '19px'}}>
+                  <FontAwesomeIcon icon={faSignOutAlt} style={{ marginRight: '8px', fontSize: '19px' }} />
+                  Logout
+                </MenuItem>
+              </MenuList>
+            </Menu>
           </Box>
 
           <Button onClick={toggleColorMode} color="orange.400">

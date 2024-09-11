@@ -6,6 +6,10 @@ query GetCustomers {
     customers {
       id
       name
+			email
+      phoneNo
+			address
+			zipcode
     }
     errors
   }
