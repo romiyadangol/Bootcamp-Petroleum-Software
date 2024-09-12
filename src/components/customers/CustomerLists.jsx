@@ -2,6 +2,8 @@ import Toastify from '../Toastify';
 import { toast  } from 'react-toastify';
 import { useQuery } from '@apollo/client';
 import AgGridTable from '../core/AgGridTable';
+import { useNavigate } from 'react-router-dom';
+import { Box, Spinner } from '@chakra-ui/react';
 import ActionButtons from '../core/ActionButtons';
 import { useColorModeValue } from '@chakra-ui/react';
 import { useEffect, useMemo, useState } from 'react'; 
@@ -12,7 +14,6 @@ import { faCirclePlus } from '@fortawesome/free-solid-svg-icons';
 import { GET_CUSTOMERS } from '../../graphql/queries/customers/getCustomers';
 import { useCreateCustomerMutation, useDeleteCustomerMutation, useUpdateCustomerMutation } from '../../hooks/useCustomerMutation';
 import { addCustomer, deleteCustomer, fetchCustomersFailure, fetchCustomersRequest, fetchCustomersSuccess, updateCustomer } from '../../redux/actions/customerActions';
-import { useNavigate } from 'react-router-dom';
 
 export default function CustomerLists() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -181,6 +182,25 @@ export default function CustomerLists() {
 
   const inputbg = useColorModeValue('#EDF2F7', '#121212');
   const buttonbg = useColorModeValue('#EDF2F7', '#121212');
+
+  if (loading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+      >
+        <Spinner
+          thickness="4px"
+          speed="0.65s"
+          emptyColor="gray.200"
+          color="blue.500"
+          size="xl"
+        />
+      </Box>
+    );
+  }
 
   return (
     <div className={theme} style={{ height: 700 }}>

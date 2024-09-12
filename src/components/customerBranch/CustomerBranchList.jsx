@@ -1,18 +1,19 @@
+import Toastify from '../Toastify';
+import { toast } from 'react-toastify';
+import { useQuery } from '@apollo/client';
+import AgGridTable from '../core/AgGridTable';
+import { Spinner, Box } from '@chakra-ui/react';
+import ActionButtons from '../core/ActionButtons';
+import { useSearchParams } from 'react-router-dom';
+import { useColorModeValue } from '@chakra-ui/react';
 import { useEffect, useMemo, useState } from 'react'; 
+import CustomerBranchForm from './CustomerBranchForm';
+import { useDispatch, useSelector } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCirclePlus } from '@fortawesome/free-solid-svg-icons';
-import { useColorModeValue } from '@chakra-ui/react';
-import { toast } from 'react-toastify';
-import Toastify from '../Toastify';
-import { useDispatch, useSelector } from 'react-redux';
-import { useQuery } from '@apollo/client';
-import ActionButtons from '../core/ActionButtons';
-import AgGridTable from '../core/AgGridTable';
 import { GET_CUSTOMER_BRANCH } from '../../graphql/queries/customerBranch/getCustomerBranch';
-import { addCustomerBranch, deleteCustomerBranch, fetchCustomerBranchesError, fetchCustomerBranchesRequest, fetchCustomerBranchesSuccess, updateCustomerBranch } from '../../redux/actions/customerBranchActions';
 import { useCreateCustomerBranchMutation, useDeleteCustomerBranchMutation, useUpdateCustomerBranchMutation } from '../../hooks/useCustomerBranchMutation';
-import CustomerBranchForm from './CustomerBranchForm';
-import { useSearchParams } from 'react-router-dom';
+import { addCustomerBranch, deleteCustomerBranch, fetchCustomerBranchesError, fetchCustomerBranchesRequest, fetchCustomerBranchesSuccess, updateCustomerBranch } from '../../redux/actions/customerBranchActions';
 
 export default function CustomerBranchList() {
   const [searchParams] = useSearchParams(); 
@@ -136,6 +137,25 @@ export default function CustomerBranchList() {
   const theme = useColorModeValue('ag-theme-quartz', 'ag-theme-quartz-dark');
   const inputbg = useColorModeValue('#EDF2F7', '#121212');
   const buttonbg = useColorModeValue('#EDF2F7', '#121212');
+
+  if (loading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+      >
+        <Spinner
+          thickness="4px"
+          speed="0.65s"
+          emptyColor="gray.200"
+          color="blue.500"
+          size="xl"
+        />
+      </Box>
+    );
+  }
 
   return (
     <div className={theme} style={{ height: 700 }}>

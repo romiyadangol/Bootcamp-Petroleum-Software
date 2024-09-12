@@ -1,6 +1,5 @@
-import customerBranchReducer from "../../redux/reducers/customerBranchReducer";
-import { InputField, SelectField } from "../core/FormFields";
 import ModalWrapper from "../core/ModalWrapper";
+import { InputField, SelectField } from "../core/FormFields";
 
 export default function CustomerBranchForm({ customerBranch, onChange, onSave, onClose }) {
   return (

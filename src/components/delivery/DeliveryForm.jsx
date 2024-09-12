@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
-import { InputField, SelectField } from "../core/FormFields";
-import ModalWrapper from "../core/ModalWrapper";
-import { Box, Button, Checkbox, Switch, Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
 import { useQuery } from '@apollo/client';
+import { useState, useEffect } from 'react';
+import ModalWrapper from "../core/ModalWrapper";
+import { InputField, SelectField } from "../core/FormFields";
 import { GET_CUSTOMERS } from '../../graphql/queries/customers/getCustomers';
 import { GET_CUSTOMER_BRANCH } from '../../graphql/queries/customerBranch/getCustomerBranch';
+import { Box, Button, Checkbox, Switch, Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
+import { GET_ORDERS } from '../../graphql/queries/delivery/getOrders';
 
 export default function DeliveryForm({ order, onChange, onSave, onClose }) {
   const [step, setStep] = useState(1);
@@ -18,13 +19,10 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
     variables: { id: selectedCustomer?.id },
     skip: !selectedCustomer,
   });
-  
   const branches = branchesData?.getCustomerBranch.customerBranches || [];
-  
-  const [bulkDeliveries, setBulkDeliveries] = useState([
-    { id: 1, name: "Tankdef-DEF", supplier: "WesRock", availableQuantity: 950, orderQuantity: 0 },
-    { id: 2, name: "Petro - Gasoline", supplier: "SunOil", availableQuantity: 500, orderQuantity: 0 },
-  ]);
+
+  const { data: lineItemsData } = useQuery(GET_ORDERS);
+  const lineItems = lineItemsData?.getOrders.orders || [];
 
   useEffect(() => {
     if (selectedCustomer) {
@@ -36,16 +34,13 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
   
 
   useEffect(() => {
-    if (branches.length > 0) {
-      const defaultBranch = branches[0];
-      if (defaultBranch && (!selectedBranch || defaultBranch.id !== selectedBranch.id)) {
-        setSelectedBranch(defaultBranch);
-        onChange({ target: { name: "orderGroupInfo.branchId", value: defaultBranch.id } });
-        onChange({ target: { name: "orderGroupInfo.location", value: defaultBranch.location } });
-      }
+    if (branches.length > 0 && !selectedBranch) {
+      const defaultBranch = branches[0]; 
+      setSelectedBranch(defaultBranch);
+      onChange({ target: { name: "orderGroupInfo.name", value: defaultBranch.name } });
+      onChange({ target: { name: "orderGroupInfo.location", value: defaultBranch.location } });
     }
   }, [branches, selectedBranch, onChange]);
-  
 
   const handleNextStep = () => {
     if (step === 1 && selectedCustomer) {
@@ -59,14 +54,6 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
 
   const handlePreviousStep = () => {
     if (step > 1) setStep(step - 1);
-  };
-
-  const handleBulkDeliveryChange = (id, newQuantity) => {
-    setBulkDeliveries((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, orderQuantity: newQuantity } : item
-      )
-    );
   };
 
   return (
@@ -98,7 +85,7 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
                       onChange={(e) => {
                         const customer = customers.find((cust) => cust.name === e.target.value);
                         setSelectedCustomer(customer);
-                        setSelectedBranch(null); // Reset branch selection
+                        setSelectedBranch(null); 
                         onChange({ target: { name: "orderGroupInfo.customerId", value: customer.id } });
                       }}
                       options={customers.map((cust) => cust.name)}
@@ -121,13 +108,14 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
                         setSelectedBranch(branch);
                         onChange({ target: { name: "orderGroupInfo.name", value: branch.name } });
                       }}
+                      
                       options={branches.map((branch) => branch.name)}
                     />
                       
                     <SelectField
                       label="Location"
                       name="location"
-                      value={selectedBranch ? selectedBranch.location : ""}
+                      value={selectedBranch ? selectedBranch.location :""}
                       onChange={(e) => {
                         const branch = branches.find((b) => b.location === e.target.value);
                         setSelectedBranch(branch);
@@ -148,8 +136,9 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
                     <Box display="flex" justifyContent="space-between" bg="gray.800" p={4} borderRadius="md" color="white">
                     <Box>
                       <h2>Bulk Delivery</h2>
-                      {bulkDeliveries.map((item) => (
+                      {lineItems.map((item) => (
                         <Box
+                          key={item.id}
                           display="flex"
                           justifyContent="space-between"
                           alignItems="center"
@@ -159,11 +148,11 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
                           <Box style={{ display: "flex"}} ml={10}>
                             <span>{item.name}</span>
                           </Box>
-                          <Box mx={40}>{item.supplier}</Box>
+                          <Box mx={40}>{item.units}</Box>
                           <InputField
                             name="orderQuantity"
-                            value={item.orderQuantity}
-                            onChange={(e) => handleBulkDeliveryChange(item.id, e.target.value)}
+                            value={item.quantity}
+                            onChange={(e) => (item.id, e.target.value)}
                             type="number"
                           />
                           <Box>{item.availableQuantity} gal</Box>

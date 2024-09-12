@@ -1,5 +1,5 @@
-import { InputField, SelectField } from "../core/FormFields";
 import ModalWrapper from "../core/ModalWrapper";
+import { InputField, SelectField } from "../core/FormFields";
 
 export default function AssetForm({ asset, onChange, onSave, onClose }) {
   const hardcodedCategories = ['trailer', 'truck', 'tank-wagon', 'tanker'];

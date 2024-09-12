@@ -1,17 +1,18 @@
+import Toastify from '../Toastify';
+import { toast } from 'react-toastify';
+import { useQuery } from '@apollo/client';
+import AssetForm from '../asset/AssetForm';
+import AgGridTable from '../core/AgGridTable';
+import { Spinner, Box } from '@chakra-ui/react';
+import ActionButtons from '../core/ActionButtons';
 import { useEffect, useMemo, useState } from 'react';
+import { useColorModeValue } from '@chakra-ui/react';
+import { useDispatch, useSelector } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCirclePlus } from '@fortawesome/free-solid-svg-icons';
-import AssetForm from '../asset/AssetForm';
-import { useColorModeValue } from '@chakra-ui/react';
-import { toast } from 'react-toastify';
-import Toastify from '../Toastify';
-import { useDispatch, useSelector } from 'react-redux';
 import { GET_ASSETS } from '../../graphql/queries/assets/getAssets';
-import { addAsset, deleteAsset, fetchAssetsRequest, fetchAssetsFailure, fetchAssetsSuccess, updateAsset } from '../../redux/actions/assetActions';
-import { useQuery } from '@apollo/client';
 import { useCreateAssetMutation, useDeleteAssetMutation, useUpdateAssetMutation } from '../../hooks/useAssetMutation';
-import ActionButtons from '../core/ActionButtons';
-import AgGridTable from '../core/AgGridTable';
+import { addAsset, deleteAsset, fetchAssetsRequest, fetchAssetsFailure, fetchAssetsSuccess, updateAsset } from '../../redux/actions/assetActions';
 
 export default function AssetLists() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -38,6 +39,7 @@ export default function AssetLists() {
   }, [data, loading, error, dispatch]);
 
   const rowData = useSelector(state => state.asset.assets || []);
+  // console.log('Row data:', rowData);
 
   const createAssetMutation = useCreateAssetMutation(refetch);
   const updateAssetMutation = useUpdateAssetMutation(refetch);
@@ -147,6 +149,25 @@ export default function AssetLists() {
   const inputbg = useColorModeValue('#EDF2F7', '#121212');
   const buttonbg = useColorModeValue('#EDF2F7', '#121212');
 
+  if (loading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+      >
+        <Spinner
+          thickness="4px"
+          speed="0.65s"
+          emptyColor="gray.200"
+          color="blue.500"
+          size="xl"
+        />
+      </Box>
+    );
+  }
+  
   return (
     <div className={theme} style={{ height: 700 }}>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15, justifyContent: 'space-between' }}>

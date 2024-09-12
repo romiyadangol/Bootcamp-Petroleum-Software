@@ -1,23 +1,22 @@
-import { useEffect, useMemo, useState } from 'react'; 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCirclePlus} from '@fortawesome/free-solid-svg-icons';
+import Toastify from '../Toastify';
+import { toast } from 'react-toastify';
+import { useQuery } from '@apollo/client';
+import AgGridTable from '../core/AgGridTable';
+import { Spinner, Box } from '@chakra-ui/react';
+import ActionButtons from '../core/ActionButtons';
 import DeliveryForm from  '../delivery/DeliveryForm';
 import { useColorModeValue } from '@chakra-ui/react';
-import { toast } from 'react-toastify';
-import Toastify from '../Toastify';
+import { useEffect, useMemo, useState } from 'react'; 
 import { useDispatch, useSelector } from 'react-redux';
-import { addDelivery, deleteDelivery, fetchDeliveriesError, fetchDeliveriesRequest, fetchDeliveriesSuccess, updateDelivery } from '../../redux/actions/deliveryActions';
-import { useQuery } from '@apollo/client';
+import { faCirclePlus} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { GET_ORDERS } from '../../graphql/queries/delivery/getOrders';
 import { useCreateDeliveryMutation, useDeleteDeliveryMutation, useUpdateDeliveryMutation } from '../../hooks/useDeliveryMutation';
-import ActionButtons from '../core/ActionButtons';
-import AgGridTable from '../core/AgGridTable';
-import { createSelector } from 'reselect';
+import { addDelivery, deleteDelivery, fetchDeliveriesError, fetchDeliveriesRequest, fetchDeliveriesSuccess, updateDelivery } from '../../redux/actions/deliveryActions';
 
 export default function DeliveryList() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [order, setOrder] = useState();
   const [mode, setMode] = useState('create');
   const dispatch = useDispatch();
 
@@ -38,13 +37,8 @@ export default function DeliveryList() {
     }
   },[data, error, loading, dispatch]);
 
-  const selectDeliveries = createSelector(
-    state => state.delivery.deliveries,
-    deliveries => deliveries || []
-  );
-
-  const rowData = useSelector(selectDeliveries);
-
+  const rowData = useSelector(state => state.delivery.orders);
+  console.log('Row data:', rowData);
 
   // delivery mutations
   const createDeliveryMutation = useCreateDeliveryMutation(refetch);
@@ -52,7 +46,6 @@ export default function DeliveryList() {
   const updateDeliveryMutation = useUpdateDeliveryMutation(refetch);
  
   const handleEdit = (order) => {
-    setOrder(order);
     setMode('edit');
     setShowModal(true);
   };
@@ -165,14 +158,8 @@ export default function DeliveryList() {
 
   const [colDefs, setColDefs] = useState([
     { headerName: "Status", field: "status", cellRenderer: statusCellRenderer },
-    { headerName: "Started At", field: "startedAt", cellEditor: 'agDateCellEditor', cellEditorParams: { 
-        min: '2000-01-01',
-        min: '2019-12-31',
-      }},
-    { headerName: "Completed At", field: "completedAt", cellEditor: 'agDateCellEditor', cellEditorParams: { 
-        min: '2000-01-01',
-        min: '2019-12-31',
-      }},
+    { headerName: "Started At", field: "startedAt", cellEditor: 'agDateCellEditor'},
+    { headerName: "Completed At", field: "completedAt", cellEditor: 'agDateCellEditor'},
     { headerName: "Customer ID", field: "customerId" },
     { headerName: "Organization ID", field: "organizationId" },
     { headerName: "Planned At", field: "deliveryOrder.plannedAt", cellEditor: 'agDateCellEditor', cellEditorParams: { 
@@ -229,6 +216,24 @@ export default function DeliveryList() {
   const inputbg = useColorModeValue('#EDF2F7', '#121212');
   const buttonbg = useColorModeValue('#EDF2F7', '#121212');
 
+  if (loading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+      >
+        <Spinner
+          thickness="4px"
+          speed="0.65s"
+          emptyColor="gray.200"
+          color="blue.500"
+          size="xl"
+        />
+      </Box>
+    );
+  }
   return (
   <div className={theme} style={{ height: 700 }}>
     <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15, justifyContent: 'space-between' }}>

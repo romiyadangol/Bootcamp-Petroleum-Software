@@ -18,6 +18,7 @@ query GetOrders {
 				customerBranchId
 				orderGroupId
 				assetId
+				driverId
 				lineItems {
 					id
 					name
@@ -27,6 +28,7 @@ query GetOrders {
 				}
 			}
     }
+		errors
   }
 }
 `;

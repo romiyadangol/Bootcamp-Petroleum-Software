@@ -1,17 +1,18 @@
+import Toastify from '../Toastify';
+import { toast } from 'react-toastify';
+import { useQuery } from '@apollo/client';
+import AgGridTable from '../core/AgGridTable';
+import { Box, Spinner } from '@chakra-ui/react';
+import ProductForm from '../products/ProductForm';
+import ActionButtons from '../core/ActionButtons';
+import { useColorModeValue } from '@chakra-ui/react';
 import { useMemo, useState, useEffect } from 'react'; 
+import { useSelector, useDispatch } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCirclePlus } from '@fortawesome/free-solid-svg-icons';
-import ProductForm from '../products/ProductForm';
-import { useColorModeValue } from '@chakra-ui/react';
-import { toast } from 'react-toastify';
-import Toastify from '../Toastify';
-import { useSelector, useDispatch } from 'react-redux';
-import { addProduct, updateProduct, deleteProduct, fetchProductsError, fetchProductsRequest, fetchProductsSuccess } from '../../redux/actions/productActions';
-import { useQuery } from '@apollo/client';
 import { FIND_PRODUCTS } from '../../graphql/queries/products/findProducts';
-import AgGridTable from '../core/AgGridTable';
 import { useCreateProductMutation, useDeleteProductMutation, useUpdateProductMutation } from '../../hooks/useProductMutation';
-import ActionButtons from '../core/ActionButtons';
+import { addProduct, updateProduct, deleteProduct, fetchProductsError, fetchProductsRequest, fetchProductsSuccess } from '../../redux/actions/productActions';
 
 export default function ProductList() {
     const [searchQuery, setSearchQuery] = useState('');
@@ -150,7 +151,24 @@ export default function ProductList() {
     const inputbg = useColorModeValue('#EDF2F7', '#121212');
     const buttonbg = useColorModeValue('#EDF2F7', '#121212');
   
-
+    if (loading) {
+        return (
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            height="100vh"
+          >
+            <Spinner
+              thickness="4px"
+              speed="0.65s"
+              emptyColor="gray.200"
+              color="blue.500"
+              size="xl"
+            />
+          </Box>
+        );
+    }
     return (
         <div className={theme} style={{ height: 700 }}>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15, justifyContent: 'space-between' }}>

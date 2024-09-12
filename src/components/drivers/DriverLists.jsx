@@ -1,19 +1,18 @@
-
+import Toastify from '../Toastify';
+import { toast  } from 'react-toastify';
+import { useQuery } from '@apollo/client';
+import AgGridTable from '../core/AgGridTable';
+import DriverForm from  '../drivers/DriverForm';
+import { Spinner, Box } from '@chakra-ui/react';
+import ActionButtons from '../core/ActionButtons';
+import { useColorModeValue } from '@chakra-ui/react';
 import { useEffect, useMemo, useState } from 'react'; 
+import { useDispatch, useSelector } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCirclePlus } from '@fortawesome/free-solid-svg-icons';
-import DriverForm from  '../drivers/DriverForm';
-import { useColorModeValue } from '@chakra-ui/react';
-import { toast  } from 'react-toastify';
-import Toastify from '../Toastify';
-import { useDispatch, useSelector } from 'react-redux';
-import { addDriver, deleteDriver, fetchDriversFailure, fetchDriversRequest, fetchDriversSuccess } from '../../redux/actions/driverActions';
 import { GET_DRIVERS } from '../../graphql/queries/driver/getDrivers';
 import { useCreateDriverMutation, useDeleteDriverMutation, useUpdateDriverMutation } from '../../hooks/useDriverMutation';
-import ActionButtons from '../core/ActionButtons';
-import AgGridTable from '../core/AgGridTable';
-import { useQuery } from '@apollo/client';
-
+import { addDriver, deleteDriver, fetchDriversFailure, fetchDriversRequest, fetchDriversSuccess } from '../../redux/actions/driverActions';
 export default function DriverLists() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -152,6 +151,24 @@ export default function DriverLists() {
   const inputbg = useColorModeValue('#EDF2F7', '#121212');
   const buttonbg = useColorModeValue('#EDF2F7', '#121212');
 
+  if (loading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+      >
+        <Spinner
+          thickness="4px"
+          speed="0.65s"
+          emptyColor="gray.200"
+          color="blue.500"
+          size="xl"
+        />
+      </Box>
+    );
+  }
   return (
     <div className={theme} style={{ height: 700 }}>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15, justifyContent: 'space-between' }}>
