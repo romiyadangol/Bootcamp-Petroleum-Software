@@ -1,10 +1,10 @@
 import { Button, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay } from "@chakra-ui/react";
 
-export default function ModalWrapper({ isOpen, onClose, title, children, onSave, showSaveButton = true }) {
+export default function ModalWrapper({ isOpen, onClose, title, children, onSave, showSaveButton = true, maxWidth }) {
     return (
         <Modal isOpen={isOpen} onClose={onClose} style={{ background: "transparent" }}>
             <ModalOverlay />
-            <ModalContent style={{ maxWidth: "800px" }}>
+            <ModalContent style={{ maxWidth }}>
                 <ModalHeader>{title}</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>

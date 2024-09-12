@@ -145,12 +145,27 @@ export default function CustomerLists() {
     {
       headerName: "Actions",
       cellRenderer: (params) => (
-        <ActionButtons 
-          onEdit={() => handleEdit(params.data)}
-          onDelete={() => handleDelete(params.data.id)}
-        />
+        <div
+          onClick={(event) => {
+            event.stopPropagation(); // Stop event from reaching grid
+          }}
+        >
+          <ActionButtons 
+            onEdit={(event) => {
+              event.stopPropagation(); // Ensure event does not bubble to parent
+              event.preventDefault();
+              handleEdit(params.data);
+            }}
+            onDelete={(event) => {
+              event.stopPropagation();
+              event.preventDefault();
+              handleDelete(params.data.id);
+            }}
+          />
+        </div>
       ),
-      width: 100
+      width: 100,
+      suppressSizeToFit: true,
     },
   ], []);
 
@@ -198,6 +213,7 @@ export default function CustomerLists() {
         rowData={filteredRowData}
         columnDefs={colDefs}
         defaultColDef={defaultColDef}
+        supressRowClickSelect={true}
         onRowClicked={(row) => handleRowClicked(row.data)}
       />
       {showModal && (

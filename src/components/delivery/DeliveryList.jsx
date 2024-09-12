@@ -6,10 +6,10 @@ import { useColorModeValue } from '@chakra-ui/react';
 import { toast } from 'react-toastify';
 import Toastify from '../Toastify';
 import { useDispatch, useSelector } from 'react-redux';
-import { addDelivery, deleteDelivery, fetchDeliveriesError, fetchDeliveriesRequest, fetchDeliveriesSuccess } from '../../redux/actions/deliveryActions';
+import { addDelivery, deleteDelivery, fetchDeliveriesError, fetchDeliveriesRequest, fetchDeliveriesSuccess, updateDelivery } from '../../redux/actions/deliveryActions';
 import { useQuery } from '@apollo/client';
 import { GET_ORDERS } from '../../graphql/queries/delivery/getOrders';
-import { useCreateDeliveryMutation, useDeleteDeliveryMutation } from '../../hooks/useDeliveryMutation';
+import { useCreateDeliveryMutation, useDeleteDeliveryMutation, useUpdateDeliveryMutation } from '../../hooks/useDeliveryMutation';
 import ActionButtons from '../core/ActionButtons';
 import AgGridTable from '../core/AgGridTable';
 import { createSelector } from 'reselect';
@@ -49,6 +49,7 @@ export default function DeliveryList() {
   // delivery mutations
   const createDeliveryMutation = useCreateDeliveryMutation(refetch);
   const deleteDeliveryMutation = useDeleteDeliveryMutation(refetch);
+  const updateDeliveryMutation = useUpdateDeliveryMutation(refetch);
  
   const handleEdit = (order) => {
     setOrder(order);
@@ -68,11 +69,44 @@ export default function DeliveryList() {
   };
 
   const handleSave = () => {
-    if(mode === 'create') {
+    if(mode === 'edit') {
+      updateDeliveryMutation({
+        variables: {
+          orderId: order.id,
+          orderGroupInfo: {
+            status: order.status,
+            startedAt: order.startedAt,
+            completedAt: order.completedAt,
+            customerId: order.customerId,
+            organizationId: order.organizationId,
+            userId: order.userId,
+            deliveryOrder: {
+              plannedAt: order.deliveryOrder.plannedAt,
+              completedAt: order.deliveryOrder.completedAt,
+              status: order.deliveryOrder.status,
+              customerBranchId: order.deliveryOrder.customerBranchId,
+              orderGroupId: order.deliveryOrder.orderGroupId,
+              assetId: order.deliveryOrder.assetId,
+              lineItems: order.deliveryOrder.lineItems.map(item => ({
+                id: item.id,
+                name: item.name,
+                quantity: item.quantity,
+                units: item.units
+              }))
+            }
+          }
+        },
+        onCompleted: (data) => {
+          dispatch(updateDelivery(data.editOrder.orders));
+          refetch();
+          toast.success('Delivery Updated');
+          setShowModal(false);
+        }
+      }); 
+    } else {
       createDeliveryMutation({
         variables: {
           orderGroupInfo: {
-            id: order.id, 
             status: order.status,
             startedAt: order.startedAt,
             completedAt: order.completedAt,
@@ -102,7 +136,7 @@ export default function DeliveryList() {
           setShowModal(false);
         }
       })
-  };
+    };
   }
 
   const defaultColDef = useMemo(() => ({

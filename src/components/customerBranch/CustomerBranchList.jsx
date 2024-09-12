@@ -12,10 +12,10 @@ import { GET_CUSTOMER_BRANCH } from '../../graphql/queries/customerBranch/getCus
 import { addCustomerBranch, deleteCustomerBranch, fetchCustomerBranchesError, fetchCustomerBranchesRequest, fetchCustomerBranchesSuccess, updateCustomerBranch } from '../../redux/actions/customerBranchActions';
 import { useCreateCustomerBranchMutation, useDeleteCustomerBranchMutation, useUpdateCustomerBranchMutation } from '../../hooks/useCustomerBranchMutation';
 import CustomerBranchForm from './CustomerBranchForm';
-import { useParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 export default function CustomerBranchList() {
-  const { customerId } = useParams(); 
+  const [searchParams] = useSearchParams(); 
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [customerBranch, setCustomerBranch] = useState();
@@ -24,7 +24,7 @@ export default function CustomerBranchList() {
 
   // Customer branch queries
   const { data, loading, error, refetch } = useQuery(GET_CUSTOMER_BRANCH, {
-    variables: { id: customerId },
+    variables: { id: searchParams.get('customerId') },
   });
 
   useEffect(() => {
@@ -41,11 +41,6 @@ export default function CustomerBranchList() {
     }
   }, [data, error, loading, dispatch]);
 
-  useEffect(() => {
-    const url = location.href;
-    const urlObj = new URL(url);
-    console.log(urlObj.searchParams.get('customerId'));
-  },[urlObj])
 
   const rowData = useSelector(state => state.customerBranch.customerBranches || []);
 
