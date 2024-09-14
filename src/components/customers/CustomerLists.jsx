@@ -146,37 +146,31 @@ export default function CustomerLists() {
     {
       headerName: "Actions",
       cellRenderer: (params) => (
-        <div
-          onClick={(event) => {
-            event.stopPropagation(); // Stop event from reaching grid
-          }}
-        >
           <ActionButtons 
-            onEdit={(event) => {
-              event.stopPropagation(); // Ensure event does not bubble to parent
-              event.preventDefault();
+            onEdit={(e) => {
+              e.stopPropagation();  
               handleEdit(params.data);
             }}
-            onDelete={(event) => {
-              event.stopPropagation();
-              event.preventDefault();
+            onDelete={(e) => {
+              e.stopPropagation();
               handleDelete(params.data.id);
             }}
           />
-        </div>
       ),
       width: 100,
-      suppressSizeToFit: true,
     },
   ], []);
 
   const filteredRowData = rowData.filter((item) => {
-    return item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    item.phone.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    item.email.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    item.address.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    item.zip.toLowerCase().includes(searchQuery.toLowerCase());
+    return (
+      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.phoneNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.zipcode.toString().includes(searchQuery)
+    );
   });
+  
 
   const theme = useColorModeValue('ag-theme-quartz', 'ag-theme-quartz-dark');
 

@@ -11,7 +11,7 @@ const deliveryReducer = (state = initialState, action) => {
         case ADD_DELIVERY:
             return {
                 ...state,
-                orders: [...state.orders, ...action.payload]
+                orders: [...state.orders,action.payload]
             };
 
         case DELETE_DELIVERY:

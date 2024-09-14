@@ -16,6 +16,8 @@ import { addDelivery, deleteDelivery, fetchDeliveriesError, fetchDeliveriesReque
 
 export default function DeliveryList() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [ order, setOrder ] = useState(null);
+  console.log('Order:', order);
   const [showModal, setShowModal] = useState(false);
   const [mode, setMode] = useState('create');
   const dispatch = useDispatch();
@@ -46,6 +48,7 @@ export default function DeliveryList() {
   const updateDeliveryMutation = useUpdateDeliveryMutation(refetch);
  
   const handleEdit = (order) => {
+    setOrder(order);
     setMode('edit');
     setShowModal(true);
   };
@@ -74,13 +77,13 @@ export default function DeliveryList() {
             organizationId: order.organizationId,
             userId: order.userId,
             deliveryOrder: {
-              plannedAt: order.deliveryOrder.plannedAt,
-              completedAt: order.deliveryOrder.completedAt,
-              status: order.deliveryOrder.status,
-              customerBranchId: order.deliveryOrder.customerBranchId,
-              orderGroupId: order.deliveryOrder.orderGroupId,
-              assetId: order.deliveryOrder.assetId,
-              lineItems: order.deliveryOrder.lineItems.map(item => ({
+              plannedAt: order.plannedAt,
+              completedAt: order.completedAt,
+              customerBranchId: order.customerBranchId,
+              orderGroupId: order.orderGroupId,
+              assetId: order.assetId,
+              driverId:order.driverId,
+              lineItems: order.lineItems.map(item => ({
                 id: item.id,
                 name: item.name,
                 quantity: item.quantity,
@@ -107,13 +110,13 @@ export default function DeliveryList() {
             organizationId: order.organizationId,
             userId: order.userId,
             deliveryOrder: {
-              plannedAt: order.orderOrder.plannedAt,
-              completedAt: order.deliveryOrder.completedAt,
-              status: order.deliveryOrder.status,
-              customerBranchId: order.deliveryOrder.customerBranchId,
-              orderGroupId: order.deliveryOrder.orderGroupId,
-              assetId: order.deliveryOrder.assetId,
-              lineItems: order.deliveryOrder.lineItems.map(item => ({
+              plannedAt: order.plannedAt,
+              completedAt: order.completedAt,
+              customerBranchId: order.customerBranchId,
+              orderGroupId: order.orderGroupId,
+              assetId: order.assetId,
+              driverId:order.driverId,
+              lineItems: order.lineItems.map(item => ({
                 id: item.id,
                 name: item.name,
                 quantity: item.quantity,
@@ -123,6 +126,7 @@ export default function DeliveryList() {
           }
         },
         onCompleted: (data) => {
+          console.log(data);
           dispatch(addDelivery(data.createDelivery.order));
           refetch();
           toast.success('Delivery Created');
@@ -157,25 +161,74 @@ export default function DeliveryList() {
   };
 
   const [colDefs, setColDefs] = useState([
-    { headerName: "Status", field: "status", cellRenderer: statusCellRenderer },
-    { headerName: "Started At", field: "startedAt", cellEditor: 'agDateCellEditor'},
-    { headerName: "Completed At", field: "completedAt", cellEditor: 'agDateCellEditor'},
+    { 
+      headerName: "Status", 
+      field: "status", 
+      cellRenderer: statusCellRenderer,
+      valueFormatter: (params) => params.value ? params.value.statusText : 'N/A',
+      valueParser: (params) => ({ statusText: params.newValue }) 
+    },
+    { 
+      headerName: "Started At", 
+      field: "startedAt", 
+      cellEditor: 'agDateCellEditor',
+      valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString() : '',
+      valueParser: (params) => params.newValue ? new Date(params.newValue).toISOString() : null
+    },
+    { 
+      headerName: "Completed At", 
+      field: "completedAt", 
+      cellEditor: 'agDateCellEditor', 
+      cellEditorParams: {
+        min: '2000-01-01',
+        max: '2019-12-31'
+      },
+      valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString() : '',
+      valueParser: (params) => params.newValue ? new Date(params.newValue).toISOString() : null
+    },
     { headerName: "Customer ID", field: "customerId" },
     { headerName: "Organization ID", field: "organizationId" },
-    { headerName: "Planned At", field: "deliveryOrder.plannedAt", cellEditor: 'agDateCellEditor', cellEditorParams: { 
+    { 
+      headerName: "Planned At", 
+      field: "deliveryOrder.plannedAt", 
+      cellEditor: 'agDateCellEditor', 
+      cellEditorParams: { 
         min: '2000-01-01',
-        min: '2019-12-31',
-      }},
-    { headerName: "Delivery Status", field: "deliveryOrder.status", cellRenderer: statusCellRenderer },
+        max: '2019-12-31'
+      },
+      valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString() : '',
+      valueParser: (params) => params.newValue ? new Date(params.newValue).toISOString() : null
+    },
+    { 
+      headerName: "Delivery Status", 
+      field: "deliveryOrder.status", 
+      cellRenderer: statusCellRenderer,
+      valueFormatter: (params) => params.value ? params.value.statusText : 'N/A',
+      valueParser: (params) => ({ statusText: params.newValue }) 
+    },
     { headerName: "Customer Branch ID", field: "deliveryOrder.customerBranchId" },
     { headerName: "Asset ID", field: "deliveryOrder.assetId" },
-    { headerName: "Line Items", field: "deliveryOrder.lineItems", cellRenderer: (params) => (
+    { 
+      headerName: "Line Items", 
+      field: "deliveryOrder.lineItems", 
+      cellRenderer: (params) => (
         <ul>
           {params.value.map(item => (
             <li key={item.id}>{item.name} (Qty: {item.quantity}, Units: {item.units})</li>
           ))}
         </ul>
-      ) 
+      ),
+      valueFormatter: (params) => params.value ? params.value.map(item => `${item.name} (Qty: ${item.quantity}, Units: ${item.units})`).join(', ') : 'N/A',
+      valueParser: (params) => {
+        return params.newValue.split(',').map(item => {
+          const [name, quantity, units] = item.split(' (Qty: ');
+          return {
+            name: name.trim(),
+            quantity: parseInt(quantity),
+            units: units.replace(')', '').trim()
+          };
+        });
+      }
     },
     {
       headerName: "Actions",
@@ -188,6 +241,7 @@ export default function DeliveryList() {
       width: 100
     }
   ], []);
+  
   
 
   const filteredRowData = rowData.filter((item) => {
