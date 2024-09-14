@@ -17,9 +17,9 @@ import { addDelivery, deleteDelivery, fetchDeliveriesError, fetchDeliveriesReque
 export default function DeliveryList() {
   const [searchQuery, setSearchQuery] = useState('');
   const [ order, setOrder ] = useState(null);
-  console.log('Order:', order);
   const [showModal, setShowModal] = useState(false);
   const [mode, setMode] = useState('create');
+  const [gridRef, setGridRef] = useState(null);
   const dispatch = useDispatch();
 
   // delivery queries
@@ -135,6 +135,11 @@ export default function DeliveryList() {
       })
     };
   }
+
+  const onBtnExport = (() => {
+    gridRef.api.exportDataAsCsv();
+  }, [gridRef]);
+
 
   const defaultColDef = useMemo(() => ({
     sortable: true,
@@ -301,11 +306,14 @@ export default function DeliveryList() {
         onChange={(e) => setSearchQuery(e.target.value)}
         />
         <button 
-        style={{ border: `1px solid ${buttonbg}`, padding: 12, borderRadius: 5, background: buttonbg, fontWeight: 'bold', width: 210, fontSize: 16 }} 
+        style={{ border: `1px solid ${buttonbg}`, padding: 12, borderRadius: 5, background: buttonbg, fontWeight: 'bold', width: 210, fontSize: 16, marginRight: 10 }} 
         onClick={() => setShowModal(true)}
         >
         <FontAwesomeIcon icon={faCirclePlus} color='orange' />&nbsp; Create New Delivery
         </button>
+        <button 
+        style={{ border: `1px solid ${buttonbg}`, padding: 12, borderRadius: 5, background: buttonbg, fontWeight: 'bold', width: 150, fontSize: 16 }} 
+        onClick={onBtnExport}> Export CSV</button>
       </div>
     </div>
     <AgGridTable

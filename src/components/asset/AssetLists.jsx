@@ -13,10 +13,12 @@ import { faCirclePlus } from '@fortawesome/free-solid-svg-icons';
 import { GET_ASSETS } from '../../graphql/queries/assets/getAssets';
 import { useCreateAssetMutation, useDeleteAssetMutation, useUpdateAssetMutation } from '../../hooks/useAssetMutation';
 import { addAsset, deleteAsset, fetchAssetsRequest, fetchAssetsFailure, fetchAssetsSuccess, updateAsset } from '../../redux/actions/assetActions';
+import DatePicker from '../core/DatePicker';
 
 export default function AssetLists() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
   const [asset, setAsset] = useState(null);
   const [mode, setMode] = useState('create');
   const dispatch = useDispatch();
@@ -63,6 +65,7 @@ export default function AssetLists() {
   };
 
   const handleSave = () => {
+    const currentDate = new Date().toISOString();
     if (mode === 'edit') {
       updateAssetMutation({
         variables: {
@@ -71,6 +74,7 @@ export default function AssetLists() {
             assetId: asset.assetId,
             assetCategory: asset.assetCategory,
             assetStatus: asset.assetStatus,
+            createdAt: asset.createdAt || currentDate,
           }
         },
         onCompleted: (data) => {
@@ -86,11 +90,15 @@ export default function AssetLists() {
           assetInfo: {
             assetId: asset.assetId,
             assetCategory: asset.assetCategory,
-            assetStatus: asset.assetStatus
+            assetStatus: asset.assetStatus,
+            createdAt: currentDate,
           }
         },
         onCompleted: (data) => {
-          dispatch(addAsset(data.createAsset.Asset));
+          dispatch(addAsset({
+            ...data.createAsset.asset,
+            createdAt: currentDate,
+          }));
           refetch();
           toast.success('Asset Created');
           setShowModal(false);
@@ -139,9 +147,13 @@ export default function AssetLists() {
   ], []);
 
   const filteredRowData = rowData.filter((item) => {
-    return item?.assetId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const matchSearchQuery = item?.assetId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
            item?.assetCategory?.toLowerCase().includes(searchQuery.toLowerCase()) ||
            item?.assetStatus?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchDate = selectedDate ? new Date(item.createdAt).toDateString() === selectedDate.toDateString() : true;
+
+    return matchSearchQuery && matchDate;
   });
   
 
@@ -172,7 +184,7 @@ export default function AssetLists() {
     <div className={theme} style={{ height: 700 }}>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15, justifyContent: 'space-between' }}>
         <h2 style={{ fontSize: 25, fontWeight: 'bold', padding: 15 }}>Asset List</h2>
-        <div>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15, justifyContent: 'space-between' }}>
           <input
             type="text"
             placeholder="Search..."
@@ -180,8 +192,9 @@ export default function AssetLists() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
+           <DatePicker selected={selectedDate} onChange={setSelectedDate} />
           <button
-            style={{ border: `1px solid ${buttonbg}`, padding: 12, borderRadius: 5, background: buttonbg, fontWeight: 'bold', width: 200, fontSize: 16 }}
+            style={{ border: `1px solid ${buttonbg}`, padding: 12, borderRadius: 5, background: buttonbg, fontWeight: 'bold', width: 200, fontSize: 16, }}
             onClick={() => {
               setAsset({
                 id: '',

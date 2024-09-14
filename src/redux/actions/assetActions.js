@@ -21,7 +21,10 @@ export const fetchAssetsFailure = (error) => ({
 
 export const addAsset = (asset) => ({
     type: ADD_ASSET,
-    payload: asset,
+    payload: {
+        ...asset,
+        createdAt: asset.createdAt || new Date().toISOString(),
+    }
 });
 
 export const deleteAsset = (id) => ({
@@ -31,5 +34,8 @@ export const deleteAsset = (id) => ({
 
 export const updateAsset = (asset) => ({
     type: UPDATE_ASSET,
-    payload: asset,
+    payload: {
+        ...asset,
+        createdAt: asset.createdAt,
+    }
 });
