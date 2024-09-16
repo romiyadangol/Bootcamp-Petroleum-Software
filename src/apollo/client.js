@@ -1,18 +1,18 @@
-import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
-import { setContext } from '@apollo/client/link/context';
-import { getToken } from  '../helper/storage.js';
+import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
+import { setContext } from "@apollo/client/link/context";
+import { getToken } from "../helper/storage.js";
 
 const httpLink = createHttpLink({
-  uri: 'https://2a85-113-199-231-2.ngrok-free.app/graphql',
+  uri: "https://e9ff-113-199-231-75.ngrok-free.app/graphql",
 });
 
 const authLink = setContext((_, { headers }) => {
-  const token = getToken(); 
+  const token = getToken();
   console.log(token);
   return {
     headers: {
       ...headers,
-      authorization: token ? `Bearer ${token}` : '',
+      authorization: token ? `Bearer ${token}` : "",
     },
   };
 });
