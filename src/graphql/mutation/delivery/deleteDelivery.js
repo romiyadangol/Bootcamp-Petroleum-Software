@@ -8,16 +8,40 @@ mutation DeleteOrder($orderId: ID!) {
       status
       startedAt
       completedAt
-      customerId
+      customer {
+				id 
+				name
+				email
+			}
+			userId
       organizationId
+			createdAt
+			recurring {
+				frequency
+				startedAt
+				endAt
+			}
 			deliveryOrder {
 				id
 				plannedAt
 				completedAt
-				status
-				customerBranchId
+				customerBranch {
+					id 
+					name 
+					location
+				}
 				orderGroupId
-				assetId
+				asset {
+					id 
+					assetId
+					assetCategory
+				}
+				driver {
+					id
+					name
+					email
+				}
+				createdAt
 				lineItems {
 					id
 					name

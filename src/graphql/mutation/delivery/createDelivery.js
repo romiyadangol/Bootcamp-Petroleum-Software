@@ -1,24 +1,47 @@
 import { gql } from "@apollo/client";
 
  export const CREATE_DELIVERY = gql`
- mutation CreateOrder($orderGroupInfo: OrderGroupInput!) {
-  createOrder(input: {orderGroupInfo: $orderGroupInfo}) {
+mutation CreateOrder($orderGroupInfo: OrderGroupInput!) {
+  createOrder(input: {
+    orderGroupInfo: $orderGroupInfo
+  }) {
     order {
-		id
+			id
       status
       startedAt
       completedAt
-      customerId
+      customer {
+				id
+				name
+				email
+			}
       organizationId
 			userId
+			recurring {
+				frequency
+				startedAt
+				endAt
+			}
 			deliveryOrder {
 				id
 				plannedAt
 				completedAt
-				status
-				customerBranchId
+				customerBranch {
+					id
+					name
+					location
+				}
 				orderGroupId
-				assetId
+				asset{
+					id
+					assetId
+					assetCategory
+				}
+				driver{
+					id 
+					name
+					email
+				}
 				lineItems {
 					id
 					name

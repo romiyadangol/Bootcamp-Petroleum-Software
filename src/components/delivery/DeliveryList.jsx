@@ -4,11 +4,11 @@ import { useQuery } from '@apollo/client';
 import AgGridTable from '../core/AgGridTable';
 import { Spinner, Box } from '@chakra-ui/react';
 import ActionButtons from '../core/ActionButtons';
-import DeliveryForm from  '../delivery/DeliveryForm';
+import DeliveryForm from '../delivery/DeliveryForm';
 import { useColorModeValue } from '@chakra-ui/react';
-import { useEffect, useMemo, useState } from 'react'; 
+import { useCallback, useEffect, useMemo, useState } from 'react'; 
 import { useDispatch, useSelector } from 'react-redux';
-import { faCirclePlus} from '@fortawesome/free-solid-svg-icons';
+import { faCirclePlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { GET_ORDERS } from '../../graphql/queries/delivery/getOrders';
 import { useCreateDeliveryMutation, useDeleteDeliveryMutation, useUpdateDeliveryMutation } from '../../hooks/useDeliveryMutation';
@@ -16,7 +16,8 @@ import { addDelivery, deleteDelivery, fetchDeliveriesError, fetchDeliveriesReque
 
 export default function DeliveryList() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [ order, setOrder ] = useState(null);
+  const [order, setOrder] = useState(null);
+  // console.log('Order:', order);
   const [showModal, setShowModal] = useState(false);
   const [mode, setMode] = useState('create');
   const [gridRef, setGridRef] = useState(null);
@@ -34,13 +35,12 @@ export default function DeliveryList() {
       dispatch(fetchDeliveriesError(error.message));
     }
 
-    if(data) {
+    if (data) {
       dispatch(fetchDeliveriesSuccess(data.getOrders.orders));
     }
-  },[data, error, loading, dispatch]);
+  }, [data, error, loading, dispatch]);
 
   const rowData = useSelector(state => state.delivery.orders);
-  console.log('Row data:', rowData);
 
   // delivery mutations
   const createDeliveryMutation = useCreateDeliveryMutation(refetch);
@@ -61,85 +61,85 @@ export default function DeliveryList() {
         refetch();
         toast.success('Delivery Deleted');
       }
-    })
+    });
   };
 
   const handleSave = () => {
-    if(mode === 'edit') {
-      updateDeliveryMutation({
-        variables: {
-          orderId: order.id,
-          orderGroupInfo: {
-            status: order.status,
-            startedAt: order.startedAt,
-            completedAt: order.completedAt,
-            customerId: order.customerId,
-            organizationId: order.organizationId,
-            userId: order.userId,
-            deliveryOrder: {
-              plannedAt: order.plannedAt,
-              completedAt: order.completedAt,
-              customerBranchId: order.customerBranchId,
-              orderGroupId: order.orderGroupId,
-              assetId: order.assetId,
-              driverId:order.driverId,
-              lineItems: order.lineItems.map(item => ({
-                id: item.id,
-                name: item.name,
-                quantity: item.quantity,
-                units: item.units
-              }))
+    if (order) {
+      if (mode === 'edit') {
+        updateDeliveryMutation({
+          variables: {
+            orderId: order?.id,
+            orderGroupInfo: {
+              status: order?.status,
+              startedAt: order?.startedAt,
+              customerId: order?.customerId,
+              deliveryOrderAttributes: {
+                plannedAt: order?.deliveryOrder?.plannedAt,
+                completedAt: order?.deliveryOrder?.completedAt,
+                customerBranchId: order?.deliveryOrder?.customerBranchId,
+                assetId: order?.deliveryOrder?.assetId,
+                driverId: order?.deliveryOrder?.driverId,
+                lineItems: order?.deliveryOrder?.lineItems.map(item => ({
+                  id: item?.id,
+                  name: item?.name,
+                  quantity: item?.quantity,
+                  units: item?.units,
+                })),
+              }
             }
+          },
+          onCompleted: (data) => {
+            dispatch(updateDelivery(data.editOrder.orders));
+            refetch();
+            toast.success('Delivery Updated');
+            setShowModal(false);
           }
-        },
-        onCompleted: (data) => {
-          dispatch(updateDelivery(data.editOrder.orders));
-          refetch();
-          toast.success('Delivery Updated');
-          setShowModal(false);
-        }
-      }); 
-    } else {
-      createDeliveryMutation({
-        variables: {
-          orderGroupInfo: {
-            status: order.status,
-            startedAt: order.startedAt,
-            completedAt: order.completedAt,
-            customerId: order.customerId,
-            organizationId: order.organizationId,
-            userId: order.userId,
-            deliveryOrder: {
-              plannedAt: order.plannedAt,
-              completedAt: order.completedAt,
-              customerBranchId: order.customerBranchId,
-              orderGroupId: order.orderGroupId,
-              assetId: order.assetId,
-              driverId:order.driverId,
-              lineItems: order.lineItems.map(item => ({
-                id: item.id,
-                name: item.name,
-                quantity: item.quantity,
-                units: item.units
-              }))
+        });
+      } else {
+        console.log('Creating new delivery:', order);
+        createDeliveryMutation({
+          variables: {
+            orderGroupInfo: {
+              status: order?.status,
+              startedAt: order?.startedAt,
+              customerId: order?.customerId,
+              recurring: {
+                frequency: order?.recurring?.frequency,
+                startedAt: order?.recurring?.startedAt,
+                endAt: order?.recurring?.endAt,
+              },
+              deliveryOrderAttributes: {
+                plannedAt: order?.deliveryOrder?.plannedAt,
+                completedAt: order?.deliveryOrder?.completedAt,
+                customerBranchId: order?.deliveryOrder?.customerBranchId,
+                orderGroupId: order?.deliveryOrder?.orderGroupId,
+                assetId: order?.deliveryOrder?.assetId,
+                driverId: order?.deliveryOrder?.driverId,
+                lineItems: order?.deliveryOrder?.lineItems.map(item => ({
+                  name: item?.name,
+                  quantity: item?.quantity,
+                  units: item?.units,
+                })),
+              }
             }
+          },
+          onCompleted: (data) => {
+            dispatch(addDelivery(data.createDelivery.order));
+            console.log(data.createDelivery.order);
+            refetch();
+            toast.success('Delivery Created');
+            setShowModal(false);
           }
-        },
-        onCompleted: (data) => {
-          console.log(data);
-          dispatch(addDelivery(data.createDelivery.order));
-          refetch();
-          toast.success('Delivery Created');
-          setShowModal(false);
-        }
-      })
-    };
-  }
+        });
+      }
+    }
+  };
+  
 
-  const onBtnExport = (() => {
+  const onBtnExport = useCallback(() => {
     gridRef.api.exportDataAsCsv();
   }, [gridRef]);
-
 
   const defaultColDef = useMemo(() => ({
     sortable: true,
@@ -166,77 +166,14 @@ export default function DeliveryList() {
   };
 
   const [colDefs, setColDefs] = useState([
-    { 
-      headerName: "Status", 
-      field: "status", 
-      cellRenderer: statusCellRenderer,
-      valueFormatter: (params) => params.value ? params.value.statusText : 'N/A',
-      valueParser: (params) => ({ statusText: params.newValue }) 
-    },
-    { 
-      headerName: "Started At", 
-      field: "startedAt", 
-      cellEditor: 'agDateCellEditor',
-      valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString() : '',
-      valueParser: (params) => params.newValue ? new Date(params.newValue).toISOString() : null
-    },
-    { 
-      headerName: "Completed At", 
-      field: "completedAt", 
-      cellEditor: 'agDateCellEditor', 
-      cellEditorParams: {
-        min: '2000-01-01',
-        max: '2019-12-31'
-      },
-      valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString() : '',
-      valueParser: (params) => params.newValue ? new Date(params.newValue).toISOString() : null
-    },
-    { headerName: "Customer ID", field: "customerId" },
-    { headerName: "Organization ID", field: "organizationId" },
-    { 
-      headerName: "Planned At", 
-      field: "deliveryOrder.plannedAt", 
-      cellEditor: 'agDateCellEditor', 
-      cellEditorParams: { 
-        min: '2000-01-01',
-        max: '2019-12-31'
-      },
-      valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString() : '',
-      valueParser: (params) => params.newValue ? new Date(params.newValue).toISOString() : null
-    },
-    { 
-      headerName: "Delivery Status", 
-      field: "deliveryOrder.status", 
-      cellRenderer: statusCellRenderer,
-      valueFormatter: (params) => params.value ? params.value.statusText : 'N/A',
-      valueParser: (params) => ({ statusText: params.newValue }) 
-    },
-    { headerName: "Customer Branch ID", field: "deliveryOrder.customerBranchId" },
-    { headerName: "Asset ID", field: "deliveryOrder.assetId" },
-    { 
-      headerName: "Line Items", 
-      field: "deliveryOrder.lineItems", 
-      cellRenderer: (params) => (
-        <ul>
-          {params.value.map(item => (
-            <li key={item.id}>{item.name} (Qty: {item.quantity}, Units: {item.units})</li>
-          ))}
-        </ul>
-      ),
-      valueFormatter: (params) => params.value ? params.value.map(item => `${item.name} (Qty: ${item.quantity}, Units: ${item.units})`).join(', ') : 'N/A',
-      valueParser: (params) => {
-        return params.newValue.split(',').map(item => {
-          const [name, quantity, units] = item.split(' (Qty: ');
-          return {
-            name: name.trim(),
-            quantity: parseInt(quantity),
-            units: units.replace(')', '').trim()
-          };
-        });
-      }
-    },
-    {
-      headerName: "Actions",
+    { headerName: "Status", field: "status", cellRenderer: statusCellRenderer },
+    { headerName: "Started At", field: "startedAt" },
+    { headerName: "Completed At", field: "completedAt" },
+    { headerName: "Customer Name", field: "customer.name" },
+    { headerName: "Customer Email", field: "customer.email" },
+    { headerName: "Asset Category", field: "deliveryOrder.asset.assetCategory" },
+    { headerName: "Driver Name", field: "deliveryOrder.driver.name" },
+    { headerName: "Actions", 
       cellRenderer: (params) => (
         <ActionButtons
           onEdit={() => handleEdit(params.data)}
@@ -247,27 +184,12 @@ export default function DeliveryList() {
     }
   ], []);
   
-  
-
-  const filteredRowData = rowData.filter((item) => {
+  const filteredRowData = rowData.filter(item => {
     return (
       item.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.startedAt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.completedAt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.customerId.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.organizationId.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.userId.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.deliveryOrder.plannedAt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.deliveryOrder.completedAt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.deliveryOrder.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.deliveryOrder.customerBranchId.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.deliveryOrder.orderGroupId.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.deliveryOrder.assetId.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.deliveryOrder.lineItems.some((lineItem) => 
-        lineItem.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        lineItem.quantity.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
-        lineItem.units.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      item.customer?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.customer?.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.deliveryOrder?.asset?.assetId.toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
   
@@ -293,45 +215,47 @@ export default function DeliveryList() {
       </Box>
     );
   }
+
   return (
-  <div className={theme} style={{ height: 700 }}>
-    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15, justifyContent: 'space-between' }}>
-      <h2 style={{ fontSize: 25, fontWeight: 'bold', padding: 15 }}>Delivery List</h2>
-      <div>
-        <input 
-        type="text" 
-        placeholder="Search..." 
-        style={{ marginRight: 10, padding: 12, width: 400, borderRadius: 5, background: inputbg, border: `1px solid ${inputbg}`, fontSize: 16 }}
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        <button 
-        style={{ border: `1px solid ${buttonbg}`, padding: 12, borderRadius: 5, background: buttonbg, fontWeight: 'bold', width: 210, fontSize: 16, marginRight: 10 }} 
-        onClick={() => setShowModal(true)}
-        >
-        <FontAwesomeIcon icon={faCirclePlus} color='orange' />&nbsp; Create New Delivery
-        </button>
-        <button 
-        style={{ border: `1px solid ${buttonbg}`, padding: 12, borderRadius: 5, background: buttonbg, fontWeight: 'bold', width: 150, fontSize: 16 }} 
-        onClick={onBtnExport}> Export CSV</button>
+    <div className={theme} style={{ height: 700 }}>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15, justifyContent: 'space-between' }}>
+        <h2 style={{ fontSize: 25, fontWeight: 'bold', padding: 15 }}>Delivery List</h2>
+        <div>
+          <input 
+            type="text" 
+            placeholder="Search..." 
+            style={{ marginRight: 10, padding: 12, width: 400, borderRadius: 5, background: inputbg, border: `1px solid ${inputbg}`, fontSize: 16 }}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <button 
+            style={{ border: `1px solid ${buttonbg}`, padding: 12, borderRadius: 5, background: buttonbg, fontWeight: 'bold', width: 210, fontSize: 16, marginRight: 10 }} 
+            onClick={() => setShowModal(true)}
+          >
+            <FontAwesomeIcon icon={faCirclePlus} color='orange' />&nbsp; Create New Delivery
+          </button>
+          <button 
+            style={{ border: `1px solid ${buttonbg}`, padding: 12, borderRadius: 5, background: buttonbg, fontWeight: 'bold', fontSize: 16 }} 
+            onClick={onBtnExport}
+          >
+            Export to CSV
+          </button>
+        </div>
       </div>
-    </div>
-    <AgGridTable
-      rowData={filteredRowData}
-      columnDefs={colDefs}
-      defaultColDef={defaultColDef}
-    />
-    {showModal && (
-    <div>
-      <DeliveryForm 
-        order={order}
-        onChange={(e) => setOrder({ ...order, [e.target.name]: e.target.value })}
-        onSave={handleSave}
-        onClose={() => setShowModal(false)}
+      <AgGridTable
+        rowData={filteredRowData}
+        columnDefs={colDefs}
+        defaultColDef={defaultColDef}
+        gridRef={(ref) => setGridRef(ref)}
+        pagination={true}
       />
+      {showModal && 
+      <DeliveryForm 
+        order={order} 
+        mode={mode} 
+        onSave={handleSave} 
+        onClose={() => setShowModal(false)} 
+        onChange={(e) => setOrder({ ...order, [e.target.name]: e.target.value })}/>}
     </div>
-    )}
-      <Toastify/>
-  </div>
   );
-  }
+}

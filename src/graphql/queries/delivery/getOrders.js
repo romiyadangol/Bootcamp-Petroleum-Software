@@ -8,17 +8,40 @@ query GetOrders {
       status
       startedAt
       completedAt
-      customerId
+      customer {
+				id 
+				name
+				email
+			}
+			userId
       organizationId
+			createdAt
+			recurring {
+				frequency
+				startedAt
+				endAt
+			}
 			deliveryOrder {
 				id
 				plannedAt
 				completedAt
-				status
-				customerBranchId
+				customerBranch {
+					id 
+					name 
+					location
+				}
 				orderGroupId
-				assetId
-				driverId
+				asset {
+					id 
+					assetId
+					assetCategory
+				}
+				driver {
+					id
+					name
+					email
+				}
+				createdAt
 				lineItems {
 					id
 					name

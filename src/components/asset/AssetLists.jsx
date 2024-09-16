@@ -51,8 +51,7 @@ export default function AssetLists() {
     }
   }, [data, loading, error, dispatch]);
 
-  const rowData = useSelector((state) => state.asset.assets || []);
-  // console.log('Row data:', rowData);
+  const rowData = useSelector(state => state.asset.assets || []);
 
   const createAssetMutation = useCreateAssetMutation(refetch);
   const updateAssetMutation = useUpdateAssetMutation(refetch);

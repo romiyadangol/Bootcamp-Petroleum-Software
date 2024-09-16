@@ -5,7 +5,6 @@ import { InputField, SelectField } from '../core/FormFields';
 import { useQuery } from '@apollo/client';
 import { GET_CUSTOMERS } from '../../graphql/queries/customers/getCustomers';
 import { GET_CUSTOMER_BRANCH } from '../../graphql/queries/customerBranch/getCustomerBranch';
-import { GET_ORDERS } from '../../graphql/queries/delivery/getOrders';
 import { FIND_PRODUCTS } from '../../graphql/queries/products/findProducts';
 import { GET_DRIVERS } from '../../graphql/queries/driver/getDrivers';
 
@@ -29,15 +28,11 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
   });
   const branches = branchesData?.getCustomerBranch.customerBranches || [];
 
-  const { data: lineItemsData } = useQuery(GET_ORDERS);
-  const lineItems = lineItemsData?.getOrders.orders || [];
-
   const { data: productData } = useQuery(FIND_PRODUCTS);
   const products = productData?.findProducts.products || [];
 
   const { data: driverData } = useQuery(GET_DRIVERS);
   const drivers = driverData?.getDrivers.drivers || [];
-  console.log(drivers);
 
   const handleAddLineItem = (product) => {
     const newLineItem = {
@@ -45,6 +40,7 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
       name: product.name,
       units: product.productUnit,
       quantity: "",
+      deliveryOrderId: order.id, 
       checked: false 
     };
     setSelectedLineItems([...selectedLineItems, newLineItem]);
@@ -72,14 +68,36 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
     }
   }, [selectedCustomer, refetchBranches]);
 
+
   useEffect(() => {
     if (branches.length > 0 && !selectedBranch) {
       const defaultBranch = branches[0];
       setSelectedBranch(defaultBranch);
-      onChange({ target: { name: 'orderGroupInfo.name', value: defaultBranch.name } });
-      onChange({ target: { name: 'orderGroupInfo.location', value: defaultBranch.location } });
+  
+      // Ensure `order` and `orderGroupInfo` are not null before updating
+      const updatedOrder = {
+        orderGroupInfo: {
+          status: "pending",
+          startedAt: new Date().toISOString(),
+          customerId: selectedCustomer?.id || null,
+          deliveryOrderAttributes: {
+            name: defaultBranch.name,
+            location: defaultBranch.location,
+            plannedAt: order?.plannedAt || new Date().toISOString(),
+            customerBranchId: defaultBranch.id,
+            assetId: 2,
+            driverId: selectedDriver?.id || null,
+            lineItemsAttributes: selectedLineItems.map(item => ({
+              name: item.name,
+              quantity: parseFloat(item.quantity) || 0,
+              units: item.units
+            }))
+          }
+        }
+      };
+      onChange({ target: { name: 'order', value: updatedOrder } });
     }
-  }, [branches, selectedBranch, onChange]);
+  }, [branches, selectedBranch, onChange, order, selectedDriver, selectedLineItems]);
 
   const handleNextStep = () => {
     if (step === 1 && selectedCustomer) {
@@ -87,7 +105,26 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
     } else if (step === 2) {
       setStep(3);
     } else {
-      onSave();
+      const updatedOrder = {
+        // ...order,
+        orderGroupInfo: {
+          status: "pending",
+          startedAt: new Date().toISOString(),
+          customerId: selectedCustomer?.id || null,
+          deliveryOrderAttributes: {
+            plannedAt: order.plannedAt || new Date().toISOString(),
+            customerBranchId: selectedBranch?.id || null,
+            assetId: 2,
+            driverId: selectedDriver?.id || null,
+            lineItemsAttributes: selectedLineItems.map(item => ({
+              name: item.name,
+              quantity: parseFloat(item.quantity) || 0,
+              units: item.units
+            }))
+          }
+        }
+      };
+      onSave({ orderGroupInfo: updatedOrder.orderGroupInfo });
     }
   };
 
@@ -108,6 +145,70 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
     }
   };
 
+  const handleCustomerChange = (customer) => {
+    setSelectedCustomer(customer);
+    setSelectedBranch(null);
+
+    console.log('Selected Driver:', selectedDriver);
+    console.log('Selected Line Items:', selectedLineItems);
+  
+    const updatedOrder = {
+      orderGroupInfo: {
+        status: "pending",
+        startedAt: new Date().toISOString(),
+        customerId: customer.id || null,
+        deliveryOrderAttributes: {
+          // Ensure other required attributes are set as needed
+          name: selectedBranch?.name || "",
+          location: selectedBranch?.location || "",
+          plannedAt: order?.plannedAt || new Date().toISOString(),
+          customerBranchId: selectedBranch?.id || null,
+          assetId: 2,
+          driverId: selectedDriver?.id || null,
+          lineItemsAttributes: selectedLineItems.map(item => ({
+            name: item.name,
+            quantity: parseFloat(item.quantity) || 0,
+            units: item.units
+          }))
+        }
+      }
+    };
+  
+    onChange({ target: { name: 'order', value: updatedOrder } });
+  };
+  
+  
+  const handleBranchChange = (branch) => {
+    setSelectedBranch(branch);
+
+    console.log('Selected Driver:', selectedDriver);
+    console.log('Selected Line Items:', selectedLineItems);
+  
+    const updatedOrder = {
+      orderGroupInfo: {
+        status: "pending",
+        startedAt: new Date().toISOString(),
+        customerId: selectedCustomer?.id || null,
+        deliveryOrderAttributes: {
+          name: branch.name,
+          location: branch.location,
+          plannedAt: order?.plannedAt || new Date().toISOString(),
+          customerBranchId: branch.id || null,
+          assetId: 2,
+          driverId: selectedDriver?.id || null,
+          lineItemsAttributes: selectedLineItems.map(item => ({
+            name: item.name,
+            quantity: parseFloat(item.quantity) || 0,
+            units: item.units
+          }))
+        }
+      }
+    };
+  
+    onChange({ target: { name: 'order', value: updatedOrder } });
+  };
+  
+  
   return (
     <>
       <ModalWrapper 
@@ -136,7 +237,7 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
         isOpen={true} 
         onClose={onClose} 
         title="Create Delivery Order" 
-        onSave={handleNextStep}
+        onSave={onSave}
         maxWidth={1600}
         showSaveButton={false}
       >
@@ -160,8 +261,7 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
                         onChange={(e) => {
                           const customer = customers.find((cust) => cust.name === e.target.value);
                           setSelectedCustomer(customer);
-                          setSelectedBranch(null);
-                          onChange({ target: { name: "orderGroupInfo.customerId", value: customer.id } });
+                          handleCustomerChange(customer);
                         }}
                         options={customers.map((cust) => cust.name)}
                       />
@@ -180,8 +280,7 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
                         value={selectedBranch ? selectedBranch.name : ""}
                         onChange={(e) => {
                           const branch = branches.find((b) => b.name === e.target.value);
-                          setSelectedBranch(branch);
-                          onChange({ target: { name: "orderGroupInfo.name", value: branch.name } });
+                          handleBranchChange(branch);
                         }}
                         options={branches.map((branch) => branch.name)}
                       />
@@ -191,8 +290,7 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
                         value={selectedBranch ? selectedBranch.location : ""}
                         onChange={(e) => {
                           const branch = branches.find((b) => b.location === e.target.value);
-                          setSelectedBranch(branch);
-                          onChange({ target: { name: "orderGroupInfo.location", value: branch.location } });
+                          handleBranchChange(branch);
                         }}
                         options={branches.map((branch) => branch.location)}
                       />
@@ -330,3 +428,5 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
     </>
   );
 }
+
+
