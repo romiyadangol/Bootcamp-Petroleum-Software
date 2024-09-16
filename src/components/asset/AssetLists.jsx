@@ -60,7 +60,6 @@ export default function AssetLists() {
 
   const handleEdit = (asset) => {
     setAsset(asset);
-    console.log(asset, "assets >>>>>");
     setMode("edit");
     setShowModal(true);
   };
@@ -78,7 +77,6 @@ export default function AssetLists() {
 
   const handleSave = () => {
     if (mode === "edit") {
-      console.log("assets update >>>>>>>>>>");
       updateAssetMutation({
         variables: {
           id: asset.id,
