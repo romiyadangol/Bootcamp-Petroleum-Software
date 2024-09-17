@@ -90,7 +90,6 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
         orderGroupInfo: {
           status: "pending",
           startedAt: new Date().toISOString(),
-          createdAt: new Date().toISOString(),
           completedAt: null,
           customerId: selectedCustomer?.id || null,
           recurring: recurring ? {
@@ -126,7 +125,6 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
       const updatedOrder = {
         status: "pending",
         startedAt: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
         completedAt: null,
         customerId: selectedCustomer?.id || null,
         recurring: recurring ? {
@@ -178,7 +176,6 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
       orderGroupInfo: {
         status: "pending",
         startedAt: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
         customerId: customer.id || null,
         deliveryOrderAttributes: {
           name: selectedBranch?.name || "",
@@ -207,7 +204,6 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
       orderGroupInfo: {
         status: "pending",
         startedAt: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
         customerId: selectedCustomer?.id || null,
         deliveryOrderAttributes: {
           name: branch.name,
@@ -235,7 +231,6 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
       orderGroupInfo: {
         status: "pending",
         startedAt: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
         customerId: selectedCustomer?.id || null,
         deliveryOrderAttributes: {
           name: selectedBranch?.name || "",
@@ -263,7 +258,6 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
       orderGroupInfo: {
         status: "pending",
         startedAt: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
         customerId: selectedCustomer?.id || null,
         deliveryOrderAttributes: {
           name: selectedBranch?.name || "",

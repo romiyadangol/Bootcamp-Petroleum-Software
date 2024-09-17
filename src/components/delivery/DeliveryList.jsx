@@ -116,7 +116,6 @@ export default function DeliveryList() {
             orderGroupInfo: {
               status: order.status,
               startedAt: order.startedAt,
-              createdAt: order.createdAt,
               customerId: order.customerId,
               recurring: order.recurring ? {
                 frequency: order.recurring.frequency || "Daily",
