@@ -161,7 +161,7 @@ export default function CustomerLists() {
     },
   ], []);
 
-  const filteredRowData = rowData.filter((item) => {
+  const filteredRowData = rowData && rowData.filter((item) => {
     return (
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.phoneNo.toLowerCase().includes(searchQuery.toLowerCase()) ||

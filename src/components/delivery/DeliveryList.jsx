@@ -6,6 +6,8 @@ import { Spinner, Box } from '@chakra-ui/react';
 import ActionButtons from '../core/ActionButtons';
 import DeliveryForm from '../delivery/DeliveryForm';
 import { useColorModeValue } from '@chakra-ui/react';
+import DatePicker from "../core/DatePicker";
+import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from 'react'; 
 import { useDispatch, useSelector } from 'react-redux';
 import { faCirclePlus } from '@fortawesome/free-solid-svg-icons';
@@ -17,8 +19,8 @@ import { addDelivery, deleteDelivery, fetchDeliveriesError, fetchDeliveriesReque
 export default function DeliveryList() {
   const [searchQuery, setSearchQuery] = useState('');
   const [order, setOrder] = useState(null);
-  // console.log('Order:', order);
   const [showModal, setShowModal] = useState(false);
+  const [selectedDate, setSelectedDate] = useState({ startDate: dayjs() });
   const [mode, setMode] = useState('create');
   const [gridRef, setGridRef] = useState(null);
   const dispatch = useDispatch();
@@ -33,6 +35,7 @@ export default function DeliveryList() {
 
     if (error) {
       dispatch(fetchDeliveriesError(error.message));
+      toast.error("Error fetching deliveries: " + error.message);
     }
 
     if (data) {
@@ -64,82 +67,93 @@ export default function DeliveryList() {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = (order) => {
     if (order) {
       if (mode === 'edit') {
         updateDeliveryMutation({
           variables: {
-            orderId: order?.id,
+            orderId: order.id,
             orderGroupInfo: {
-              status: order?.status,
-              startedAt: order?.startedAt,
-              customerId: order?.customerId,
+              status: order.status,
+              startedAt: order.startedAt,
+              completedAt: order.completedAt,
+              customerId: order.customerId,
+              recurring: {
+                frequency: order.recurring?.frequency,
+                startedAt: order.recurring?.startedAt,
+                endAt: order.recurring?.endAt,
+              },
               deliveryOrderAttributes: {
-                plannedAt: order?.deliveryOrder?.plannedAt,
-                completedAt: order?.deliveryOrder?.completedAt,
-                customerBranchId: order?.deliveryOrder?.customerBranchId,
-                assetId: order?.deliveryOrder?.assetId,
-                driverId: order?.deliveryOrder?.driverId,
-                lineItems: order?.deliveryOrder?.lineItems.map(item => ({
-                  id: item?.id,
-                  name: item?.name,
-                  quantity: item?.quantity,
-                  units: item?.units,
+                plannedAt: order.deliveryOrder?.plannedAt,
+                completedAt: order.deliveryOrder?.completedAt,
+                customerBranchId: order.deliveryOrder?.customerBranchId,
+                assetId: order.deliveryOrder?.assetId,
+                driverId: order.deliveryOrder?.driverId,
+                lineItems: order.deliveryOrder?.lineItems.map(item => ({
+                  name: item.name,
+                  quantity: item.quantity,
+                  units: item.units,
                 })),
+
               }
             }
           },
           onCompleted: (data) => {
-            dispatch(updateDelivery(data.editOrder.orders));
+            dispatch(updateDelivery(data.editOrder.UpdateOrder));
             refetch();
             toast.success('Delivery Updated');
             setShowModal(false);
+          },
+          onError: (error) => {
+            toast.error('Error updating delivery: ' + error.message);
           }
         });
       } else {
-        console.log('Creating new delivery:', order);
+      console.log('Order:', order);
+
         createDeliveryMutation({
           variables: {
             orderGroupInfo: {
-              status: order?.status,
-              startedAt: order?.startedAt,
-              customerId: order?.customerId,
-              recurring: {
-                frequency: order?.recurring?.frequency,
-                startedAt: order?.recurring?.startedAt,
-                endAt: order?.recurring?.endAt,
-              },
+              status: order.status,
+              startedAt: order.startedAt,
+              createdAt: order.createdAt,
+              customerId: order.customerId,
+              recurring: order.recurring ? {
+                frequency: order.recurring.frequency || "Daily",
+                startedAt: order.recurring.startedAt || getTomorrowDate(),
+                endAt: order.recurring.endAt || null,
+              } : null,
               deliveryOrderAttributes: {
-                plannedAt: order?.deliveryOrder?.plannedAt,
-                completedAt: order?.deliveryOrder?.completedAt,
-                customerBranchId: order?.deliveryOrder?.customerBranchId,
-                orderGroupId: order?.deliveryOrder?.orderGroupId,
-                assetId: order?.deliveryOrder?.assetId,
-                driverId: order?.deliveryOrder?.driverId,
-                lineItems: order?.deliveryOrder?.lineItems.map(item => ({
-                  name: item?.name,
-                  quantity: item?.quantity,
-                  units: item?.units,
+                plannedAt: order.deliveryOrderAttributes?.plannedAt,
+                completedAt: order.deliveryOrderAttributes?.completedAt,
+                customerBranchId: order.deliveryOrderAttributes?.customerBranchId,
+                assetId: order.deliveryOrderAttributes?.assetId,
+                driverId: order.deliveryOrderAttributes?.driverId,
+                lineItemsAttributes: order.deliveryOrderAttributes?.lineItemsAttributes.map(item => ({
+                  name: item.name,
+                  quantity: item.quantity,
+                  units: item.units,
                 })),
               }
             }
           },
           onCompleted: (data) => {
-            dispatch(addDelivery(data.createDelivery.order));
-            console.log(data.createDelivery.order);
-            refetch();
-            toast.success('Delivery Created');
             setShowModal(false);
+            console.log('Order created:', data);
+            refetch();
+            toast.success('Order Created');
+            dispatch(addDelivery(data.createOrder.order));
+
           }
         });
       }
     }
   };
-  
+
 
   const onBtnExport = useCallback(() => {
-    gridRef.api.exportDataAsCsv();
-  }, [gridRef]);
+    gridRef.current.api.exportDataAsCsv();
+  }, []);
 
   const defaultColDef = useMemo(() => ({
     sortable: true,
@@ -184,14 +198,34 @@ export default function DeliveryList() {
     }
   ], []);
   
-  const filteredRowData = rowData.filter(item => {
-    return (
-      item.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.customer?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.customer?.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.deliveryOrder?.asset?.assetId.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  });
+  // const filteredRowData = rowData && rowData.filter((item) => {
+  //     return (
+  //       item.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //       item.customer?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //       item.customer?.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //       item.deliveryOrder?.asset?.assetId.toLowerCase().includes(searchQuery.toLowerCase())
+  //     );
+  //   });
+
+  const filteredRowData = useMemo(() => {
+    if (!rowData) return [];
+  
+    return rowData.filter((item) => {
+      const createdAt = dayjs(item.createdAt);
+      const isDateInRange = !selectedDate || (
+        createdAt.isSame(selectedDate.startDate, 'day')
+      );
+      
+      const matchesQuery = searchQuery === '' || 
+        item.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.customer?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.customer?.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.deliveryOrder?.asset?.assetId.toLowerCase().includes(searchQuery.toLowerCase());
+  
+      return isDateInRange && matchesQuery;
+    });
+  }, [rowData, searchQuery, selectedDate]);
+  
   
   const theme = useColorModeValue('ag-theme-quartz', 'ag-theme-quartz-dark');
   const inputbg = useColorModeValue('#EDF2F7', '#121212');
@@ -220,7 +254,15 @@ export default function DeliveryList() {
     <div className={theme} style={{ height: 700 }}>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15, justifyContent: 'space-between' }}>
         <h2 style={{ fontSize: 25, fontWeight: 'bold', padding: 15 }}>Delivery List</h2>
-        <div>
+        <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          marginBottom: 15,
+          justifyContent: "space-between",
+          marginTop: 15
+        }}
+        >
           <input 
             type="text" 
             placeholder="Search..." 
@@ -228,6 +270,7 @@ export default function DeliveryList() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
+          <DatePicker selected={selectedDate} onChange={setSelectedDate} />
           <button 
             style={{ border: `1px solid ${buttonbg}`, padding: 12, borderRadius: 5, background: buttonbg, fontWeight: 'bold', width: 210, fontSize: 16, marginRight: 10 }} 
             onClick={() => setShowModal(true)}
@@ -246,7 +289,7 @@ export default function DeliveryList() {
         rowData={filteredRowData}
         columnDefs={colDefs}
         defaultColDef={defaultColDef}
-        gridRef={(ref) => setGridRef(ref)}
+        onGridReady={(params) => setGridRef(params)}
         pagination={true}
       />
       {showModal && 
@@ -255,7 +298,8 @@ export default function DeliveryList() {
         mode={mode} 
         onSave={handleSave} 
         onClose={() => setShowModal(false)} 
-        onChange={(e) => setOrder({ ...order, [e.target.name]: e.target.value })}/>}
+        onChange={(e) => setOrder({ ...order, [e.target.name]: e.target.value })}
+        />}
     </div>
   );
 }

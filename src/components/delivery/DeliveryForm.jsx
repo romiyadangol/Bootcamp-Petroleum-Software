@@ -7,6 +7,7 @@ import { GET_CUSTOMERS } from '../../graphql/queries/customers/getCustomers';
 import { GET_CUSTOMER_BRANCH } from '../../graphql/queries/customerBranch/getCustomerBranch';
 import { FIND_PRODUCTS } from '../../graphql/queries/products/findProducts';
 import { GET_DRIVERS } from '../../graphql/queries/driver/getDrivers';
+import { GET_ASSETS } from '../../graphql/queries/assets/getAssets';
 
 export default function DeliveryForm({ order, onChange, onSave, onClose }) {
   const [step, setStep] = useState(1);
@@ -18,6 +19,7 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
   const [newProductUnit, setNewProductUnit] = useState('');
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState(null);
+  const [selectedAsset, setSelectedAsset] = useState(null);
 
   const { data: customersData } = useQuery(GET_CUSTOMERS);
   const customers = customersData?.getCustomers.customers || [];
@@ -33,6 +35,16 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
 
   const { data: driverData } = useQuery(GET_DRIVERS);
   const drivers = driverData?.getDrivers.drivers || [];
+
+  const { data: assetData } = useQuery(GET_ASSETS);
+  const assets = assetData?.getAssets.assets || [];
+
+  const getTomorrowDate = () => {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    return tomorrow.toISOString();
+  };
 
   const handleAddLineItem = (product) => {
     const newLineItem = {
@@ -74,18 +86,24 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
       const defaultBranch = branches[0];
       setSelectedBranch(defaultBranch);
   
-      // Ensure `order` and `orderGroupInfo` are not null before updating
       const updatedOrder = {
         orderGroupInfo: {
           status: "pending",
           startedAt: new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+          completedAt: null,
           customerId: selectedCustomer?.id || null,
+          recurring: recurring ? {
+            frequency: order.frequency || "Daily",
+            startedAt: getTomorrowDate(order.startedAt),
+            endAt: new Date(order.endAt).toISOString(),
+          } : null,
           deliveryOrderAttributes: {
             name: defaultBranch.name,
             location: defaultBranch.location,
             plannedAt: order?.plannedAt || new Date().toISOString(),
             customerBranchId: defaultBranch.id,
-            assetId: 2,
+            assetId: selectedAsset?.id || null,
             driverId: selectedDriver?.id || null,
             lineItemsAttributes: selectedLineItems.map(item => ({
               name: item.name,
@@ -106,27 +124,34 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
       setStep(3);
     } else {
       const updatedOrder = {
-        // ...order,
-        orderGroupInfo: {
-          status: "pending",
-          startedAt: new Date().toISOString(),
-          customerId: selectedCustomer?.id || null,
-          deliveryOrderAttributes: {
-            plannedAt: order.plannedAt || new Date().toISOString(),
-            customerBranchId: selectedBranch?.id || null,
-            assetId: 2,
-            driverId: selectedDriver?.id || null,
-            lineItemsAttributes: selectedLineItems.map(item => ({
-              name: item.name,
-              quantity: parseFloat(item.quantity) || 0,
-              units: item.units
-            }))
-          }
+        status: "pending",
+        startedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        completedAt: null,
+        customerId: selectedCustomer?.id || null,
+        recurring: recurring ? {
+          frequency: order.frequency || "Daily",
+          startedAt: getTomorrowDate(order.startedAt),
+          endAt: new Date(order.endAt).toISOString(),
+        } : null,
+        deliveryOrderAttributes: {
+          plannedAt: new Date().toISOString(),
+          completedAt: null,
+          customerBranchId: selectedBranch?.id || null,
+          orderGroupId: null,
+          assetId: selectedAsset?.id || null,
+          driverId: selectedDriver?.id || null,
+          lineItemsAttributes: selectedLineItems.map(item => ({
+            name: item.name,
+            quantity: parseFloat(item.quantity) || 0,
+            units: item.units
+          }))
         }
       };
-      onSave({ orderGroupInfo: updatedOrder.orderGroupInfo });
+      onSave(updatedOrder); 
     }
   };
+  
 
   const handlePreviousStep = () => {
     if (step > 1) setStep(step - 1);
@@ -148,22 +173,19 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
   const handleCustomerChange = (customer) => {
     setSelectedCustomer(customer);
     setSelectedBranch(null);
-
-    console.log('Selected Driver:', selectedDriver);
-    console.log('Selected Line Items:', selectedLineItems);
   
     const updatedOrder = {
       orderGroupInfo: {
         status: "pending",
         startedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
         customerId: customer.id || null,
         deliveryOrderAttributes: {
-          // Ensure other required attributes are set as needed
           name: selectedBranch?.name || "",
           location: selectedBranch?.location || "",
           plannedAt: order?.plannedAt || new Date().toISOString(),
           customerBranchId: selectedBranch?.id || null,
-          assetId: 2,
+          assetId: selectedAsset?.id || null,
           driverId: selectedDriver?.id || null,
           lineItemsAttributes: selectedLineItems.map(item => ({
             name: item.name,
@@ -180,21 +202,19 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
   
   const handleBranchChange = (branch) => {
     setSelectedBranch(branch);
-
-    console.log('Selected Driver:', selectedDriver);
-    console.log('Selected Line Items:', selectedLineItems);
   
     const updatedOrder = {
       orderGroupInfo: {
         status: "pending",
         startedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
         customerId: selectedCustomer?.id || null,
         deliveryOrderAttributes: {
           name: branch.name,
           location: branch.location,
           plannedAt: order?.plannedAt || new Date().toISOString(),
           customerBranchId: branch.id || null,
-          assetId: 2,
+          assetId: selectedAsset?.id || null,
           driverId: selectedDriver?.id || null,
           lineItemsAttributes: selectedLineItems.map(item => ({
             name: item.name,
@@ -207,6 +227,62 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
   
     onChange({ target: { name: 'order', value: updatedOrder } });
   };
+
+  const handleDriverChange = (driver) => {
+    setSelectedDriver(driver);
+
+    const updatedOrder = {
+      orderGroupInfo: {
+        status: "pending",
+        startedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        customerId: selectedCustomer?.id || null,
+        deliveryOrderAttributes: {
+          name: selectedBranch?.name || "",
+          location: selectedBranch?.location || "",
+          plannedAt: order?.plannedAt || new Date().toISOString(),
+          customerBranchId: selectedBranch?.id || null,
+          assetId: selectedAsset?.id || null,
+          driverId: driver.id || null,
+          lineItemsAttributes: selectedLineItems.map(item => ({
+            name: item.name,
+            quantity: parseFloat(item.quantity) || 0,
+            units: item.units
+          }))
+        }
+      }
+    };
+  
+    onChange({ target: { name: 'order', value: updatedOrder } });
+  }
+
+  const handleAssetChange = (asset) => {
+    setSelectedAsset(asset);
+
+    const updatedOrder = {
+      orderGroupInfo: {
+        status: "pending",
+        startedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        customerId: selectedCustomer?.id || null,
+        deliveryOrderAttributes: {
+          name: selectedBranch?.name || "",
+          location: selectedBranch?.location || "",
+          plannedAt: order?.plannedAt || new Date().toISOString(),
+          customerBranchId: selectedBranch?.id || null,
+          assetId: selectedAsset?.id || null,
+          driverId: selectedDriver?.id || null,
+          lineItemsAttributes: selectedLineItems.map(item => ({
+            name: item.name,
+            quantity: parseFloat(item.quantity) || 0,
+            units: item.units
+          }))
+        }
+      }
+    };
+  
+    onChange({ target: { name: 'order', value: updatedOrder } });
+  }
   
   
   return (
@@ -372,17 +448,24 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
                             <>
                               <InputField
                                 label="Recurrence Start Date"
-                                name="recurrenceStartDate"
-                                type="date"
-                                value={order.recurrenceStartDate || ""}
+                                name="startedAt"
+                                type="datetime-local"
+                                value={ order.startedAt || getTomorrowDate() }
                                 onChange={onChange}
                               />
                               <SelectField
                                 label="Frequency"
-                                name="recurrenceFrequency"
-                                value={order.recurrenceFrequency || ""}
+                                name="frequency"
+                                value={order.frequency || ""}
                                 onChange={onChange}
-                                options={["Daily", "Weekly", "Monthly"]}
+                                options={["daily", "every_week", "every_month"]}
+                              />
+                              <InputField
+                                label="Recurrence End Date"
+                                name="endAt"
+                                type="datetime-local"
+                                value={order.endAt || ""}
+                                onChange={onChange}
                               />
                             </>
                           )}
@@ -399,10 +482,23 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
                             onChange={(e) => {
                               const driver = drivers.find((driver) => driver.name === e.target.value);
                               setSelectedDriver(driver);
-                              onChange({ target: { name: "driverInfo.id", value: driver.id } });
+                              handleDriverChange(driver);
                             }}
                             options={drivers.map((driver) => driver.name)}
                             width="100%"
+                          />
+                        </Box>
+                        <Box>
+                          <SelectField
+                          label="Asset Category"
+                          name="assetCategory"
+                          value={selectedAsset ? selectedAsset.assetCategory : ""}
+                          onChange={(e) => {
+                            const asset = assets.find((asset) => asset.assetCategory === e.target.value);
+                            setSelectedAsset(asset);
+                            handleAssetChange(asset);
+                          }}
+                          options={assets.map((asset) => asset.assetCategory)}
                           />
                         </Box>
                         <Box>
@@ -416,7 +512,7 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
                         </Box>
                       </Box>
                       <Button onClick={handlePreviousStep} mr={4} mt={4}>Back</Button>
-                      <Button onClick={onSave} colorScheme="blue" mt={4}>Create Order</Button>
+                      <Button onClick={handleNextStep} colorScheme="blue" mt={4}>Create Order</Button>
                     </>
                   )}
                 </TabPanel>

@@ -24,12 +24,10 @@ import {
   fetchAssetsSuccess,
   updateAsset,
 } from "../../redux/actions/assetActions";
-import DatePicker from "../core/DatePicker";
 
 export default function AssetLists() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(null);
   const [asset, setAsset] = useState(null);
   const [mode, setMode] = useState("create");
   const dispatch = useDispatch();
@@ -238,7 +236,6 @@ export default function AssetLists() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <DatePicker selected={selectedDate} onChange={setSelectedDate} />
           <button
             style={{
               border: `1px solid ${buttonbg}`,

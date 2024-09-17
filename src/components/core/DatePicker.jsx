@@ -7,25 +7,20 @@ import dayjs from "dayjs";
 export default function DatePicker({ selected, onChange }) {
   const [dateRange, setDateRange] = useState({
     startDate: selected?.startDate || dayjs(),
-    endDate: selected?.endDate || dayjs().add(7, 'day'),
   });
 
   const handlePrevious = () => {
-    const newRange = {
-      startDate: dateRange.startDate.subtract(1, 'week'),
-      endDate: dateRange.endDate.subtract(1, 'week'),
-    };
+    const newStartDate = dateRange.startDate.subtract(1, 'day');
+    const newRange = { startDate: newStartDate };
     setDateRange(newRange);
-    onChange(newRange); 
+    onChange(newRange);
   };
 
   const handleNext = () => {
-    const newRange = {
-      startDate: dateRange.startDate.add(1, 'week'),
-      endDate: dateRange.endDate.add(1, 'week'),
-    };
+    const newStartDate = dateRange.startDate.add(1, 'day');
+    const newRange = { startDate: newStartDate };
     setDateRange(newRange);
-    onChange(newRange);  
+    onChange(newRange);
   };
 
   const datePickerBg = useColorModeValue('#EDF2F7', '#121212');
@@ -54,7 +49,7 @@ export default function DatePicker({ selected, onChange }) {
           color="gray.500"
         />
         <Text>
-          {dateRange.startDate.format('MMM DD, YYYY')} - {dateRange.endDate.format('MMM DD, YYYY')}
+          {dateRange.startDate.format('MMM DD, YYYY')}
         </Text>
         <IconButton
           aria-label="Next"

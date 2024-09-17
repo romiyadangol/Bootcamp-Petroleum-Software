@@ -6,7 +6,8 @@ import { UPDATE_DELIVERY } from "../graphql/mutation/delivery/updateDelivery";
 
 export const useCreateDeliveryMutation = (refetch) => {
     const [ createDelivery ] = useMutation(CREATE_DELIVERY, {
-        onCompleted: () => {
+        onCompleted: (data) => {
+            console.log('Delivery created successfully:', data);
             toast.success('Delivery created successfully');
             refetch();
         },
