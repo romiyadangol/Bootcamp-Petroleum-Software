@@ -7,16 +7,18 @@ import customerReducer from "./reducers/customerReducer";
 import customerBranchReducer from "./reducers/customerBranchReducer";
 import deliveryReducer from "./reducers/deliveryReducer";
 import driverReducer from "./reducers/driverReducer";
+import categoryReducer from "./reducers/categoryReducer";
 
 const rootReducer = combineReducers({
-    auth: authReducer,
-    asset: assetReducer,
-    product: productReducer,
-    user: userReducer,
-    customer: customerReducer,
-    customerBranch: customerBranchReducer,
-    delivery: deliveryReducer,
-    driver: driverReducer
+  auth: authReducer,
+  asset: assetReducer,
+  category: categoryReducer,
+  product: productReducer,
+  user: userReducer,
+  customer: customerReducer,
+  customerBranch: customerBranchReducer,
+  delivery: deliveryReducer,
+  driver: driverReducer,
 });
 
 export default rootReducer;
