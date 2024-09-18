@@ -44,10 +44,10 @@ function App() {
           path: "products",
           element: <ProductList />,
         },
-        {
-          path: "users",
-          element: <UserLists />,
-        },
+        // {
+        //   path: "users",
+        //   element: <UserLists />,
+        // },
         {
           path: "drivers",
           element: <DriverLists />,
