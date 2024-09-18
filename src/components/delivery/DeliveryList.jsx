@@ -174,7 +174,39 @@ export default function DeliveryList() {
           },
         });
       }
-    }
+    };
+  };
+  
+  const handleSave = (order) => {
+    if (!order) return;
+  
+    const orderData = prepareOrderData(order, mode === 'edit');
+  
+    const mutation = mode === 'edit' ? updateDeliveryMutation : createDeliveryMutation;
+    const successMessage = mode === 'edit' ? 'Delivery Updated' : 'Order Created';
+    const dispatchAction = mode === 'edit' ? updateDelivery : addDelivery;
+  
+    mutation({
+      variables: {
+        ...(mode === 'edit' ? { orderId: order.id } : {}),
+        ...orderData
+      },
+      onCompleted: (data) => {
+        toast.success(successMessage);
+        dispatch(dispatchAction(mode === 'edit' ? data.editOrder.UpdateOrder : data.createOrder.order));
+        refetch();
+        setShowModal(false);
+      },
+      onError: (error) => {
+        toast.error('Error updating delivery: ' + error.message);
+      }
+    });
+  };
+  
+  const handleRowClicked = (params) => {
+    // setOrder(params.data);
+    // setMode('edit');
+    // setShowModal(true);
   };
 
   const onBtnExport = useCallback(() => {
@@ -381,6 +413,7 @@ export default function DeliveryList() {
         defaultColDef={defaultColDef}
         onGridReady={(params) => setGridRef(params)}
         pagination={true}
+        onRowClicked={handleRowClicked}
       />
       {showModal && (
         <DeliveryForm
