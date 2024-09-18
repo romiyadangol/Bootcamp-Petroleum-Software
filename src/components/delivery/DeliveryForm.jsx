@@ -9,6 +9,7 @@ import { FIND_PRODUCTS } from '../../graphql/queries/products/findProducts';
 import { GET_DRIVERS } from '../../graphql/queries/driver/getDrivers';
 import { GET_ASSETS } from '../../graphql/queries/assets/getAssets';
 
+//dates
 const convertToISO8601 = (datetimeLocal) => {
   const date = new Date(datetimeLocal);
   return date.toISOString();
@@ -23,7 +24,6 @@ const convertToDatetimeLocal = (isoString) => {
   const minutes = String(date.getMinutes()).padStart(2, '0');
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
-
 
 export default function DeliveryForm({ order, onChange, onSave, onClose }) {
   const [step, setStep] = useState(1);
@@ -40,7 +40,7 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
     const now = new Date().toISOString();
     return convertToDatetimeLocal(now);
   });
-  
+
   const { data: customersData } = useQuery(GET_CUSTOMERS);
   const customers = customersData?.getCustomers.customers || [];
 
@@ -65,6 +65,9 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
     tomorrow.setDate(today.getDate() + 1);
     return tomorrow.toISOString();
   };
+
+  const defaultStartDate = convertToDatetimeLocal(getTomorrowDate());
+
   const handlePlannedAtChange = (e) => {
     const newDatetimeLocal = e.target.value;
     console.log('Local Time Input:', newDatetimeLocal);
@@ -72,7 +75,6 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
     console.log('Converted ISO 8601:', isoString);
     setPlannedAt(newDatetimeLocal);
   };
-  
 
   const handleAddLineItem = (product) => {
     const newLineItem = {
@@ -109,54 +111,74 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
   }, [selectedCustomer, refetchBranches]);
 
 
-  const buildUpdatedOrder = (defaultBranch) => {
-    return {
-      status: order?.status || "pending",
-      startedAt: order?.startedAt || new Date().toISOString(),
-      completedAt: null,
-      customerId: selectedCustomer?.id || null,
-      recurring: recurring ? {
-        frequency: order.frequency || "Daily",
-        startedAt: getTomorrowDate(order.startedAt),
-        endAt: new Date(order.endAt).toISOString(),
-      } : null,
-      deliveryOrderAttributes: {
-        name: defaultBranch?.name || selectedBranch?.name,
-        location: defaultBranch?.location || selectedBranch?.location,
-        plannedAt: convertToISO8601(plannedAt),
-        customerBranchId: defaultBranch?.id || selectedBranch?.id,
-        assetId: selectedAsset?.id || null,
-        driverId: selectedDriver?.id || null,
-        lineItemsAttributes: selectedLineItems.map(item => ({
-          name: item.name,
-          quantity: parseFloat(item.quantity) || 0,
-          units: item.units
-        }))
-      }
-    };
-  };
-  
-  
   useEffect(() => {
     if (branches.length > 0 && !selectedBranch) {
       const defaultBranch = branches[0];
       setSelectedBranch(defaultBranch);
-      const updatedOrder = buildUpdatedOrder(defaultBranch);
+  
+      const updatedOrder = {
+        orderGroupInfo: {
+          status: "pending",
+          startedAt: new Date().toISOString(),
+          completedAt: null,
+          customerId: selectedCustomer?.id || null,
+          recurring: recurring ? {
+            frequency: order.frequency || "Daily",
+            startedAt: getTomorrowDate(order.startedAt),
+            endAt: new Date(order.endAt).toISOString(),
+          } : null,
+          deliveryOrderAttributes: {
+            name: defaultBranch.name,
+            location: defaultBranch.location,
+            plannedAt: convertToISO8601(plannedAt),
+            customerBranchId: defaultBranch.id,
+            assetId: selectedAsset?.id || null,
+            driverId: selectedDriver?.id || null,
+            lineItemsAttributes: selectedLineItems.map(item => ({
+              name: item.name,
+              quantity: parseFloat(item.quantity) || 0,
+              units: item.units
+            }))
+          }
+        }
+      };
       onChange({ target: { name: 'order', value: updatedOrder } });
     }
-  }, [branches, selectedBranch, selectedCustomer, recurring, order, selectedDriver, selectedLineItems, plannedAt, getTomorrowDate, onChange]);
-  
+  }, [branches, selectedBranch, onChange, order, selectedDriver, selectedLineItems]);
+
   const handleNextStep = () => {
     if (step === 1 && selectedCustomer) {
       setStep(2);
     } else if (step === 2) {
       setStep(3);
     } else {
-      const updatedOrder = buildUpdatedOrder();
+      const updatedOrder = {
+        status: "pending",
+        startedAt: new Date().toISOString(),
+        completedAt: null,
+        customerId: selectedCustomer?.id || null,
+        recurring: recurring ? {
+          frequency: order.frequency || "Daily",
+          startedAt: getTomorrowDate(order.startedAt),
+          endAt: new Date(order.endAt).toISOString(),
+        } : null,
+        deliveryOrderAttributes: {
+          plannedAt: convertToISO8601(plannedAt),
+          completedAt: null,
+          customerBranchId: selectedBranch?.id || null,
+          orderGroupId: null,
+          assetId: selectedAsset?.id || null,
+          driverId: selectedDriver?.id || null,
+          lineItemsAttributes: selectedLineItems.map(item => ({
+            name: item.name,
+            quantity: parseFloat(item.quantity) || 0,
+            units: item.units
+          }))
+        }
+      };
       onSave(updatedOrder); 
     }
   };
-  
   
 
   const handlePreviousStep = () => {
@@ -285,8 +307,7 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
   
     onChange({ target: { name: 'order', value: updatedOrder } });
   }
-  const defaultStartDate = convertToDatetimeLocal(getTomorrowDate());
-
+  
   
   return (
     <>
@@ -453,7 +474,7 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
                                 label="Recurrence Start Date"
                                 name="startedAt"
                                 type="datetime-local"
-                                value={order.startedAt ? convertToDatetimeLocal(order.startedAt) : defaultStartDate}
+                                value={ order.startedAt ? convertToDatetimeLocal(order.startedAt) : defaultStartDate }
                                 onChange={onChange}
                               />
                               <SelectField
@@ -504,15 +525,14 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
                           options={assets.map((asset) => asset.assetCategory)}
                           />
                         </Box>
-                        <Box
-                        >
-                        <input
-                          label="Planned At"
-                          type="datetime-local"
-                          value={plannedAt}
-                          onChange={handlePlannedAtChange}
-                          style={{ padding: "10px", width: "100%" }}
-                        />
+                        <Box>
+                          <InputField
+                            label="Planned_At"
+                            name="plannedAt"
+                            type="datetime-local"
+                            value={plannedAt}
+                            onChange={handlePlannedAtChange}
+                          />
                         </Box>
                       </Box>
                       <Button onClick={handlePreviousStep} mr={4} mt={4}>Back</Button>
@@ -528,5 +548,4 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
     </>
   );
 }
-
 
