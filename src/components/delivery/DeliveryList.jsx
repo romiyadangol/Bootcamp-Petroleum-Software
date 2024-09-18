@@ -27,6 +27,7 @@ import {
   updateDelivery,
 } from "../../redux/actions/deliveryActions";
 import { SelectField } from "../core/FormFields";
+import DeliveryDetails from "./DeliveryDetails";
 
 export default function DeliveryList() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -36,6 +37,7 @@ export default function DeliveryList() {
   const [mode, setMode] = useState("create");
   const [gridRef, setGridRef] = useState(null);
   const [orderType, setOrderType] = useState("Order Group");
+  const [showDeliveryModal, setShowDeliveryModal] = useState(false);
   const dispatch = useDispatch();
 
   const orderFilterTypes = ["Order Group", "Recurring Order"];
@@ -44,6 +46,13 @@ export default function DeliveryList() {
   const { data, loading, error, refetch } = useQuery(
     orderType === "Order Group" ? GET_ORDERS : GET_RECURRING_ORDERS
   );
+
+  const getTomorrowDate = (baseDate) => {
+    const today = baseDate ? new Date(baseDate) : new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    return tomorrow.toISOString();
+  };
 
   useEffect(() => {
     if (loading) {
@@ -177,9 +186,8 @@ export default function DeliveryList() {
   };
 
   const handleRowClicked = (params) => {
-    // setOrder(params.data);
-    // setMode('edit');
-    // setShowModal(true);
+    setOrder(params.data);
+    setShowDeliveryModal(true);
   };
 
   const onBtnExport = useCallback(() => {
@@ -400,6 +408,14 @@ export default function DeliveryList() {
           }
         />
       )}
+
+      {showDeliveryModal && (
+        <DeliveryDetails
+          order={order}
+          onClose={() => setShowDeliveryModal(false)}
+        />
+      )}
+        
     </div>
   );
 }
