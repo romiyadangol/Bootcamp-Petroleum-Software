@@ -45,6 +45,13 @@ export default function DeliveryList() {
     orderType === "Order Group" ? GET_ORDERS : GET_RECURRING_ORDERS
   );
 
+  const getTomorrowDate = (baseDate) => {
+    const today = baseDate ? new Date(baseDate) : new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    return tomorrow.toISOString();
+  };
+
   useEffect(() => {
     if (loading) {
       dispatch(fetchDeliveriesRequest());
@@ -177,9 +184,6 @@ export default function DeliveryList() {
   };
 
   const handleRowClicked = (params) => {
-    // setOrder(params.data);
-    // setMode('edit');
-    // setShowModal(true);
   };
 
   const onBtnExport = useCallback(() => {
