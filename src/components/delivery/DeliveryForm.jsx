@@ -152,6 +152,7 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
     } else if (step === 2) {
       setStep(3);
     } else {
+      const getValidDate = (date) => date ? new Date(date).toISOString() : null;
       const updatedOrder = {
         status: "pending",
         startedAt: new Date().toISOString(),
@@ -159,8 +160,8 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
         customerId: selectedCustomer?.id || null,
         recurring: recurring ? {
           frequency: order.frequency || "Daily",
-          startedAt: new Date(order.startedAt).toISOString(),
-          endAt: new Date(order.endAt).toISOString(),
+          startedAt: getValidDate(order.startedAt),
+          endAt: getValidDate(order.endAt),
         } : null,
         deliveryOrderAttributes: {
           plannedAt: convertToISO8601(plannedAt),
