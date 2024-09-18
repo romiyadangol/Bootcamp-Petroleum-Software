@@ -4,7 +4,6 @@ import Login from "./components/Login";
 import Nav from "./components/Nav";
 import "./App.css";
 import ProductList from "./components/products/ProductList";
-import UserLists from "./components/users/UserLists";
 import DriverLists from "./components/drivers/DriverLists";
 import AssetLists from "./components/asset/AssetLists";
 import DeliveryList from "./components/delivery/DeliveryList";

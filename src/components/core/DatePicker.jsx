@@ -31,9 +31,8 @@ export default function DatePicker({ selected, onChange }) {
       border="none"
       borderColor="gray.600"
       borderRadius="md"
-      py={2}
-      px={4}
-      maxWidth="300px"
+      p={1.5}
+      maxWidth="200px"
       textAlign="center"
       backgroundColor={datePickerBg}
       color={textColor}

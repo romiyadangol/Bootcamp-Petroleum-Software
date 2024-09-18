@@ -1,17 +1,18 @@
-import { AgGridReact } from "ag-grid-react";
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-quartz.css";
+import { forwardRef } from 'react';
+import { AgGridReact } from 'ag-grid-react';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-quartz.css';
 
-export default function AgGridTable({
+const AgGridTable = forwardRef(({
   rowData,
   columnDefs,
   defaultColDef,
   paginationPageSize = 20,
   paginationPageSizeSelector = [20, 30, 40],
   onRowClicked,
-  onGridReady,
   isRowClickable,
-}) {
+  onGridReady,
+}, ref) => {
   return (
     <AgGridReact
       rowData={rowData}
@@ -23,7 +24,9 @@ export default function AgGridTable({
       paginationPageSizeSelector={paginationPageSizeSelector}
       onRowClicked={onRowClicked}
       onGridReady={onGridReady}
+      ref={ref}
       rowStyle={{ cursor: isRowClickable ? "pointer" : "default" }}
     />
   );
-}
+});
+export default AgGridTable;
