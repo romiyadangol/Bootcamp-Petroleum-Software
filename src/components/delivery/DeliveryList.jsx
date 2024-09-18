@@ -27,7 +27,6 @@ import {
   updateDelivery,
 } from "../../redux/actions/deliveryActions";
 import { SelectField } from "../core/FormFields";
-import DeliveryDetails from "./DeliveryDetails";
 
 export default function DeliveryList() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -37,7 +36,6 @@ export default function DeliveryList() {
   const [mode, setMode] = useState("create");
   const [gridRef, setGridRef] = useState(null);
   const [orderType, setOrderType] = useState("Order Group");
-  const [showDeliveryModal, setShowDeliveryModal] = useState(false);
   const dispatch = useDispatch();
 
   const orderFilterTypes = ["Order Group", "Recurring Order"];
@@ -186,8 +184,6 @@ export default function DeliveryList() {
   };
 
   const handleRowClicked = (params) => {
-    setOrder(params.data);
-    setShowDeliveryModal(true);
   };
 
   const onBtnExport = useCallback(() => {
@@ -408,14 +404,6 @@ export default function DeliveryList() {
           }
         />
       )}
-
-      {showDeliveryModal && (
-        <DeliveryDetails
-          order={order}
-          onClose={() => setShowDeliveryModal(false)}
-        />
-      )}
-        
     </div>
   );
 }
