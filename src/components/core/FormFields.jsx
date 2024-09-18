@@ -27,7 +27,7 @@ export const SelectField = ({
       style={{ width }}
       disabled={isDisabled}
     >
-      <option value="">Select {label}</option>
+      {label && <option value="">Select {label}</option>}
       {options.map((option, index) => (
         <option key={index} value={option}>
           {option}

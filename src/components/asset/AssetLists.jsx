@@ -49,7 +49,7 @@ export default function AssetLists() {
     }
   }, [data, loading, error, dispatch]);
 
-  const rowData = useSelector(state => state.asset.assets || []);
+  const rowData = useSelector((state) => state.asset.assets || []);
 
   const createAssetMutation = useCreateAssetMutation(refetch);
   const updateAssetMutation = useUpdateAssetMutation(refetch);
@@ -170,11 +170,7 @@ export default function AssetLists() {
       item?.assetCategory?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item?.assetStatus?.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchDate = selectedDate
-      ? new Date(item.createdAt).toDateString() === selectedDate.toDateString()
-      : true;
-
-    return matchSearchQuery && matchDate;
+    return matchSearchQuery;
   });
 
   const theme = useColorModeValue("ag-theme-quartz", "ag-theme-quartz-dark");

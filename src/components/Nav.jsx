@@ -83,14 +83,14 @@ export default function Nav() {
             >
               Category
             </ChakraLink>
-            <ChakraLink
+            {/* <ChakraLink
               as={RouterLink}
               to="/dashboard/users"
               _hover={{ textDecoration: "none" }}
               fontSize="18px"
             >
               Users
-            </ChakraLink>
+            </ChakraLink> */}
             <ChakraLink
               as={RouterLink}
               to="/dashboard/drivers"
@@ -107,21 +107,21 @@ export default function Nav() {
             >
               Customers
             </ChakraLink>
-            <ChakraLink
+            {/* <ChakraLink
               as={RouterLink}
               to="/dashboard/customersBranch"
               _hover={{ textDecoration: "none" }}
               fontSize="18px"
             >
               Customers Branch
-            </ChakraLink>
+            </ChakraLink> */}
             <ChakraLink
               as={RouterLink}
               to="/dashboard/delivery"
               _hover={{ textDecoration: "none" }}
               fontSize="18px"
             >
-              Delivery
+              Orders
             </ChakraLink>
           </HStack>
 
