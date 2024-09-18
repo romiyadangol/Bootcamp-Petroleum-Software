@@ -124,7 +124,7 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
           customerId: selectedCustomer?.id || null,
           recurring: recurring ? {
             frequency: order.frequency || "Daily",
-            startedAt: order.startedAt,
+            startedAt: new Date(order.startedAt).toISOString(),
             endAt: new Date(order.endAt).toISOString(),
           } : null,
           deliveryOrderAttributes: {
@@ -159,7 +159,7 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
         customerId: selectedCustomer?.id || null,
         recurring: recurring ? {
           frequency: order.frequency || "Daily",
-          startedAt: order.startedAt,
+          startedAt: new Date(order.startedAt).toISOString(),
           endAt: new Date(order.endAt).toISOString(),
         } : null,
         deliveryOrderAttributes: {
