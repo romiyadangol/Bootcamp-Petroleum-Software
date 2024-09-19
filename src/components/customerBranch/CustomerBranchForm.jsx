@@ -27,12 +27,6 @@ export default function CustomerBranchForm({
         value={customerBranch.location || " "}
         onChange={onChange}
       />
-      {/* <InputField
-        label="Customer ID"
-        name="customerId"
-        value={customerBranch.customerId || " "}
-        onChange={onChange}
-      /> */}
     </ModalWrapper>
   );
 }
