@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import Toastify from "../Toastify";
 import { toast } from "react-toastify";
 import { useQuery } from "@apollo/client";
 import DatePicker from "../core/DatePicker";
@@ -86,13 +87,14 @@ export default function DeliveryList() {
     setShowModal(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = (orderId) => {
     deleteDeliveryMutation({
-      variables: { id },
+      variables: { orderId },
       onCompleted: () => {
-        dispatch(deleteDelivery(id));
+        console.log("order deleted>>>>");
+        toast.success("Order deleted successfully");
         refetch();
-        toast.success("Delivery Deleted");
+        dispatch(deleteDelivery(orderId));
       },
     });
   };
@@ -180,11 +182,10 @@ export default function DeliveryList() {
           },
         });
       }
-    };
+    }
   };
 
-  const handleRowClicked = (params) => {
-  };
+  const handleRowClicked = (params) => {};
 
   const onBtnExport = useCallback(() => {
     gridRef.current.api.exportDataAsCsv();
@@ -404,6 +405,7 @@ export default function DeliveryList() {
           }
         />
       )}
+      <Toastify />
     </div>
   );
 }
