@@ -1,3 +1,4 @@
+import Toastify from "../Toastify";
 import dayjs from "dayjs";
 import Toastify from "../Toastify";
 import { toast } from "react-toastify";
@@ -30,11 +31,13 @@ import {
 } from "../../redux/actions/deliveryActions";
 import { SelectField } from "../core/FormFields";
 import { convertFileToBase64 } from "../../helper/utils";
+import DeliveryDetails from "../delivery/DeliveryDetails";
 
 export default function DeliveryList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [order, setOrder] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showDeliveryModal, setShowDeliveryModal] = useState(null);
   const [selectedDate, setSelectedDate] = useState({ startDate: dayjs() });
   const [mode, setMode] = useState("create");
   const [gridRef, setGridRef] = useState(null);
@@ -212,7 +215,15 @@ export default function DeliveryList() {
     }
   };
 
-  const handleRowClicked = (params) => {};
+  const handleRowClicked = (params) => {
+    console.log("Row Clicked Data:", params.data);
+    setOrder(params.data);
+    setShowDeliveryModal(true);
+  };
+
+  const handleOrderChange = (e) => {
+    setOrder({ ...order, [e.target.name]: e.target.value });
+  };
 
   const onBtnExport = useCallback(() => {
     gridRef.current.api.exportDataAsCsv();
@@ -222,13 +233,12 @@ export default function DeliveryList() {
     () => ({
       sortable: true,
       flex: 1,
-      editable: true,
     }),
     []
   );
 
   const statusCellRenderer = (params) => {
-    const status = params.value === "Active" ? "success" : "danger";
+    const status = params.value === "completed" ? "success" : "danger";
     const dotStyle = {
       display: "inline-block",
       width: "10px",
@@ -426,7 +436,6 @@ export default function DeliveryList() {
               borderRadius: 5,
               fontWeight: "bold",
               fontSize: 16,
-              background: "blue",
             }}
             onClick={onBtnExport}
           >
@@ -451,6 +460,14 @@ export default function DeliveryList() {
           onChange={(e) =>
             setOrder({ ...order, [e.target.name]: e.target.value })
           }
+        />
+      )}
+
+      {showDeliveryModal && (
+        <DeliveryDetails
+          order={order}
+          onChange={handleOrderChange}
+          onClose={() => setShowDeliveryModal(false)}
         />
       )}
       <Toastify />

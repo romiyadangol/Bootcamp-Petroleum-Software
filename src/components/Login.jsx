@@ -66,7 +66,8 @@ const Login = () => {
     }
   });
 
-  const handleLogin = () => {
+  const handleLogin = (e) => {
+    e.preventDefault(); 
     if (!email || !password) {
       dispatch(loginUserFailure("Please fill in both email and password."));
       return;
@@ -112,6 +113,7 @@ const Login = () => {
         {auth.error && <Text color="red.500" mb="4">{auth.error}</Text>}
         {error && <Text color="red.500" mb="4">{error.message}</Text>}
 
+        <form onSubmit={handleLogin}>
         <VStack spacing="4">
           <FormControl id="email" isRequired  >
             <FormLabel color="#fa6501">Email</FormLabel>
@@ -142,9 +144,9 @@ const Login = () => {
           </FormControl>
 
           <Button
+            type="submit"
             colorScheme="orange"
             width="100%"
-            onClick={handleLogin}
             mt="4"
             background="#fa6501"
             isLoading={loading}
@@ -153,6 +155,7 @@ const Login = () => {
             Login
           </Button>
         </VStack>
+        </form>
 
         <Box mt="6">
           <Link href="/forgot-password" color="#fa6501">
