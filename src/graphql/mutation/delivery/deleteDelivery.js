@@ -13,7 +13,11 @@ export const DELETE_DELIVERY = gql`
           name
           email
         }
-        userId
+        user {
+          id
+          name
+          email
+        }
         organizationId
         createdAt
         recurring {

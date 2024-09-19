@@ -14,7 +14,11 @@ export const GET_RECURRING_ORDERS = gql`
           name
           email
         }
-        userId
+        user {
+          id
+          name
+          email
+        }
         organizationId
         createdAt
         recurring {
