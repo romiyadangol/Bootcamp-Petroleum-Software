@@ -18,7 +18,6 @@ const AgGridTable = forwardRef(({
       rowData={rowData}
       columnDefs={columnDefs}
       defaultColDef={defaultColDef}
-      rowSelection="multiple"
       pagination={true}
       paginationPageSize={paginationPageSize}
       paginationPageSizeSelector={paginationPageSizeSelector}
