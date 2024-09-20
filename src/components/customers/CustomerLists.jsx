@@ -80,7 +80,6 @@ export default function CustomerLists() {
   };
 
   const handleSave = () => {
-    console.log(customer);
     if (mode === "edit") {
       updateCustomerMutation({
         variables: {
@@ -270,7 +269,17 @@ export default function CustomerLists() {
         columnDefs={colDefs}
         defaultColDef={defaultColDef}
         supressRowClickSelect={true}
-        onRowClicked={(row) => handleRowClicked(row.data)}
+        onRowClicked={(row) => {
+          console.log(row.event.target.tagName, "row clicked");
+          if (
+            row.event.target.tagName === "BUTTON" ||
+            row.event.target.tagName === "svg"
+          ) {
+            return;
+          } else {
+            handleRowClicked(row.data);
+          }
+        }}
         isRowClickable={true}
       />
       {showModal && (
