@@ -1,6 +1,5 @@
 import Toastify from "../Toastify";
 import dayjs from "dayjs";
-import Toastify from "../Toastify";
 import { toast } from "react-toastify";
 import { useQuery } from "@apollo/client";
 import DatePicker from "../core/DatePicker";
@@ -189,10 +188,15 @@ export default function DeliveryList() {
   };
 
   const handleRowClicked = (params) => {
-    console.log('Row Clicked Data:', params.data);
-    setOrder(params.data);
-    setShowDeliveryModal(true);
-  };
+  console.log("Row Clicked Data:", params.data);
+  const recurringInfo = params.data.recurring
+    ? params.data.recurring.frequency
+    : "No recurring info";
+  console.log("Recurring Info:", recurringInfo);
+  setOrder(params.data);
+  setShowDeliveryModal(true);
+};
+
 
 
   const handleOrderChange = (e) => {
@@ -420,6 +424,7 @@ export default function DeliveryList() {
         <DeliveryDetails
         order={order}
         onChange={handleOrderChange}
+        onSave={handleSave}
         onClose={() => setShowDeliveryModal(false)}
         />
       )}

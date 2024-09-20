@@ -139,7 +139,6 @@ export default function UserLists() {
         rowData={filteredRowData}
         columnDefs={colDefs}
         defaultColDef={defaultColDef}
-        rowSelection='multiple'
         pagination={true}
         paginationPageSize={10}
         paginationPageSizeSelector={[10, 20, 30]}
