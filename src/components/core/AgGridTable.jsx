@@ -23,9 +23,13 @@ const AgGridTable = forwardRef(({
       paginationPageSizeSelector={paginationPageSizeSelector}
       onRowClicked={onRowClicked}
       onGridReady={onGridReady}
+      selection={{ mode: "multiple" }} 
       ref={ref}
       rowStyle={{ cursor: isRowClickable ? "pointer" : "default" }}
     />
   );
 });
+
+AgGridTable.displayName = 'AgGridTable';
+
 export default AgGridTable;

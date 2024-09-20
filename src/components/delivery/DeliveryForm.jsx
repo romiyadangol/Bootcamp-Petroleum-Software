@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Button, Checkbox, Input, Select, Switch, Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react';
 import ModalWrapper from '../core/ModalWrapper';
 import { InputField, SelectField } from '../core/FormFields';
