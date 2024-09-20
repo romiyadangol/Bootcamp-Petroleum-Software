@@ -1,31 +1,42 @@
-import Toastify from '../Toastify';
-import { toast } from 'react-toastify';
-import { useQuery } from '@apollo/client';
-import AgGridTable from '../core/AgGridTable';
-import { Spinner, Box } from '@chakra-ui/react';
-import ActionButtons from '../core/ActionButtons';
-import { useSearchParams } from 'react-router-dom';
-import { useColorModeValue } from '@chakra-ui/react';
-import { useEffect, useMemo, useState } from 'react'; 
-import CustomerBranchForm from './CustomerBranchForm';
-import { useDispatch, useSelector } from 'react-redux';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCirclePlus } from '@fortawesome/free-solid-svg-icons';
-import { GET_CUSTOMER_BRANCH } from '../../graphql/queries/customerBranch/getCustomerBranch';
-import { useCreateCustomerBranchMutation, useDeleteCustomerBranchMutation, useUpdateCustomerBranchMutation } from '../../hooks/useCustomerBranchMutation';
-import { addCustomerBranch, deleteCustomerBranch, fetchCustomerBranchesError, fetchCustomerBranchesRequest, fetchCustomerBranchesSuccess, updateCustomerBranch } from '../../redux/actions/customerBranchActions';
+import Toastify from "../Toastify";
+import { toast } from "react-toastify";
+import { useQuery } from "@apollo/client";
+import AgGridTable from "../core/AgGridTable";
+import { Spinner, Box } from "@chakra-ui/react";
+import ActionButtons from "../core/ActionButtons";
+import { useSearchParams } from "react-router-dom";
+import { useColorModeValue } from "@chakra-ui/react";
+import { useEffect, useMemo, useState } from "react";
+import CustomerBranchForm from "./CustomerBranchForm";
+import { useDispatch, useSelector } from "react-redux";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCirclePlus } from "@fortawesome/free-solid-svg-icons";
+import { GET_CUSTOMER_BRANCH } from "../../graphql/queries/customerBranch/getCustomerBranch";
+import {
+  useCreateCustomerBranchMutation,
+  useDeleteCustomerBranchMutation,
+  useUpdateCustomerBranchMutation,
+} from "../../hooks/useCustomerBranchMutation";
+import {
+  addCustomerBranch,
+  deleteCustomerBranch,
+  fetchCustomerBranchesError,
+  fetchCustomerBranchesRequest,
+  fetchCustomerBranchesSuccess,
+  updateCustomerBranch,
+} from "../../redux/actions/customerBranchActions";
 
 export default function CustomerBranchList() {
-  const [searchParams] = useSearchParams(); 
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [customerBranch, setCustomerBranch] = useState();
-  const [mode, setMode] = useState('create');
+  const [customerBranch, setCustomerBranch] = useState({});
+  const [mode, setMode] = useState("create");
   const dispatch = useDispatch();
 
   // Customer branch queries
   const { data, loading, error, refetch } = useQuery(GET_CUSTOMER_BRANCH, {
-    variables: { id: searchParams.get('customerId') },
+    variables: { id: searchParams.get("customerId") },
   });
 
   useEffect(() => {
@@ -37,13 +48,16 @@ export default function CustomerBranchList() {
       dispatch(fetchCustomerBranchesError(error.message));
     }
 
-    if(data) {
-      dispatch(fetchCustomerBranchesSuccess(data.getCustomerBranch.customerBranches));
+    if (data) {
+      dispatch(
+        fetchCustomerBranchesSuccess(data.getCustomerBranch.customerBranches)
+      );
     }
   }, [data, error, loading, dispatch]);
 
-
-  const rowData = useSelector(state => state.customerBranch.customerBranches || []);
+  const rowData = useSelector(
+    (state) => state.customerBranch.customerBranches || []
+  );
 
   // Customer branch mutations
   const createCustomerBranchMutation = useCreateCustomerBranchMutation(refetch);
@@ -52,7 +66,7 @@ export default function CustomerBranchList() {
 
   const handleEdit = (customerBranch) => {
     setCustomerBranch(customerBranch);
-    setMode('edit');
+    setMode("edit");
     setShowModal(true);
   };
 
@@ -62,28 +76,31 @@ export default function CustomerBranchList() {
       onCompleted: () => {
         dispatch(deleteCustomerBranch(id));
         refetch();
-        toast.success('Customer Branch Deleted');
-      }
+        toast.success("Customer Branch Deleted");
+      },
     });
   };
-
   const handleSave = () => {
-    if (mode === 'edit') {
+    if (mode === "edit") {
       updateCustomerBranchMutation({
         variables: {
+          id: customerBranch.id,
           branchInfo: {
             name: customerBranch.name,
             location: customerBranch.location,
-            customerId: customerBranch.customerId,
-            customerBranchId: customerBranch.customerBranchId
-          }
+            customerId: searchParams.get("customerId"),
+          },
         },
         onCompleted: (data) => {
-          dispatch(updateCustomerBranch(data.updateCustomerBranch.customerBranch));
           refetch();
-          toast.success('Customer Branch Updated');
+          setCustomerBranch({});
+          toast.success("Customer Branch Updated");
           setShowModal(false);
-        }
+          dispatch(
+            updateCustomerBranch(data.updateCustomerBranch.customerBranch)
+          );
+          // setCustomerBranch({});
+        },
       });
     } else {
       createCustomerBranchMutation({
@@ -91,40 +108,46 @@ export default function CustomerBranchList() {
           branchInfo: {
             name: customerBranch.name,
             location: customerBranch.location,
-            customerId: customerBranch.customerId,
-          }
+            customerId: searchParams.get("customerId"),
+          },
         },
         onCompleted: (data) => {
           dispatch(addCustomerBranch(data.createCustomerBranch.customerBranch));
           refetch();
-          toast.success('Customer Branch Created');
+          toast.success("Customer Branch Created");
           setShowModal(false);
-        }
+        },
       });
     }
   };
 
-  const defaultColDef = useMemo(() => ({
-    sortable: true,
-    flex: 1,
-    editable: true,
-  }), []);
+  const defaultColDef = useMemo(
+    () => ({
+      sortable: true,
+      flex: 1,
+      editable: true,
+    }),
+    []
+  );
 
-  const [colDefs, setColDefs] = useState([
-    { headerName: "Name", field: "name" },
-    { headerName: "Location", field: "location" },
-    { headerName: "Customer ID", field: "customerId" },
-    {
-      headerName: "Actions",
-      cellRenderer: (params) => (
-        <ActionButtons
-          onEdit={() => handleEdit(params.data)}
-          onDelete={() => handleDelete(params.data.id)}
-        />
-      ),
-      width: 100
-    }
-  ], []);
+  const [colDefs, setColDefs] = useState(
+    [
+      { headerName: "Name", field: "name" },
+      { headerName: "Location", field: "location" },
+      { headerName: "Customer ID", field: "customerId" },
+      {
+        headerName: "Actions",
+        cellRenderer: (params) => (
+          <ActionButtons
+            onEdit={() => handleEdit(params.data)}
+            onDelete={() => handleDelete(params.data.id)}
+          />
+        ),
+        width: 100,
+      },
+    ],
+    []
+  );
 
   const filteredRowData = rowData.filter((item) => {
     return (
@@ -134,9 +157,9 @@ export default function CustomerBranchList() {
     );
   });
 
-  const theme = useColorModeValue('ag-theme-quartz', 'ag-theme-quartz-dark');
-  const inputbg = useColorModeValue('#EDF2F7', '#121212');
-  const buttonbg = useColorModeValue('#EDF2F7', '#121212');
+  const theme = useColorModeValue("ag-theme-quartz", "ag-theme-quartz-dark");
+  const inputbg = useColorModeValue("#EDF2F7", "#121212");
+  const buttonbg = useColorModeValue("#EDF2F7", "#121212");
 
   if (loading) {
     return (
@@ -159,21 +182,51 @@ export default function CustomerBranchList() {
 
   return (
     <div className={theme} style={{ height: 700 }}>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15, justifyContent: 'space-between' }}>
-        <h2 style={{ fontSize: 25, fontWeight: 'bold', padding: 15 }}>Customer Branch List</h2>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          marginBottom: 15,
+          justifyContent: "space-between",
+        }}
+      >
+        <h2 style={{ fontSize: 25, fontWeight: "bold", padding: 15 }}>
+          Customer Branch List
+        </h2>
         <div>
-          <input 
-            type="text" 
-            placeholder="Search..." 
-            style={{ marginRight: 10, padding: 12, width: 400, borderRadius: 5, background: inputbg, border: `1px solid ${inputbg}`, fontSize: 16 }}
+          <input
+            type="text"
+            placeholder="Search..."
+            style={{
+              marginRight: 10,
+              padding: 12,
+              width: 400,
+              borderRadius: 5,
+              background: inputbg,
+              border: `1px solid ${inputbg}`,
+              fontSize: 16,
+            }}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <button 
-            style={{ border: `1px solid ${buttonbg}`, padding: 12, borderRadius: 5, background: buttonbg, fontWeight: 'bold', width: 290, fontSize: 16 }} 
-            onClick={() => setShowModal(true)}
+          <button
+            style={{
+              border: `1px solid ${buttonbg}`,
+              padding: 12,
+              borderRadius: 5,
+              background: buttonbg,
+              fontWeight: "bold",
+              width: 290,
+              fontSize: 16,
+            }}
+            onClick={() => {
+              setMode("create");
+              setCustomerBranch({});
+              setShowModal(true);
+            }}
           >
-            <FontAwesomeIcon icon={faCirclePlus} color='orange' />&nbsp; Create New Customer Branch
+            <FontAwesomeIcon icon={faCirclePlus} color="orange" />
+            &nbsp; Create New Customer Branch
           </button>
         </div>
       </div>
@@ -185,8 +238,14 @@ export default function CustomerBranchList() {
       {showModal && (
         <div>
           <CustomerBranchForm
+            mode={mode}
             customerBranch={customerBranch || {}}
-            onChange={(e) => setCustomerBranch({ ...customerBranch, [e.target.name]: e.target.value })}
+            onChange={(e) =>
+              setCustomerBranch({
+                ...customerBranch,
+                [e.target.name]: e.target.value,
+              })
+            }
             onSave={handleSave}
             onClose={() => setShowModal(false)}
           />
