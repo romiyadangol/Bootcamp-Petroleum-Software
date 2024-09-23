@@ -1,13 +1,27 @@
-import { useState, useEffect } from 'react';
-import { Box, Button, Checkbox, Input, Select, Switch, Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react';
-import ModalWrapper from '../core/ModalWrapper';
-import { InputField, SelectField } from '../core/FormFields';
-import { useQuery } from '@apollo/client';
-import { GET_CUSTOMERS } from '../../graphql/queries/customers/getCustomers';
-import { GET_CUSTOMER_BRANCH } from '../../graphql/queries/customerBranch/getCustomerBranch';
-import { FIND_PRODUCTS } from '../../graphql/queries/products/findProducts';
-import { GET_DRIVERS } from '../../graphql/queries/driver/getDrivers';
-import { GET_ASSETS } from '../../graphql/queries/assets/getAssets';
+import { useState, useEffect } from "react";
+import {
+  Box,
+  Button,
+  Checkbox,
+  Input,
+  Select,
+  Switch,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+} from "@chakra-ui/react";
+import ModalWrapper from "../core/ModalWrapper";
+import { InputField, SelectField } from "../core/FormFields";
+import { useQuery } from "@apollo/client";
+import { GET_CUSTOMERS } from "../../graphql/queries/customers/getCustomers";
+import { GET_CUSTOMER_BRANCH } from "../../graphql/queries/customerBranch/getCustomerBranch";
+import { FIND_PRODUCTS } from "../../graphql/queries/products/findProducts";
+import { GET_DRIVERS } from "../../graphql/queries/driver/getDrivers";
+import { GET_ASSETS } from "../../graphql/queries/assets/getAssets";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
 
 //dates
 const convertToISO8601 = (datetimeLocal) => {
@@ -18,10 +32,10 @@ const convertToISO8601 = (datetimeLocal) => {
 const convertToDatetimeLocal = (isoString) => {
   const date = new Date(isoString);
   const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
@@ -31,8 +45,8 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
   const [selectedBranch, setSelectedBranch] = useState(null);
   const [selectedLineItems, setSelectedLineItems] = useState([]);
   const [recurring, setRecurring] = useState(false);
-  const [newProductName, setNewProductName] = useState('');
-  const [newProductUnit, setNewProductUnit] = useState('');
+  const [newProductName, setNewProductName] = useState("");
+  const [newProductUnit, setNewProductUnit] = useState("");
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [selectedAsset, setSelectedAsset] = useState(null);
@@ -44,10 +58,13 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
   const { data: customersData } = useQuery(GET_CUSTOMERS);
   const customers = customersData?.getCustomers.customers || [];
 
-  const { data: branchesData, refetch: refetchBranches } = useQuery(GET_CUSTOMER_BRANCH, {
-    variables: { id: selectedCustomer?.id },
-    skip: !selectedCustomer,
-  });
+  const { data: branchesData, refetch: refetchBranches } = useQuery(
+    GET_CUSTOMER_BRANCH,
+    {
+      variables: { id: selectedCustomer?.id },
+      skip: !selectedCustomer,
+    }
+  );
   const branches = branchesData?.getCustomerBranch.customerBranches || [];
 
   const { data: productData } = useQuery(FIND_PRODUCTS);
@@ -70,9 +87,9 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
 
   const handlePlannedAtChange = (e) => {
     const newDatetimeLocal = e.target.value;
-    console.log('Local Time Input:', newDatetimeLocal);
+    console.log("Local Time Input:", newDatetimeLocal);
     const isoString = convertToISO8601(newDatetimeLocal);
-    console.log('Converted ISO 8601:', isoString);
+    console.log("Converted ISO 8601:", isoString);
     setPlannedAt(newDatetimeLocal);
   };
 
@@ -82,51 +99,66 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
       name: product.name,
       units: product.productUnit,
       quantity: "",
-      deliveryOrderId: order.id, 
-      checked: false 
+      deliveryOrderId: order.id,
+      checked: false,
     };
     setSelectedLineItems([...selectedLineItems, newLineItem]);
   };
 
   const handleQuantityChange = (itemId, quantity) => {
     setSelectedLineItems((prevItems) =>
-      prevItems.map((item) => (item.id === itemId ? { ...item, quantity } : item))
-    );
-  };
-
-  const handleCheckboxChange = (itemId, isChecked) => {
-    setSelectedLineItems((prevItems) =>
       prevItems.map((item) =>
-        item.id === itemId ? { ...item, checked: isChecked } : item
+        item.id === itemId ? { ...item, quantity } : item
       )
     );
   };
 
+  const handleDeleteLineItems = (itemId) => {
+    setSelectedLineItems((prevItems) =>
+      prevItems.filter((item) => item.id !== itemId)
+    );
+  };
+
+  const handleCheckboxChange = (itemId, isChecked) => {
+    if (isChecked) {
+      setSelectedLineItems((prevItems) =>
+        prevItems.map((item) =>
+          item.id === itemId ? { ...item, checked: isChecked } : item
+        )
+      );
+    } else {
+      setSelectedLineItems((prevItems) =>
+        prevItems.filter((item) => item.id !== itemId)
+      );
+    }
+  };
+
   useEffect(() => {
     if (selectedCustomer) {
-      refetchBranches().catch(err => {
-        console.error('Error refetching branches:', err);
+      refetchBranches().catch((err) => {
+        console.error("Error refetching branches:", err);
       });
     }
   }, [selectedCustomer, refetchBranches]);
-
 
   useEffect(() => {
     if (branches.length > 0 && !selectedBranch) {
       const defaultBranch = branches[0];
       setSelectedBranch(defaultBranch);
-  
+
       const updatedOrder = {
         orderGroupInfo: {
           status: "pending",
           startedAt: new Date().toISOString(),
           completedAt: null,
           customerId: selectedCustomer?.id || null,
-          recurring: recurring ? {
-            frequency: order.frequency || "Daily",
-            startedAt: new Date(order.startedAt).toISOString(),
-            endAt: new Date(order.endAt).toISOString(),
-          } : null,
+          recurring: recurring
+            ? {
+                frequency: order.frequency || "Daily",
+                startedAt: new Date(order.startedAt).toISOString(),
+                endAt: new Date(order.endAt).toISOString(),
+              }
+            : null,
           deliveryOrderAttributes: {
             name: defaultBranch.name,
             location: defaultBranch.location,
@@ -134,17 +166,28 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
             customerBranchId: defaultBranch.id,
             assetId: selectedAsset?.id || null,
             driverId: selectedDriver?.id || null,
-            lineItemsAttributes: selectedLineItems.map(item => ({
+            lineItemsAttributes: selectedLineItems.map((item) => ({
               name: item.name,
               quantity: parseFloat(item.quantity) || 0,
-              units: item.units
-            }))
-          }
-        }
+              units: item.units,
+            })),
+          },
+        },
       };
-      onChange({ target: { name: 'order', value: updatedOrder } });
+      onChange({ target: { name: "order", value: updatedOrder } });
     }
-  }, [branches, selectedBranch, onChange, order, selectedDriver, selectedLineItems]);
+  }, [
+    branches,
+    selectedAsset,
+    selectedBranch,
+    selectedDriver,
+    selectedLineItems,
+    selectedCustomer,
+    recurring,
+    order,
+    plannedAt,
+    onChange,
+  ]);
 
   const handleNextStep = () => {
     if (step === 1 && selectedCustomer) {
@@ -152,17 +195,20 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
     } else if (step === 2) {
       setStep(3);
     } else {
-      const getValidDate = (date) => date ? new Date(date).toISOString() : null;
+      const getValidDate = (date) =>
+        date ? new Date(date).toISOString() : null;
       const updatedOrder = {
         status: "pending",
         startedAt: new Date().toISOString(),
         completedAt: null,
         customerId: selectedCustomer?.id || null,
-        recurring: recurring ? {
-          frequency: order.frequency || "Daily",
-          startedAt: getValidDate(order.startedAt),
-          endAt: getValidDate(order.endAt),
-        } : null,
+        recurring: recurring
+          ? {
+              frequency: order.frequency || "Daily",
+              startedAt: getValidDate(order.startedAt),
+              endAt: getValidDate(order.endAt),
+            }
+          : null,
         deliveryOrderAttributes: {
           plannedAt: convertToISO8601(plannedAt),
           completedAt: null,
@@ -170,17 +216,16 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
           orderGroupId: null,
           assetId: selectedAsset?.id || null,
           driverId: selectedDriver?.id || null,
-          lineItemsAttributes: selectedLineItems.map(item => ({
+          lineItemsAttributes: selectedLineItems.map((item) => ({
             name: item.name,
             quantity: parseFloat(item.quantity) || 0,
-            units: item.units
-          }))
-        }
+            units: item.units,
+          })),
+        },
       };
-      onSave(updatedOrder); 
+      onSave(updatedOrder);
     }
   };
-  
 
   const handlePreviousStep = () => {
     if (step > 1) setStep(step - 1);
@@ -189,12 +234,12 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
   const handleSaveNewProduct = () => {
     if (newProductName && newProductUnit) {
       const newProduct = {
-        id: Date.now(), 
+        id: Date.now(),
         name: newProductName,
         productUnit: newProductUnit,
-        checked: false
+        checked: false,
       };
-      setSelectedLineItems([...selectedLineItems, newProduct]); 
+      setSelectedLineItems([...selectedLineItems, newProduct]);
       setIsProductModalOpen(false);
     }
   };
@@ -202,7 +247,7 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
   const handleCustomerChange = (customer) => {
     setSelectedCustomer(customer);
     setSelectedBranch(null);
-  
+
     const updatedOrder = {
       orderGroupInfo: {
         status: "pending",
@@ -215,22 +260,21 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
           customerBranchId: selectedBranch?.id || null,
           assetId: selectedAsset?.id || null,
           driverId: selectedDriver?.id || null,
-          lineItemsAttributes: selectedLineItems.map(item => ({
+          lineItemsAttributes: selectedLineItems.map((item) => ({
             name: item.name,
             quantity: parseFloat(item.quantity) || 0,
-            units: item.units
-          }))
-        }
-      }
+            units: item.units,
+          })),
+        },
+      },
     };
-  
-    onChange({ target: { name: 'order', value: updatedOrder } });
+
+    onChange({ target: { name: "order", value: updatedOrder } });
   };
-  
-  
+
   const handleBranchChange = (branch) => {
     setSelectedBranch(branch);
-  
+
     const updatedOrder = {
       orderGroupInfo: {
         status: "pending",
@@ -243,16 +287,16 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
           customerBranchId: branch.id || null,
           assetId: selectedAsset?.id || null,
           driverId: selectedDriver?.id || null,
-          lineItemsAttributes: selectedLineItems.map(item => ({
+          lineItemsAttributes: selectedLineItems.map((item) => ({
             name: item.name,
             quantity: parseFloat(item.quantity) || 0,
-            units: item.units
-          }))
-        }
-      }
+            units: item.units,
+          })),
+        },
+      },
     };
-  
-    onChange({ target: { name: 'order', value: updatedOrder } });
+
+    onChange({ target: { name: "order", value: updatedOrder } });
   };
 
   const handleDriverChange = (driver) => {
@@ -270,17 +314,17 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
           customerBranchId: selectedBranch?.id || null,
           assetId: selectedAsset?.id || null,
           driverId: driver.id || null,
-          lineItemsAttributes: selectedLineItems.map(item => ({
+          lineItemsAttributes: selectedLineItems.map((item) => ({
             name: item.name,
             quantity: parseFloat(item.quantity) || 0,
-            units: item.units
-          }))
-        }
-      }
+            units: item.units,
+          })),
+        },
+      },
     };
-  
-    onChange({ target: { name: 'order', value: updatedOrder } });
-  }
+
+    onChange({ target: { name: "order", value: updatedOrder } });
+  };
 
   const handleAssetChange = (asset) => {
     setSelectedAsset(asset);
@@ -297,25 +341,24 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
           customerBranchId: selectedBranch?.id || null,
           assetId: selectedAsset?.id || null,
           driverId: selectedDriver?.id || null,
-          lineItemsAttributes: selectedLineItems.map(item => ({
+          lineItemsAttributes: selectedLineItems.map((item) => ({
             name: item.name,
             quantity: parseFloat(item.quantity) || 0,
-            units: item.units
-          }))
-        }
-      }
+            units: item.units,
+          })),
+        },
+      },
     };
-  
-    onChange({ target: { name: 'order', value: updatedOrder } });
-  }
-  
-  
+
+    onChange({ target: { name: "order", value: updatedOrder } });
+  };
+
   return (
     <>
-      <ModalWrapper 
-        isOpen={isProductModalOpen} 
-        onClose={() => setIsProductModalOpen(false)} 
-        title="Add New Product" 
+      <ModalWrapper
+        isOpen={isProductModalOpen}
+        onClose={() => setIsProductModalOpen(false)}
+        title="Add New Product"
         onSave={handleSaveNewProduct}
         maxWidth="500px"
         showSaveButton={true}
@@ -334,17 +377,22 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
         />
       </ModalWrapper>
 
-      <ModalWrapper 
-        isOpen={true} 
-        onClose={onClose} 
-        title="Create Delivery Order" 
+      <ModalWrapper
+        isOpen={true}
+        onClose={onClose}
+        title="Create Delivery Order"
         onSave={onSave}
         maxWidth={1600}
         showSaveButton={false}
       >
         <Box display="flex" height="100%">
           <Box flex="1" padding="20px">
-            <Tabs index={step - 1} onChange={(index) => setStep(index + 1)} isFitted variant="enclosed">
+            <Tabs
+              index={step - 1}
+              onChange={(index) => setStep(index + 1)}
+              isFitted
+              variant="enclosed"
+            >
               <TabList mb={4}>
                 <Tab isDisabled={step === 1}>Step 1: Select Customer</Tab>
                 <Tab isDisabled={step === 2}>Step 2: Select Branch</Tab>
@@ -360,64 +408,88 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
                         name="customer"
                         value={selectedCustomer ? selectedCustomer.name : ""}
                         onChange={(e) => {
-                          const customer = customers.find((cust) => cust.name === e.target.value);
+                          const customer = customers.find(
+                            (cust) => cust.name === e.target.value
+                          );
                           setSelectedCustomer(customer);
                           handleCustomerChange(customer);
                         }}
                         options={customers.map((cust) => cust.name)}
                       />
-                      <Button onClick={handleNextStep} mr={4}>Next</Button>
+                      <Button onClick={handleNextStep} mr={4}>
+                        Next
+                      </Button>
                     </>
                   )}
                 </TabPanel>
 
                 <TabPanel>
-                  {step === 2 && selectedCustomer && (
-                    <>
-                      <h2>Customer Branch: </h2>
-                      <SelectField
-                        label="Branch"
-                        name="branch"
-                        value={selectedBranch ? selectedBranch.name : ""}
-                        onChange={(e) => {
-                          const branch = branches.find((b) => b.name === e.target.value);
-                          handleBranchChange(branch);
-                        }}
-                        options={branches.map((branch) => branch.name)}
-                      />
-                      <SelectField
-                        label="Location"
-                        name="location"
-                        value={selectedBranch ? selectedBranch.location : ""}
-                        onChange={(e) => {
-                          const branch = branches.find((b) => b.location === e.target.value);
-                          handleBranchChange(branch);
-                        }}
-                        options={branches.map((branch) => branch.location)}
-                      />
-                      <Button onClick={handlePreviousStep} mr={4} mt={5}>Back</Button>
-                      <Button onClick={handleNextStep} mr={4} mt={5}>Next</Button>
-                    </>
-                  )}
+                  {step === 2 &&
+                    selectedCustomer &&
+                    (console.log("Selected Customer:", selectedCustomer),
+                    (
+                      <>
+                        <h2>Customer Branch: </h2>
+                        <SelectField
+                          label="Branch"
+                          name="branch"
+                          value={selectedBranch ? selectedBranch.name : ""}
+                          onChange={(e) => {
+                            const branch = branches.find(
+                              (b) => b.name === e.target.value
+                            );
+                            handleBranchChange(branch);
+                          }}
+                          options={branches.map((branch) => branch.name)}
+                        />
+                        <SelectField
+                          label="Location"
+                          name="location"
+                          value={selectedBranch ? selectedBranch.location : ""}
+                          onChange={(e) => {
+                            const branch = branches.find(
+                              (b) => b.location === e.target.value
+                            );
+                            handleBranchChange(branch);
+                          }}
+                          options={branches.map((branch) => branch.location)}
+                        />
+                        <Button onClick={handlePreviousStep} mr={4} mt={5}>
+                          Back
+                        </Button>
+                        <Button onClick={handleNextStep} mr={4} mt={5}>
+                          Next
+                        </Button>
+                      </>
+                    ))}
                 </TabPanel>
 
                 <TabPanel>
                   {step === 3 && selectedCustomer && (
                     <>
                       <Box>
-                          <h2>Customer Details</h2>
-                          <p>Name: {selectedCustomer.name}</p>
-                          <p>Customer Branch: {selectedBranch.name}</p>
-                          <p>Location: {selectedBranch.location}</p>
-                          <p>Zip: {selectedCustomer.zipcode}</p>
+                        <h2>Customer Details</h2>
+                        <p>Name: {selectedCustomer.name}</p>
+                        <p>Customer Branch: {selectedBranch.name}</p>
+                        <p>Location: {selectedBranch.location}</p>
+                        <p>Zip: {selectedCustomer.zipcode}</p>
                       </Box>
-                      <Box display="flex" justifyContent="space-between" bg="gray.800" p={4} borderRadius="md" color="white">
+                      <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        bg="gray.800"
+                        p={4}
+                        borderRadius="md"
+                        color="white"
+                      >
                         <Box flex="1">
                           <h2>Bulk Delivery</h2>
                           <Select
                             placeholder="Select Product"
                             onChange={(e) => {
-                              const selectedProduct = products.find(product => product.id === e.target.value);
+                              const selectedProduct = products.find(
+                                (product) => product.id === e.target.value
+                              );
                               if (selectedProduct) {
                                 handleAddLineItem(selectedProduct);
                               }
@@ -445,24 +517,54 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
                             >
                               <Checkbox
                                 isChecked={item.checked}
-                                onChange={(e) => handleCheckboxChange(item.id, e.target.checked)}
+                                onChange={(e) =>
+                                  handleCheckboxChange(
+                                    item.id,
+                                    e.target.checked
+                                  )
+                                }
                               >
                                 {item.name} - {item.units}
                               </Checkbox>
-                              <Input
-                                type="number"
-                                placeholder="Quantity"
-                                value={item.quantity}
-                                onChange={(e) => handleQuantityChange(item.id, e.target.value)}
-                                width="100px"
-                                ml={4}
-                                isDisabled={!item.checked}
-                              />
+                              <div>
+                                <Input
+                                  type="number"
+                                  placeholder="Quantity"
+                                  value={item.quantity}
+                                  onChange={(e) =>
+                                    handleQuantityChange(
+                                      item.id,
+                                      e.target.value
+                                    )
+                                  }
+                                  width="100px"
+                                  ml={4}
+                                  isDisabled={!item.checked}
+                                />
+                                <button
+                                  onClick={() => handleDeleteLineItems(item.id)}
+                                >
+                                  <FontAwesomeIcon
+                                    icon={faXmark}
+                                    style={{
+                                      color: "gray.500",
+                                      fontSize: 20,
+                                      margin: "0 10px",
+                                    }}
+                                  />
+                                </button>
+                              </div>
                             </Box>
                           ))}
                         </Box>
 
-                        <Box width="35%" bg="gray.700" p={4} borderRadius="md" ml={4}>
+                        <Box
+                          width="35%"
+                          bg="gray.700"
+                          p={4}
+                          borderRadius="md"
+                          ml={4}
+                        >
                           <h2>Recurring Delivery</h2>
                           <Switch
                             isChecked={recurring}
@@ -475,7 +577,11 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
                                 label="Recurrence Start Date"
                                 name="startedAt"
                                 type="datetime-local"
-                                value={ order.startedAt ? convertToDatetimeLocal(order.startedAt) : defaultStartDate }
+                                value={
+                                  order.startedAt
+                                    ? convertToDatetimeLocal(order.startedAt)
+                                    : defaultStartDate
+                                }
                                 onChange={onChange}
                               />
                               <SelectField
@@ -489,7 +595,11 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
                                 label="Recurrence End Date"
                                 name="endAt"
                                 type="datetime-local"
-                                value={order.endAt ? convertToDatetimeLocal(order.endAt) : ""}
+                                value={
+                                  order.endAt
+                                    ? convertToDatetimeLocal(order.endAt)
+                                    : ""
+                                }
                                 onChange={onChange}
                               />
                             </>
@@ -497,15 +607,25 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
                         </Box>
                       </Box>
 
-                      <Box display="flex" justifyContent="space-between" bg="gray.800" p={4} borderRadius="md" color="white" mt={4}>
+                      <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        bg="gray.800"
+                        p={4}
+                        borderRadius="md"
+                        color="white"
+                        mt={4}
+                      >
                         <Box>
-                        <h2>Assign Driver</h2>
+                          <h2>Assign Driver</h2>
                           <SelectField
                             label="Driver"
                             name="driver"
                             value={selectedDriver ? selectedDriver.name : ""}
                             onChange={(e) => {
-                              const driver = drivers.find((driver) => driver.name === e.target.value);
+                              const driver = drivers.find(
+                                (driver) => driver.name === e.target.value
+                              );
                               setSelectedDriver(driver);
                               handleDriverChange(driver);
                             }}
@@ -515,15 +635,20 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
                         </Box>
                         <Box>
                           <SelectField
-                          label="Asset Category"
-                          name="assetCategory"
-                          value={selectedAsset ? selectedAsset.assetCategory : ""}
-                          onChange={(e) => {
-                            const asset = assets.find((asset) => asset.assetCategory === e.target.value);
-                            setSelectedAsset(asset);
-                            handleAssetChange(asset);
-                          }}
-                          options={assets.map((asset) => asset.assetCategory)}
+                            label="Asset Category"
+                            name="assetCategory"
+                            value={
+                              selectedAsset ? selectedAsset.assetCategory : ""
+                            }
+                            onChange={(e) => {
+                              const asset = assets.find(
+                                (asset) =>
+                                  asset.assetCategory === e.target.value
+                              );
+                              setSelectedAsset(asset);
+                              handleAssetChange(asset);
+                            }}
+                            options={assets.map((asset) => asset.assetCategory)}
                           />
                         </Box>
                         <Box>
@@ -536,8 +661,16 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
                           />
                         </Box>
                       </Box>
-                      <Button onClick={handlePreviousStep} mr={4} mt={4}>Back</Button>
-                      <Button onClick={handleNextStep} colorScheme="blue" mt={4}>Create Order</Button>
+                      <Button onClick={handlePreviousStep} mr={4} mt={4}>
+                        Back
+                      </Button>
+                      <Button
+                        onClick={handleNextStep}
+                        colorScheme="blue"
+                        mt={4}
+                      >
+                        Create Order
+                      </Button>
                     </>
                   )}
                 </TabPanel>
@@ -549,4 +682,3 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
     </>
   );
 }
-

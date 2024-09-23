@@ -23,7 +23,7 @@ const AgGridTable = forwardRef(({
       paginationPageSizeSelector={paginationPageSizeSelector}
       onRowClicked={onRowClicked}
       onGridReady={onGridReady}
-      selection={{ mode: "multiple" }} 
+      // selection={{ mode: "multiple" }} 
       ref={ref}
       rowStyle={{ cursor: isRowClickable ? "pointer" : "default" }}
     />

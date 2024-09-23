@@ -13,6 +13,9 @@ export const GET_RECURRING_ORDERS = gql`
           id
           name
           email
+          address
+          zipcode
+          phoneNo
         }
         user {
           id
