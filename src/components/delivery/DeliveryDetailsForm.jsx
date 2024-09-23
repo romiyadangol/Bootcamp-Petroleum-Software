@@ -65,7 +65,7 @@ export default function DeliveryDetailsForm({
         <SelectField
           label="Units"
           name="units"
-          value={lineItem.units.toLowerCase()}
+          value={lineItem.units ? lineItem.units.toLowerCase() : ""}
           onChange={handleChange}
           options={["gallons", "liters"]}
         />

@@ -24,7 +24,14 @@ import {
 import { useCallback } from "react";
 import { toast } from "react-toastify";
 
-const DeliveryDetails = ({ order, onClose, onSave, onChange }) => {
+const DeliveryDetails = ({
+  order,
+  onClose,
+  onSave,
+  onChange,
+  mode,
+  setMode,
+}) => {
   const [rowData, setRowData] = useState([]);
   const [editingField, setEditingField] = useState(null);
   const [showDetailsForm, setShowDetailsForm] = useState(false);
@@ -423,7 +430,13 @@ const DeliveryDetails = ({ order, onClose, onSave, onChange }) => {
 
           <HStack justify="space-between">
             <Text fontWeight="bold">LineItems</Text>
-            <Button colorScheme="cyan" onClick={() => setShowDetailsForm(true)}>
+            <Button
+              colorScheme="cyan"
+              onClick={() => {
+                setShowDetailsForm(true);
+                setEditingLineItem(null);
+              }}
+            >
               Add LineItem
             </Button>
           </HStack>
