@@ -18,6 +18,7 @@ import {
   useCreateDeliveryMutation,
   useDeleteDeliveryMutation,
   useUpdateDeliveryMutation,
+  useUploadDeliveryMutation,
 } from "../../hooks/useDeliveryMutation";
 import {
   addDelivery,
@@ -28,6 +29,7 @@ import {
   updateDelivery,
 } from "../../redux/actions/deliveryActions";
 import { SelectField } from "../core/FormFields";
+import { convertFileToBase64 } from "../../helper/utils";
 
 export default function DeliveryList() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -74,9 +76,15 @@ export default function DeliveryList() {
     }
   }, [data, error, loading, dispatch, orderType]);
 
+  // Refetch on orderType change
+  useEffect(() => {
+    refetch();
+  }, [orderType, refetch]);
+
   const rowData = useSelector((state) => state.delivery.orders);
 
   // delivery mutations
+  const uploadDeliveryMutation = useUploadDeliveryMutation(refetch);
   const createDeliveryMutation = useCreateDeliveryMutation(refetch);
   const deleteDeliveryMutation = useDeleteDeliveryMutation(refetch);
   const updateDeliveryMutation = useUpdateDeliveryMutation(refetch);
@@ -97,6 +105,25 @@ export default function DeliveryList() {
         dispatch(deleteDelivery(orderId));
       },
     });
+  };
+
+  const handleFileChange = async (e) => {
+    const csv_file = await convertFileToBase64(e.target.files[0]);
+
+    if (csv_file) {
+      console.log("Selected file:", csv_file);
+
+      uploadDeliveryMutation({
+        variables: { file: csv_file },
+        onCompleted: (data) => {
+          console.log("Order created csv:", data);
+          refetch();
+          toast.success("Order uploaded successfully");
+        },
+      });
+    } else {
+      toast.error("Please select a valid CSV file.");
+    }
   };
 
   const handleSave = (order) => {
@@ -370,12 +397,33 @@ export default function DeliveryList() {
             <FontAwesomeIcon icon={faCirclePlus} color="orange" />
             &nbsp; Create New Delivery Order
           </button>
+          <label
+            style={{
+              background: "blue",
+              padding: "12px",
+              fontWeight: "bold",
+              borderRadius: "5px",
+              fontSize: "16px",
+              color: "white",
+              marginRight: "10px",
+              cursor: "pointer",
+            }}
+          >
+            Import from CSV
+            <input
+              type="file"
+              id="upload-photo"
+              className="file-input"
+              accept=".csv"
+              onChange={(e) => handleFileChange(e)}
+              style={{ display: "none" }}
+            />
+          </label>
           <button
             style={{
               border: `1px solid ${buttonbg}`,
               padding: 12,
               borderRadius: 5,
-              background: buttonbg,
               fontWeight: "bold",
               fontSize: 16,
               background: "blue",
