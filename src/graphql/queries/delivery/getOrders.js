@@ -25,11 +25,6 @@ export const GET_ORDERS = gql`
         }
         organizationId
         createdAt
-        recurring {
-          frequency
-          startedAt
-          endAt
-        }
         deliveryOrder {
           id
           plannedAt

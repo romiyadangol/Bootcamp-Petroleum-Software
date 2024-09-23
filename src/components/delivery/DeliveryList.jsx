@@ -485,6 +485,8 @@ export default function DeliveryList() {
       {showDeliveryModal && (
         <DeliveryDetails
           order={order}
+          mode={mode}
+          setMode={setMode}
           onChange={(order) => setOrder(order)}
           onSave={handleSave}
           onClose={() => setShowDeliveryModal(false)}
