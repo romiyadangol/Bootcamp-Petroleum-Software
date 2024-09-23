@@ -101,6 +101,7 @@ export default function DeliveryList() {
     deleteDeliveryMutation({
       variables: { orderId },
       onCompleted: () => {
+        setShowDeliveryModal(false);
         console.log("order deleted>>>>");
         toast.success("Order deleted successfully");
         refetch();
@@ -444,6 +445,7 @@ export default function DeliveryList() {
               borderRadius: 5,
               fontWeight: "bold",
               fontSize: 16,
+              background: "blue",
             }}
             onClick={onBtnExport}
           >
@@ -457,7 +459,16 @@ export default function DeliveryList() {
         defaultColDef={defaultColDef}
         onGridReady={(params) => setGridRef(params)}
         pagination={true}
-        onRowClicked={handleRowClicked}
+        onRowClicked={(row) => {
+          if (
+            row.event.target.tagName === "BUTTON" ||
+            row.event.target.tagName === "svg"
+          ) {
+            return;
+          } else {
+            handleRowClicked(row);
+          }
+        }}
       />
       {showModal && (
         <DeliveryForm

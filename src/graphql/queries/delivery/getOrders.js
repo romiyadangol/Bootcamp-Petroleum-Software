@@ -8,6 +8,7 @@ export const GET_ORDERS = gql`
         status
         startedAt
         completedAt
+        cancelledAt
         parentOrderId
         customer {
           id

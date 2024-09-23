@@ -1,42 +1,52 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import ModalWrapper from "../core/ModalWrapper";
 import { useQuery } from "@apollo/client";
 import { FIND_PRODUCTS } from "../../graphql/queries/products/findProducts";
 import { InputField, SelectField } from "../core/FormFields";
-import { VStack } from '@chakra-ui/react';
+import { VStack } from "@chakra-ui/react";
 
-export default function DeliveryDetailsForm({ onClose, onSave, initialLineItem }) {
+export default function DeliveryDetailsForm({
+  onClose,
+  onSave,
+  initialLineItem,
+}) {
   const [lineItem, setLineItem] = useState({
-    id: initialLineItem?.id || '',
-    name: initialLineItem?.name || '',
+    id: initialLineItem?.id || "",
+    name: initialLineItem?.name || "",
     quantity: initialLineItem?.quantity || 0,
-    units: initialLineItem?.units || '',
+    units: initialLineItem?.units || "",
   });
   const { data: productData } = useQuery(FIND_PRODUCTS);
-  const products = productData?.findProducts.products || [];  
+  const products = productData?.findProducts.products || [];
 
   useEffect(() => {
     if (initialLineItem) {
+      console.log("Setting lineItem state to:", initialLineItem);
       setLineItem(initialLineItem);
     }
   }, [initialLineItem]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setLineItem(prev => ({
+    setLineItem((prev) => ({
       ...prev,
-      [name]: name === 'quantity' ? Number(value) : value,
+      [name]: name === "quantity" ? Number(value) : value,
     }));
   };
 
   const handleSave = () => {
-    console.log('Saving line item:', lineItem);
-    onSave(lineItem); 
+    console.log("Saving line item:", lineItem);
+    onSave(lineItem);
     onClose();
   };
 
   return (
-    <ModalWrapper isOpen={true} onClose={onClose} title="LineItem Details" onSave={handleSave}>
+    <ModalWrapper
+      isOpen={true}
+      onClose={onClose}
+      title="LineItem Details"
+      onSave={handleSave}
+    >
       <VStack spacing={4}>
         <SelectField
           label="Name"
@@ -55,9 +65,9 @@ export default function DeliveryDetailsForm({ onClose, onSave, initialLineItem }
         <SelectField
           label="Units"
           name="units"
-          value={lineItem.units}
+          value={lineItem.units.toLowerCase()}
           onChange={handleChange}
-          options={["gallons", "litres"]}
+          options={["gallons", "liters"]}
         />
       </VStack>
     </ModalWrapper>
