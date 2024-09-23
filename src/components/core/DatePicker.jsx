@@ -1,23 +1,23 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Box, Flex, IconButton, Text, useColorModeValue } from "@chakra-ui/react";
 import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import dayjs from "dayjs";
+import { format, addDays, subDays } from "date-fns";
 
 export default function DatePicker({ selected, onChange }) {
   const [dateRange, setDateRange] = useState({
-    startDate: selected?.startDate || dayjs(),
+    startDate: selected?.startDate || new Date(),
   });
 
   const handlePrevious = () => {
-    const newStartDate = dateRange.startDate.subtract(1, 'day');
+    const newStartDate = subDays(dateRange.startDate, 1);
     const newRange = { startDate: newStartDate };
     setDateRange(newRange);
     onChange(newRange);
   };
 
   const handleNext = () => {
-    const newStartDate = dateRange.startDate.add(1, 'day');
+    const newStartDate = addDays(dateRange.startDate, 1);
     const newRange = { startDate: newStartDate };
     setDateRange(newRange);
     onChange(newRange);
@@ -48,7 +48,7 @@ export default function DatePicker({ selected, onChange }) {
           color="gray.500"
         />
         <Text>
-          {dateRange.startDate.format('MMM DD, YYYY')}
+          {format(dateRange.startDate, 'MMM dd, yyyy')}
         </Text>
         <IconButton
           aria-label="Next"

@@ -1,4 +1,3 @@
-import dayjs from "dayjs";
 import Toastify from "../Toastify";
 import { toast } from "react-toastify";
 import { useQuery } from "@apollo/client";
@@ -30,12 +29,15 @@ import {
 } from "../../redux/actions/deliveryActions";
 import { SelectField } from "../core/FormFields";
 import { convertFileToBase64 } from "../../helper/utils";
+import DeliveryDetails from "../delivery/DeliveryDetails";
+import { format, isSameDay, parseISO } from "date-fns";
 
 export default function DeliveryList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [order, setOrder] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [selectedDate, setSelectedDate] = useState({ startDate: dayjs() });
+  const [showDeliveryModal, setShowDeliveryModal] = useState(false);
+  const [selectedDate, setSelectedDate] = useState({ startDate: new Date() });
   const [mode, setMode] = useState("create");
   const [gridRef, setGridRef] = useState(null);
   const [orderType, setOrderType] = useState("Order Group");
@@ -92,13 +94,14 @@ export default function DeliveryList() {
   const handleEdit = (order) => {
     setOrder(order);
     setMode("edit");
-    setShowModal(true);
+    setShowDeliveryModal(true);
   };
 
   const handleDelete = (orderId) => {
     deleteDeliveryMutation({
       variables: { orderId },
       onCompleted: () => {
+        setShowDeliveryModal(false);
         console.log("order deleted>>>>");
         toast.success("Order deleted successfully");
         refetch();
@@ -125,94 +128,98 @@ export default function DeliveryList() {
       toast.error("Please select a valid CSV file.");
     }
   };
+  const formatDate = (date) =>
+    date ? format(parseISO(date), "eee MMM d, HH:mm") : "N/A";
+
+  // Inside DeliveryList.jsx
 
   const handleSave = (order) => {
     if (order) {
+      const startedAt = order.startedAt
+        ? format(parseISO(order.startedAt), "yyyy-MM-dd'T'HH:mm:ss")
+        : null;
+      const completedAt = order.completedAt
+        ? format(parseISO(order.completedAt), "yyyy-MM-dd'T'HH:mm:ss")
+        : null;
+
+      const mappedDeliveryOrderAttributes = {
+        status: order.status,
+        startedAt: startedAt,
+        completedAt: completedAt,
+        customerId: order.customerId,
+        recurring: order.recurring
+          ? {
+              frequency: order.recurring.frequency || "Daily",
+              startedAt: order.recurring.startedAt || getTomorrowDate(),
+              endAt: order.recurring.endAt || null,
+            }
+          : null,
+        deliveryOrderAttributes: {
+          plannedAt: order.deliveryOrderAttributes?.plannedAt,
+          completedAt: order.deliveryOrderAttributes?.completedAt,
+          customerBranchId: order.deliveryOrderAttributes?.customerBranchId,
+          assetId: order.deliveryOrderAttributes?.assetId,
+          driverId: order.deliveryOrderAttributes?.driverId,
+          lineItemsAttributes:
+            order.deliveryOrderAttributes?.lineItemsAttributes?.map((item) => ({
+              name: item.name,
+              quantity: item.quantity,
+              units: item.units,
+            })) || [],
+        },
+      };
+      console.log(
+        "Mapped Delivery Order Attributes:",
+        mappedDeliveryOrderAttributes
+      );
+
       if (mode === "edit") {
         updateDeliveryMutation({
           variables: {
             orderId: order.id,
-            orderGroupInfo: {
-              status: order.status,
-              startedAt: order.startedAt,
-              completedAt: order.completedAt,
-              customerId: order.customerId,
-              recurring: {
-                frequency: order.recurring?.frequency,
-                startedAt: order.recurring?.startedAt,
-                endAt: order.recurring?.endAt,
-              },
-              deliveryOrderAttributes: {
-                plannedAt: order.deliveryOrder?.plannedAt,
-                completedAt: order.deliveryOrder?.completedAt,
-                customerBranchId: order.deliveryOrder?.customerBranchId,
-                assetId: order.deliveryOrder?.assetId,
-                driverId: order.deliveryOrder?.driverId,
-                lineItems: order.deliveryOrder?.lineItems.map((item) => ({
-                  name: item.name,
-                  quantity: item.quantity,
-                  units: item.units,
-                })),
-              },
-            },
+            orderInfo: mappedDeliveryOrderAttributes,
           },
           onCompleted: (data) => {
-            dispatch(updateDelivery(data.editOrder.UpdateOrder));
-            refetch();
-            toast.success("Delivery Updated");
-            setShowModal(false);
+            if (data.editOrder.errors && data.editOrder.errors.length > 0) {
+              toast.error(
+                "Error updating delivery: " + data.editOrder.errors.join(", ")
+              );
+            } else {
+              dispatch(updateDelivery(order)); // Dispatch the updated order
+              toast.success(data.editOrder.message);
+              setShowDeliveryModal(false);
+              refetch();
+            }
           },
           onError: (error) => {
             toast.error("Error updating delivery: " + error.message);
           },
         });
       } else {
-        console.log("Order:", order);
-
         createDeliveryMutation({
           variables: {
-            orderGroupInfo: {
-              status: order.status,
-              startedAt: order.startedAt,
-              customerId: order.customerId,
-              recurring: order.recurring
-                ? {
-                    frequency: order.recurring.frequency || "Daily",
-                    startedAt: order.recurring.startedAt || getTomorrowDate(),
-                    endAt: order.recurring.endAt || null,
-                  }
-                : null,
-              deliveryOrderAttributes: {
-                plannedAt: order.deliveryOrderAttributes?.plannedAt,
-                completedAt: order.deliveryOrderAttributes?.completedAt,
-                customerBranchId:
-                  order.deliveryOrderAttributes?.customerBranchId,
-                assetId: order.deliveryOrderAttributes?.assetId,
-                driverId: order.deliveryOrderAttributes?.driverId,
-                lineItemsAttributes:
-                  order.deliveryOrderAttributes?.lineItemsAttributes.map(
-                    (item) => ({
-                      name: item.name,
-                      quantity: item.quantity,
-                      units: item.units,
-                    })
-                  ),
-              },
-            },
+            orderGroupInfo: mappedDeliveryOrderAttributes,
           },
           onCompleted: (data) => {
-            setShowModal(false);
-            console.log("Order created:", data);
-            refetch();
-            toast.success("Order Created");
             dispatch(addDelivery(data.createOrder.order));
+            toast.success("Order Created");
+            setShowModal(false);
+            refetch();
+          },
+          onError: (error) => {
+            toast.error("Error creating delivery: " + error.message);
           },
         });
       }
     }
   };
 
-  const handleRowClicked = (params) => {};
+  const handleRowClicked = (params) => {
+    console.log("Row Clicked Data:", params.data);
+    setOrder(params.data);
+    setMode("edit");
+    setShowDeliveryModal(true);
+  };
 
   const onBtnExport = useCallback(() => {
     gridRef.current.api.exportDataAsCsv();
@@ -222,27 +229,37 @@ export default function DeliveryList() {
     () => ({
       sortable: true,
       flex: 1,
-      editable: true,
     }),
     []
   );
 
   const statusCellRenderer = (params) => {
-    const status = params.value === "Active" ? "success" : "danger";
+    let statusColor;
+    switch (params.value) {
+      case "completed":
+        statusColor = "green";
+        break;
+      case "pending":
+        statusColor = "orange";
+        break;
+      case "cancelled":
+        statusColor = "red";
+        break;
+      default:
+        statusColor = "gray";
+    }
     const dotStyle = {
       display: "inline-block",
       width: "10px",
       height: "10px",
       borderRadius: "50%",
       marginRight: "8px",
-      backgroundColor: status === "success" ? "green" : "red",
+      backgroundColor: statusColor,
     };
     return (
       <span>
         <span style={dotStyle}></span>
-        <span className={`badge rounded-pill bg-${status}`}>
-          {params.value}
-        </span>
+        {params.value}
       </span>
     );
   };
@@ -254,8 +271,16 @@ export default function DeliveryList() {
         field: "status",
         cellRenderer: statusCellRenderer,
       },
-      { headerName: "Started At", field: "startedAt" },
-      { headerName: "Completed At", field: "completedAt" },
+      {
+        headerName: "Started At",
+        field: "startedAt",
+        valueGetter: (params) => formatDate(params.data.startedAt),
+      },
+      {
+        headerName: "Created By",
+        field: "user?.name",
+        valueGetter: (params) => params.data.user?.name || "N/A",
+      },
       { headerName: "Customer Name", field: "customer.name" },
       { headerName: "Customer Email", field: "customer.email" },
       {
@@ -277,22 +302,13 @@ export default function DeliveryList() {
     []
   );
 
-  // const filteredRowData = rowData && rowData.filter((item) => {
-  //     return (
-  //       item.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //       item.customer?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //       item.customer?.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //       item.deliveryOrder?.asset?.assetId.toLowerCase().includes(searchQuery.toLowerCase())
-  //     );
-  //   });
-
   const filteredRowData = useMemo(() => {
     if (!rowData) return [];
 
     return rowData.filter((item) => {
-      const createdAt = dayjs(item.createdAt);
+      const createdAt = item.createdAt ? parseISO(item.createdAt) : null;
       const isDateInRange =
-        !selectedDate || createdAt.isSame(selectedDate.startDate, "day");
+        !selectedDate || isSameDay(createdAt, selectedDate.startDate);
 
       const matchesQuery =
         searchQuery === "" ||
@@ -379,7 +395,10 @@ export default function DeliveryList() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <DatePicker selected={selectedDate} onChange={setSelectedDate} />
+          <DatePicker
+            selected={selectedDate ? selectedDate.startDate : new Date()}
+            onChange={setSelectedDate}
+          />
           <button
             style={{
               border: `1px solid ${buttonbg}`,
@@ -440,7 +459,16 @@ export default function DeliveryList() {
         defaultColDef={defaultColDef}
         onGridReady={(params) => setGridRef(params)}
         pagination={true}
-        onRowClicked={handleRowClicked}
+        onRowClicked={(row) => {
+          if (
+            row.event.target.tagName === "BUTTON" ||
+            row.event.target.tagName === "svg"
+          ) {
+            return;
+          } else {
+            handleRowClicked(row);
+          }
+        }}
       />
       {showModal && (
         <DeliveryForm
@@ -451,6 +479,15 @@ export default function DeliveryList() {
           onChange={(e) =>
             setOrder({ ...order, [e.target.name]: e.target.value })
           }
+        />
+      )}
+
+      {showDeliveryModal && (
+        <DeliveryDetails
+          order={order}
+          onChange={(order) => setOrder(order)}
+          onSave={handleSave}
+          onClose={() => setShowDeliveryModal(false)}
         />
       )}
       <Toastify />

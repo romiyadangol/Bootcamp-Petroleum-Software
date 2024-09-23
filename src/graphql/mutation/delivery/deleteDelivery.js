@@ -8,6 +8,7 @@ export const DELETE_DELIVERY = gql`
         status
         startedAt
         completedAt
+        cancelledAt
         customer {
           id
           name
