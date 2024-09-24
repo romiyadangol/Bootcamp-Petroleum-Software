@@ -25,7 +25,7 @@ export default function CategoryForm({
       <InputField
         label="Category Name"
         name="name"
-        value={category.name || " "}
+        value={category.name || ""}
         onChange={onChange}
       />
       {mode == "create" && (
