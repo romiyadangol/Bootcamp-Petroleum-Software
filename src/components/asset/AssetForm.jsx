@@ -26,7 +26,7 @@ export default function AssetForm({ mode, asset, onChange, onSave, onClose }) {
         <InputField
           label="Asset ID"
           name="assetId"
-          value={asset.assetId || " "}
+          value={asset.assetId || ""}
           onChange={onChange}
         />
       )}
