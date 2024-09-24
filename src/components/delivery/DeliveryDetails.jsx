@@ -23,15 +23,9 @@ import {
 } from "@chakra-ui/react";
 import { useCallback } from "react";
 import { toast } from "react-toastify";
+import { GET_ASSETS } from "../../graphql/queries/assets/getAssets";
 
-const DeliveryDetails = ({
-  order,
-  onClose,
-  onSave,
-  onChange,
-  mode,
-  setMode,
-}) => {
+const DeliveryDetails = ({ order, onClose, onSave, onChange }) => {
   const [rowData, setRowData] = useState([]);
   const [editingField, setEditingField] = useState(null);
   const [showDetailsForm, setShowDetailsForm] = useState(false);
@@ -44,10 +38,12 @@ const DeliveryDetails = ({
   const [selectedDriver, setSelectedDriver] = useState(
     order.deliveryOrder?.driver?.name || ""
   );
+  const [selectedAsset, setSelectedAsset] = useState(
+    order.deliveryOrder?.asset?.assetCategory || ""
+  );
   const [status, setStatus] = useState(order.status || "");
 
   const [deliveryOrderAttributes, setDeliveryOrderAttributes] = useState(() => {
-    console.log("Initializing deliveryOrderAttributes:", order.deliveryOrder);
     return {
       plannedAt: order.deliveryOrder?.plannedAt || null,
       driverId: order.deliveryOrder?.driver?.id || "",
@@ -60,7 +56,6 @@ const DeliveryDetails = ({
 
   const updateParent = useCallback(
     (updatedOrder) => {
-      console.log("Updating parent with:", updatedOrder);
       onChange(updatedOrder);
     },
     [onChange]
@@ -80,6 +75,9 @@ const DeliveryDetails = ({
 
   const { data: driverData } = useQuery(GET_DRIVERS);
   const drivers = driverData?.getDrivers.drivers || [];
+
+  const { data: assetData } = useQuery(GET_ASSETS);
+  const assets = assetData?.getAssets.assets || [];
 
   const formatDate = (date) =>
     date ? format(new Date(date), "eee MMM d, HH:mm") : "N/A";
@@ -126,7 +124,6 @@ const DeliveryDetails = ({
         units: item.units || "N/A",
       })
     );
-    console.log("Updated row data:", updatedRowData);
     setRowData(updatedRowData);
   };
 
@@ -148,8 +145,6 @@ const DeliveryDetails = ({
   );
 
   const handleChange = (field, value) => {
-    console.log(`Updating field: ${field} with value:`, value);
-
     let updatedDeliveryOrderAttributes;
     if (field.includes(".")) {
       const [parentField, childField] = field.split(".");
@@ -181,12 +176,12 @@ const DeliveryDetails = ({
     const updatedOrder = {
       ...order,
       status: newStatus,
+      completedAt: newStatus === "completed" ? new Date().toISOString() : null,
+      cancelledAt: newStatus === "cancelled" ? new Date().toISOString() : null,
       deliveryOrder: {
         ...order.deliveryOrder,
         completedAt:
-          newStatus === "completed"
-            ? new Date().toISOString()
-            : order.deliveryOrder?.completedAt,
+          newStatus === "completed" ? new Date().toISOString() : null,
       },
     };
     handleChange("status", newStatus);
@@ -210,6 +205,25 @@ const DeliveryDetails = ({
     );
     if (selectedDriverObj) {
       handleChange("driverId", selectedDriverObj.id);
+    }
+  };
+
+  const saveAsset = (newAsset) => {
+    setEditingField(null);
+    setSelectedAsset(newAsset);
+    const selectedAssetObj = assets.find(
+      (asset) => asset.assetCategory === newAsset
+    );
+    if (selectedAssetObj) {
+      handleChange("assetId", selectedAssetObj.id);
+      const updatedOrder = {
+        ...order,
+        deliveryOrder: {
+          ...order.deliveryOrder,
+          asset: selectedAssetObj,
+        },
+      };
+      updateParent(updatedOrder);
     }
   };
 
@@ -294,6 +308,7 @@ const DeliveryDetails = ({
       id: order.id,
       status: status,
       startedAt: order.startedAt,
+      cancelledAt: order.cancelledAt,
       customerId: order.customer?.id || "defaultCustomerId",
       recurring: order.recurring,
       deliveryOrderAttributes: {
@@ -324,7 +339,7 @@ const DeliveryDetails = ({
             <Text fontSize="xl">Delivery Order</Text>
           </HStack>
 
-          <HStack spacing={4} maxWidth="70%">
+          <HStack spacing={4} w="max-content">
             <SelectField
               label="Status"
               value={status}
@@ -332,10 +347,22 @@ const DeliveryDetails = ({
               onChange={handleStatusChange}
               options={["pending", "completed", "cancelled"]}
             />
-            <Text color="cyan.300" w={700}>
+            <Text
+              color="cyan.300"
+              w="max-content"
+              whiteSpace="nowrap"
+              fontSize={25}
+              marginTop={5}
+            >
               {order.customer?.name}
             </Text>
-            <Text color="cyan.300" w={700}>
+            <Text
+              color="cyan.300"
+              w="max-content"
+              whiteSpace="nowrap"
+              fontSize={25}
+              marginTop={5}
+            >
               {order.deliveryOrder?.customerBranch?.name}
             </Text>
           </HStack>
@@ -389,10 +416,22 @@ const DeliveryDetails = ({
                   label="STARTED AT"
                   value={formatDate(order.startedAt)}
                 />
-                <InfoItem
-                  label="COMPLETED AT"
-                  value={formatDate(order.deliveryOrder?.completedAt) || "N/A"}
-                />
+                {status !== "cancelled" && (
+                  <InfoItem
+                    label="COMPLETED AT"
+                    value={
+                      formatDate(order.deliveryOrder?.completedAt) || "N/A"
+                    }
+                  />
+                )}
+                {status === "cancelled" ? (
+                  <InfoItem
+                    label="CANCELLED AT"
+                    value={formatDate(order.cancelledAt) || "N/A"}
+                  />
+                ) : (
+                  "N/A"
+                )}
                 {editingField === "driver" ? (
                   <SelectField
                     label="Driver"
@@ -420,10 +459,26 @@ const DeliveryDetails = ({
                   label="ASSET ID"
                   value={order.deliveryOrder?.asset?.assetId || "N/A"}
                 />
-                <InfoItem
-                  label="ASSET CATEGORY"
-                  value={order.deliveryOrder?.asset?.assetCategory || "N/A"}
-                />
+                {editingField === "asset" ? (
+                  <SelectField
+                    label="Asset Category"
+                    name="asset"
+                    value={selectedAsset}
+                    onChange={(e) => saveAsset(e.target.value)}
+                    options={
+                      assets?.length > 0
+                        ? assets.map((a) => a.assetCategory)
+                        : []
+                    }
+                  />
+                ) : (
+                  <InfoItem
+                    label="ASSET CATEGORY"
+                    value={selectedAsset || "N/A"}
+                    editable
+                    onEdit={() => setEditingField("asset")}
+                  />
+                )}
               </VStack>
             </GridItem>
           </Grid>
