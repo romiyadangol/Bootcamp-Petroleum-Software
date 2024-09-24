@@ -141,11 +141,15 @@ export default function DeliveryList() {
       const completedAt = order.completedAt
         ? format(parseISO(order.completedAt), "yyyy-MM-dd'T'HH:mm:ss")
         : null;
+      const cancelledAt = order.cancelledAt
+        ? format(parseISO(order.cancelledAt), "yyyy-MM-dd'T'HH:mm:ss")
+        : null;
 
       const mappedDeliveryOrderAttributes = {
         status: order.status,
         startedAt: startedAt,
         completedAt: completedAt,
+        cancelledAt: cancelledAt,
         customerId: order.customerId,
         recurring: order.recurring
           ? {
@@ -226,7 +230,9 @@ export default function DeliveryList() {
       status: order.status,
       startedAt: order.startedAt,
       completedAt: order.completedAt ?? "N/A",
-      customerId: order.customer?.id,
+      cancelledAt: order.cancelledAt ?? "N/A",
+      // customerId: order.customer?.id,
+      customerName: order.customer?.name,
       recurring: order.recurring
         ? JSON.stringify({
             frequency: order.recurring.frequency || "Daily",
@@ -237,9 +243,12 @@ export default function DeliveryList() {
       deliveryOrderAttributes: JSON.stringify({
         plannedAt: order.deliveryOrder?.plannedAt,
         completedAt: order.deliveryOrder?.completedAt,
-        customerBranchId: order.deliveryOrder?.customerBranch?.id,
-        assetId: order.deliveryOrder?.asset?.id,
-        driverId: order.deliveryOrder?.driver?.id,
+        // customerBranchId: order.deliveryOrder?.customerBranch?.id,
+        customerBranchName: order.deliveryOrder?.customerBranch?.name,
+        // assetId: order.deliveryOrder?.asset?.id,
+        assetCategory: order.deliveryOrder?.asset?.assetCategory,
+        // driverId: order.deliveryOrder?.driver?.id,
+        driverName: order.deliveryOrder?.driver?.name,
       }),
       lineItemsAttributes: JSON.stringify(
         order.deliveryOrder?.lineItems?.map((item) => ({
@@ -253,7 +262,7 @@ export default function DeliveryList() {
 
     const csvContent = [
       // CSV Header
-      "status,started_at,completedAt,customer_id,recurring,delivery_order_attributes,line_items_attributes",
+      "status,started_at,completedAt,cancelledAt,customer_name,recurring,delivery_order_attributes,line_items_attributes",
       // CSV Rows
       ...dataToExport.map((row) =>
         Object.values(row)
@@ -304,18 +313,32 @@ export default function DeliveryList() {
         statusColor = "gray";
     }
     return (
-      <span
+      <div
         style={{
-          padding: "4px 8px",
           borderRadius: "12px",
           color: "white",
           backgroundColor: statusColor,
           fontWeight: "bold",
           textAlign: "center",
+          width: "60%",
+          padding: "15px",
+          height: "25px",
+          marginTop: "5px",
+          position: "relative",
         }}
       >
-        {params.value}
-      </span>
+        <span
+          style={{
+            display: "block",
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          {params.value}
+        </span>
+      </div>
     );
   };
 
@@ -515,6 +538,7 @@ export default function DeliveryList() {
         rowData={filteredRowData}
         columnDefs={colDefs}
         defaultColDef={defaultColDef}
+        gridRef={gridRef}
         onGridReady={(params) => setGridRef(params)}
         pagination={true}
         onRowClicked={(row) => {
