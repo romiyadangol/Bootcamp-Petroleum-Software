@@ -222,8 +222,63 @@ export default function DeliveryList() {
   };
 
   const onBtnExport = useCallback(() => {
-    gridRef.current.api.exportDataAsCsv();
-  }, []);
+    const dataToExport = rowData.map((order) => ({
+      status: order.status,
+      startedAt: order.startedAt,
+      completedAt: order.completedAt ?? "N/A",
+      customerId: order.customer?.id,
+      recurring: order.recurring
+        ? JSON.stringify({
+            frequency: order.recurring.frequency || "Daily",
+            startedAt: order.recurring.startedAt || getTomorrowDate(),
+            endAt: order.recurring.endAt || "N/A",
+          })
+        : "null",
+      deliveryOrderAttributes: JSON.stringify({
+        plannedAt: order.deliveryOrder?.plannedAt,
+        completedAt: order.deliveryOrder?.completedAt,
+        customerBranchId: order.deliveryOrder?.customerBranch?.id,
+        assetId: order.deliveryOrder?.asset?.id,
+        driverId: order.deliveryOrder?.driver?.id,
+      }),
+      lineItemsAttributes: JSON.stringify(
+        order.deliveryOrder?.lineItems?.map((item) => ({
+          name: item.name,
+          quantity: item.quantity,
+          units: item.units,
+        })) || []
+      ),
+    }));
+    console.log("Data to export:", dataToExport);
+
+    const csvContent = [
+      // CSV Header
+      "status,started_at,completedAt,customer_id,recurring,delivery_order_attributes,line_items_attributes",
+      // CSV Rows
+      ...dataToExport.map((row) =>
+        Object.values(row)
+          .map((value) =>
+            typeof value === "string" ? `"${value.replace(/"/g, '""')}"` : value
+          )
+          .join(",")
+      ),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute(
+        "download",
+        `delivery_list_${format(new Date(), "yyyy-MM-dd")}.csv`
+      );
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }, [rowData]);
 
   const defaultColDef = useMemo(
     () => ({
@@ -248,17 +303,17 @@ export default function DeliveryList() {
       default:
         statusColor = "gray";
     }
-    const dotStyle = {
-      display: "inline-block",
-      width: "10px",
-      height: "10px",
-      borderRadius: "50%",
-      marginRight: "8px",
-      backgroundColor: statusColor,
-    };
     return (
-      <span>
-        <span style={dotStyle}></span>
+      <span
+        style={{
+          padding: "4px 8px",
+          borderRadius: "12px",
+          color: "white",
+          backgroundColor: statusColor,
+          fontWeight: "bold",
+          textAlign: "center",
+        }}
+      >
         {params.value}
       </span>
     );
@@ -398,6 +453,7 @@ export default function DeliveryList() {
           <DatePicker
             selected={selectedDate ? selectedDate.startDate : new Date()}
             onChange={setSelectedDate}
+            refetch={refetch}
           />
           <button
             style={{
@@ -426,6 +482,7 @@ export default function DeliveryList() {
               color: "white",
               marginRight: "10px",
               cursor: "pointer",
+              whiteSpace: "nowrap",
             }}
           >
             Import from CSV
@@ -446,6 +503,7 @@ export default function DeliveryList() {
               fontWeight: "bold",
               fontSize: 16,
               background: "blue",
+              whiteSpace: "nowrap",
             }}
             onClick={onBtnExport}
           >
