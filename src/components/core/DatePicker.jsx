@@ -1,30 +1,42 @@
-import { useState } from 'react';
-import { Box, Flex, IconButton, Text, useColorModeValue } from "@chakra-ui/react";
-import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import { useState } from "react";
+import {
+  Box,
+  Flex,
+  IconButton,
+  Text,
+  useColorModeValue,
+} from "@chakra-ui/react";
+import {
+  faChevronLeft,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { format, addDays, subDays } from "date-fns";
 
-export default function DatePicker({ selected, onChange }) {
+export default function DatePicker({ selected, onChange, refetch }) {
   const [dateRange, setDateRange] = useState({
     startDate: selected?.startDate || new Date(),
   });
 
-  const handlePrevious = () => {
-    const newStartDate = subDays(dateRange.startDate, 1);
-    const newRange = { startDate: newStartDate };
+  const handleDateChange = (newDate) => {
+    const newRange = { startDate: newDate };
     setDateRange(newRange);
     onChange(newRange);
+    refetch();
+  };
+
+  const handlePrevious = () => {
+    const newStartDate = subDays(dateRange.startDate, 1);
+    handleDateChange(newStartDate);
   };
 
   const handleNext = () => {
     const newStartDate = addDays(dateRange.startDate, 1);
-    const newRange = { startDate: newStartDate };
-    setDateRange(newRange);
-    onChange(newRange);
+    handleDateChange(newStartDate);
   };
 
-  const datePickerBg = useColorModeValue('#EDF2F7', '#121212');
-  const textColor = useColorModeValue('gray.800', 'gray.200');
+  const datePickerBg = useColorModeValue("#EDF2F7", "#121212");
+  const textColor = useColorModeValue("gray.800", "gray.200");
 
   return (
     <Box
@@ -47,9 +59,7 @@ export default function DatePicker({ selected, onChange }) {
           variant="ghost"
           color="gray.500"
         />
-        <Text>
-          {format(dateRange.startDate, 'MMM dd, yyyy')}
-        </Text>
+        <Text>{format(dateRange.startDate, "MMM dd, yyyy")}</Text>
         <IconButton
           aria-label="Next"
           icon={<FontAwesomeIcon icon={faChevronRight} />}
