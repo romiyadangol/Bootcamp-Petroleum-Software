@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import Login from "./components/Login";
 import Nav from "./components/Nav";
@@ -12,13 +11,17 @@ import CustomerBranchList from "./components/customerBranch/CustomerBranchList";
 import Logout from "./components/Logout";
 import Dashboard from "./components/Dashboard";
 import CategoryList from "./components/category/CategoryList";
+import PrivateRoute from "./components/privateRoute/PrivateRoute";
+// import PrivateRoute from "./components/privateRoute/PrivateRoute";
 
 function App() {
   const MainLayout = () => {
     return (
       <div>
+        {/* <PrivateRoute> */}
         <Nav />
         <Outlet />
+        {/* </PrivateRoute> */}
       </div>
     );
   };
@@ -33,7 +36,11 @@ function App() {
     },
     {
       path: "/dashboard",
-      element: <MainLayout />,
+      element: (
+        <PrivateRoute>
+          <MainLayout />
+        </PrivateRoute>
+      ),
       children: [
         {
           index: true,

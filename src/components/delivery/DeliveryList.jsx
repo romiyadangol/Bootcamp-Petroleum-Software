@@ -31,6 +31,7 @@ import { SelectField } from "../core/FormFields";
 import { convertFileToBase64 } from "../../helper/utils";
 import DeliveryDetails from "../delivery/DeliveryDetails";
 import { format, isSameDay, parseISO } from "date-fns";
+import statusRender from "../core/StatusRender";
 
 export default function DeliveryList() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -297,57 +298,12 @@ export default function DeliveryList() {
     []
   );
 
-  const statusCellRenderer = (params) => {
-    let statusColor;
-    switch (params.value) {
-      case "completed":
-        statusColor = "green";
-        break;
-      case "pending":
-        statusColor = "orange";
-        break;
-      case "cancelled":
-        statusColor = "red";
-        break;
-      default:
-        statusColor = "gray";
-    }
-    return (
-      <div
-        style={{
-          borderRadius: "12px",
-          color: "white",
-          backgroundColor: statusColor,
-          fontWeight: "bold",
-          textAlign: "center",
-          width: "60%",
-          padding: "15px",
-          height: "25px",
-          marginTop: "5px",
-          position: "relative",
-        }}
-      >
-        <span
-          style={{
-            display: "block",
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-          }}
-        >
-          {params.value}
-        </span>
-      </div>
-    );
-  };
-
   const [colDefs, setColDefs] = useState(
     [
       {
         headerName: "Status",
         field: "status",
-        cellRenderer: statusCellRenderer,
+        cellRenderer: statusRender,
       },
       {
         headerName: "Started At",
@@ -391,11 +347,18 @@ export default function DeliveryList() {
       const matchesQuery =
         searchQuery === "" ||
         item.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        formatDate(item.startedAt)
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        item.user?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.customer?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.customer?.email
           .toLowerCase()
           .includes(searchQuery.toLowerCase()) ||
-        item.deliveryOrder?.asset?.assetId
+        item.deliveryOrder?.asset?.assetCategory
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        item.deliveryOrder?.driver?.name
           .toLowerCase()
           .includes(searchQuery.toLowerCase());
 
