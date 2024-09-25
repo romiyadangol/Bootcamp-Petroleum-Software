@@ -120,6 +120,7 @@ export default function CustomerBranchList() {
       });
     }
   };
+  console.log(rowData);
 
   const defaultColDef = useMemo(
     () => ({

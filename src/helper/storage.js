@@ -13,12 +13,7 @@ export const storeToken = (token, roles) => {
 
 export const getToken = () => {
   try {
-    const role = ls.get("userRole");
-    if (role === "admin") {
-      return ls.get("authToken");
-    } else {
-      return null;
-    }
+    return ls.get("authToken") ?? null;
   } catch (e) {
     console.error("Error retrieving token:", e);
   }

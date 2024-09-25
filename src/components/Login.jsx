@@ -55,9 +55,7 @@ const Login = () => {
           };
           ls.set("loggedInUser", secureUser);
 
-          if (user.roles.includes("admin")) {
-            storeToken(token, user.roles);
-          }
+          storeToken(token, user.roles);
 
           dispatch(loginUserSuccess(user));
           setEmail("");
