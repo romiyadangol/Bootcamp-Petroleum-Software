@@ -36,7 +36,7 @@ const Login = () => {
   const navigate = useNavigate();
   const ls = new SecureLS({ encodingType: "aes" });
 
-  const [login, { data, error, loading }] = useMutation(LOGIN_USER, {
+  const [login, { error, loading }] = useMutation(LOGIN_USER, {
     onCompleted: (data) => {
       const { user, token, errors } = data.userSession || {};
 
@@ -61,7 +61,8 @@ const Login = () => {
           setEmail("");
           setPassword("");
           navigate("/dashboard");
-        } catch (e) {
+        } catch (error) {
+          console.error("Error storing token:", error);
           dispatch(loginUserFailure("Failed to store token."));
         }
       } else {
