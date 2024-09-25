@@ -58,7 +58,7 @@ export default function DeliveryForm({
   const [selectedAsset, setSelectedAsset] = useState(null);
   const [plannedAt, setPlannedAt] = useState(() => {
     const now = new Date().toISOString();
-    return convertToDatetimeLocal(selectedDate.startDate);
+    return convertToDatetimeLocal(now);
   });
 
   const { data: customersData } = useQuery(GET_CUSTOMERS);
@@ -604,7 +604,7 @@ export default function DeliveryForm({
                                 value={
                                   order.endAt
                                     ? convertToDatetimeLocal(order.endAt)
-                                    : defaultStartDate
+                                    : ""
                                 }
                                 onChange={onChange}
                               />

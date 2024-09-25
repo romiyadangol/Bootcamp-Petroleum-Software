@@ -144,22 +144,28 @@ export default function DeliveryList() {
     date ? format(parseISO(date), "eee MMM d, HH:mm") : "N/A";
 
   // Inside DeliveryList.jsx
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString();
+  };
 
   const handleSave = (order) => {
     if (order) {
-      const startedAt = order.startedAt
-        ? format(parseISO(order.startedAt), "yyyy-MM-dd'T'HH:mm:ss")
-        : null;
+      // const startedAt = order.startedAt
+      //   ? format(parseISO(order.startedAt), "yyyy-MM-dd'T'HH:mm:ss")
+      //   : getTodayDate();
       const completedAt = order.completedAt
         ? format(parseISO(order.completedAt), "yyyy-MM-dd'T'HH:mm:ss")
         : null;
       const cancelledAt = order.cancelledAt
         ? format(parseISO(order.cancelledAt), "yyyy-MM-dd'T'HH:mm:ss")
-        : null;
+        : getTodayDate();
+
+      console.log(order, "order>>>>>>>>>");
 
       const mappedDeliveryOrderAttributes = {
         status: order.status,
-        startedAt: startedAt,
+        startedAt: order.startedAt,
         completedAt: completedAt,
         cancelledAt: cancelledAt,
         customerId: order.customerId,
@@ -189,7 +195,7 @@ export default function DeliveryList() {
         mappedDeliveryOrderAttributes
       );
 
-      if (order.id) {
+      if (mode === "edit") {
         updateDeliveryMutation({
           variables: {
             orderId: order.id,
