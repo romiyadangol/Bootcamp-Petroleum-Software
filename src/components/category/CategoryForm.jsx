@@ -14,7 +14,7 @@ export default function CategoryForm({
     if (mode === "create") {
       onChange({ target: { name: "categoryClass", value: categoryClass } });
     }
-  }, [mode, categoryClass]);
+  }, [mode, categoryClass, onChange]);
   return (
     <ModalWrapper
       isOpen={true}

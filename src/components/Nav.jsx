@@ -118,7 +118,7 @@ export default function Nav() {
           </Box>
 
           <Button onClick={toggleColorMode} color="orange.400">
-            {colorMode === "dark" ? <SunIcon /> : <MoonIcon />}
+            {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
           </Button>
 
           <IconButton
