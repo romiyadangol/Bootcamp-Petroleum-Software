@@ -75,15 +75,22 @@ export default function ProductList() {
   };
 
   const handleSave = () => {
+    const trimmedProduct = {
+      ...product,
+      name: product.name.trim(),
+      productCategory: product.productCategory.trim(),
+      productStatus: product.productStatus.trim(),
+      productUnit: product.productUnit.trim(),
+    };
     if (mode === "edit") {
       updateProductMutation({
         variables: {
-          id: product.id,
+          id: trimmedProduct.id,
           productInfo: {
-            name: product.name,
-            productCategory: product.productCategory,
-            productStatus: product.productStatus,
-            productUnit: product.productUnit,
+            name: trimmedProduct.name,
+            productCategory: trimmedProduct.productCategory,
+            productStatus: trimmedProduct.productStatus,
+            productUnit: trimmedProduct.productUnit,
           },
         },
         onCompleted: (data) => {
@@ -97,10 +104,10 @@ export default function ProductList() {
       createProductMutation({
         variables: {
           productInfo: {
-            name: product.name,
-            productCategory: product.productCategory,
-            productStatus: product.productStatus,
-            productUnit: product.productUnit,
+            name: trimmedProduct.name,
+            productCategory: trimmedProduct.productCategory,
+            productStatus: trimmedProduct.productStatus,
+            productUnit: trimmedProduct.productUnit,
           },
         },
         onCompleted: (data) => {

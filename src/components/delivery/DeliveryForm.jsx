@@ -604,7 +604,7 @@ export default function DeliveryForm({
                                 value={
                                   order.endAt
                                     ? convertToDatetimeLocal(order.endAt)
-                                    : ""
+                                    : defaultStartDate
                                 }
                                 onChange={onChange}
                               />

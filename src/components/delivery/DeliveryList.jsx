@@ -92,6 +92,17 @@ export default function DeliveryList() {
   const deleteDeliveryMutation = useDeleteDeliveryMutation(refetch);
   const updateDeliveryMutation = useUpdateDeliveryMutation(refetch);
 
+  const handleCreateNewOrder = () => {
+    setOrder({
+      id: "",
+      assetId: "",
+      assetCategory: "",
+      assetStatus: "",
+    });
+    setMode("create");
+    setShowModal(true);
+  };
+
   const handleEdit = (order) => {
     setOrder(order);
     setMode("edit");
@@ -178,7 +189,7 @@ export default function DeliveryList() {
         mappedDeliveryOrderAttributes
       );
 
-      if (mode === "edit") {
+      if (order.id) {
         updateDeliveryMutation({
           variables: {
             orderId: order.id,
@@ -458,7 +469,7 @@ export default function DeliveryList() {
               marginRight: 10,
               whiteSpace: "nowrap",
             }}
-            onClick={() => setShowModal(true)}
+            onClick={handleCreateNewOrder}
           >
             <FontAwesomeIcon icon={faCirclePlus} color="orange" />
             &nbsp; Create New Delivery Order

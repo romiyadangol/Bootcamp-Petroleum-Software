@@ -73,14 +73,20 @@ export default function AssetLists() {
   };
 
   const handleSave = () => {
+    const trimmedAsset = {
+      ...asset,
+      assetId: asset.assetId.trim(),
+      assetCategory: asset.assetCategory.trim(),
+      assetStatus: asset.assetStatus.trim(),
+    };
     if (mode === "edit") {
       updateAssetMutation({
         variables: {
-          id: asset.id,
+          id: trimmedAsset.id,
           assetInfo: {
-            assetId: asset.assetId,
-            assetCategory: asset.assetCategory,
-            assetStatus: asset.assetStatus,
+            assetId: trimmedAsset.assetId,
+            assetCategory: trimmedAsset.assetCategory,
+            assetStatus: trimmedAsset.assetStatus,
           },
         },
         onCompleted: (data) => {
@@ -94,9 +100,9 @@ export default function AssetLists() {
       createAssetMutation({
         variables: {
           assetInfo: {
-            assetId: asset.assetId,
-            assetCategory: asset.assetCategory,
-            assetStatus: asset.assetStatus,
+            assetId: trimmedAsset.assetId,
+            assetCategory: trimmedAsset.assetCategory,
+            assetStatus: trimmedAsset.assetStatus,
           },
         },
         onCompleted: (data) => {
@@ -214,7 +220,6 @@ export default function AssetLists() {
             display: "flex",
             alignItems: "center",
             marginBottom: 15,
-            marginTop: 12,
             justifyContent: "space-between",
           }}
         >
