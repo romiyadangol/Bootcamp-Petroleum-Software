@@ -227,7 +227,12 @@ export default function DeliveryList() {
   };
 
   const onBtnExport = useCallback(() => {
-    const dataToExport = rowData.map((order) => ({
+    const filteredData = rowData.filter((order) => {
+      const startedAt = order.startedAt ? parseISO(order.startedAt) : null;
+      return selectedDate ? isSameDay(startedAt, selectedDate.startDate) : true;
+    });
+
+    const dataToExport = filteredData.map((order) => ({
       status: order.status,
       startedAt: order.startedAt,
       completedAt: order.completedAt ?? "N/A",
@@ -288,7 +293,7 @@ export default function DeliveryList() {
       link.click();
       document.body.removeChild(link);
     }
-  }, [rowData]);
+  }, [rowData, selectedDate]);
 
   const defaultColDef = useMemo(
     () => ({
@@ -340,9 +345,9 @@ export default function DeliveryList() {
     if (!rowData) return [];
 
     return rowData.filter((item) => {
-      const createdAt = item.createdAt ? parseISO(item.createdAt) : null;
+      const startedAt = item.startedAt ? parseISO(item.startedAt) : null;
       const isDateInRange =
-        !selectedDate || isSameDay(createdAt, selectedDate.startDate);
+        !selectedDate || isSameDay(startedAt, selectedDate.startDate);
 
       const matchesQuery =
         searchQuery === "" ||
@@ -519,6 +524,7 @@ export default function DeliveryList() {
         <DeliveryForm
           order={order}
           mode={mode}
+          selectedDate={selectedDate}
           onSave={handleSave}
           onClose={() => setShowModal(false)}
           onChange={(e) =>

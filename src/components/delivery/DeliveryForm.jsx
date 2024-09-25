@@ -39,7 +39,13 @@ const convertToDatetimeLocal = (isoString) => {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
-export default function DeliveryForm({ order, onChange, onSave, onClose }) {
+export default function DeliveryForm({
+  selectedDate,
+  order,
+  onChange,
+  onSave,
+  onClose,
+}) {
   const [step, setStep] = useState(1);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [selectedBranch, setSelectedBranch] = useState(null);
@@ -52,7 +58,7 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
   const [selectedAsset, setSelectedAsset] = useState(null);
   const [plannedAt, setPlannedAt] = useState(() => {
     const now = new Date().toISOString();
-    return convertToDatetimeLocal(now);
+    return convertToDatetimeLocal(selectedDate.startDate);
   });
 
   const { data: customersData } = useQuery(GET_CUSTOMERS);
@@ -149,7 +155,7 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
       const updatedOrder = {
         orderGroupInfo: {
           status: "pending",
-          startedAt: new Date().toISOString(),
+          startedAt: convertToISO8601(plannedAt),
           completedAt: null,
           customerId: selectedCustomer?.id || null,
           recurring: recurring
@@ -199,7 +205,7 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
         date ? new Date(date).toISOString() : null;
       const updatedOrder = {
         status: "pending",
-        startedAt: new Date().toISOString(),
+        startedAt: convertToISO8601(plannedAt),
         completedAt: null,
         customerId: selectedCustomer?.id || null,
         recurring: recurring
@@ -251,7 +257,7 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
     const updatedOrder = {
       orderGroupInfo: {
         status: "pending",
-        startedAt: new Date().toISOString(),
+        startedAt: convertToISO8601(plannedAt),
         customerId: customer.id || null,
         deliveryOrderAttributes: {
           name: selectedBranch?.name || "",
@@ -278,7 +284,7 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
     const updatedOrder = {
       orderGroupInfo: {
         status: "pending",
-        startedAt: new Date().toISOString(),
+        startedAt: convertToISO8601(plannedAt),
         customerId: selectedCustomer?.id || null,
         deliveryOrderAttributes: {
           name: branch.name,
@@ -305,7 +311,7 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
     const updatedOrder = {
       orderGroupInfo: {
         status: "pending",
-        startedAt: new Date().toISOString(),
+        startedAt: convertToISO8601(plannedAt),
         customerId: selectedCustomer?.id || null,
         deliveryOrderAttributes: {
           name: selectedBranch?.name || "",
@@ -332,7 +338,7 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
     const updatedOrder = {
       orderGroupInfo: {
         status: "pending",
-        startedAt: new Date().toISOString(),
+        startedAt: convertToISO8601(plannedAt),
         customerId: selectedCustomer?.id || null,
         deliveryOrderAttributes: {
           name: selectedBranch?.name || "",

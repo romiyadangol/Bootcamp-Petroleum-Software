@@ -18,13 +18,13 @@ export default function CustomerBranchForm({
       <InputField
         label="Name"
         name="name"
-        value={customerBranch.name || ""}
+        value={customerBranch.name ?? ""}
         onChange={onChange}
       />
       <InputField
         label="Location"
         name="location"
-        value={customerBranch.location || ""}
+        value={customerBranch.location ?? ""}
         onChange={onChange}
       />
     </ModalWrapper>

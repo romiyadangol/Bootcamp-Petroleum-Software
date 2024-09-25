@@ -214,6 +214,7 @@ export default function AssetLists() {
             display: "flex",
             alignItems: "center",
             marginBottom: 15,
+            marginTop: 12,
             justifyContent: "space-between",
           }}
         >
