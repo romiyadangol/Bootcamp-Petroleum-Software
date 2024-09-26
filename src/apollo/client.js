@@ -3,7 +3,7 @@ import { setContext } from "@apollo/client/link/context";
 import { getToken } from "../helper/storage.js";
 
 const httpLink = createHttpLink({
-  uri: "https://ff03-110-44-126-21.ngrok-free.app/graphql",
+  uri: "https://2e2e-113-199-229-40.ngrok-free.app/graphql",
 });
 
 const authLink = setContext((_, { headers }) => {
