@@ -1,4 +1,4 @@
-import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Login from "./components/Login";
 import Nav from "./components/Nav";
 import "./App.css";
@@ -14,15 +14,24 @@ import CategoryList from "./components/categories/CategoryList";
 import PrivateRoute from "./components/privateRoute/PrivateRoute";
 import { ROUTES } from "./constants/routes";
 
+function MainLayout({ children }) {
+  return (
+    <div>
+      <Nav />
+      {children}
+    </div>
+  );
+}
+
+function ProtectedLayout({ children }) {
+  return (
+    <PrivateRoute>
+      <MainLayout>{children}</MainLayout>
+    </PrivateRoute>
+  );
+}
+
 function App() {
-  const MainLayout = () => {
-    return (
-      <div>
-        <Nav />
-        <Outlet />
-      </div>
-    );
-  };
   const router = createBrowserRouter([
     {
       path: ROUTES.LOGIN,
@@ -35,44 +44,66 @@ function App() {
     {
       path: ROUTES.DASHBOARD,
       element: (
-        <PrivateRoute>
-          <MainLayout />
-        </PrivateRoute>
+        <ProtectedLayout>
+          <Dashboard />
+        </ProtectedLayout>
       ),
-      children: [
-        {
-          index: true,
-          element: <Dashboard />,
-        },
-        {
-          path: ROUTES.PRODUCTS,
-          element: <ProductList />,
-        },
-        {
-          path: ROUTES.DRIVERS,
-          element: <DriverLists />,
-        },
-        {
-          path: ROUTES.ASSETS,
-          element: <AssetLists />,
-        },
-        {
-          path: ROUTES.CUSTOMERS,
-          element: <CustomerLists />,
-        },
-        {
-          path: ROUTES.CUSTOMERS_BRANCH,
-          element: <CustomerBranchList />,
-        },
-        {
-          path: ROUTES.DELIVERIES,
-          element: <DeliveryList />,
-        },
-        {
-          path: ROUTES.CATEGORIES,
-          element: <CategoryList />,
-        },
-      ],
+    },
+    {
+      path: ROUTES.PRODUCTS,
+      element: (
+        <ProtectedLayout>
+          <ProductList />
+        </ProtectedLayout>
+      ),
+    },
+    {
+      path: ROUTES.DRIVERS,
+      element: (
+        <ProtectedLayout>
+          <DriverLists />
+        </ProtectedLayout>
+      ),
+    },
+    {
+      path: ROUTES.ASSETS,
+      element: (
+        <ProtectedLayout>
+          <AssetLists />
+        </ProtectedLayout>
+      ),
+    },
+    {
+      path: ROUTES.CUSTOMERS,
+      element: (
+        <ProtectedLayout>
+          <CustomerLists />
+        </ProtectedLayout>
+      ),
+    },
+    {
+      path: ROUTES.CUSTOMERS_BRANCH,
+      element: (
+        <ProtectedLayout>
+          <CustomerBranchList />
+        </ProtectedLayout>
+      ),
+    },
+    {
+      path: ROUTES.DELIVERIES,
+      element: (
+        <ProtectedLayout>
+          <DeliveryList />
+        </ProtectedLayout>
+      ),
+    },
+    {
+      path: ROUTES.CATEGORIES,
+      element: (
+        <ProtectedLayout>
+          <CategoryList />
+        </ProtectedLayout>
+      ),
     },
   ]);
 
