@@ -541,7 +541,6 @@ export default function DeliveryList() {
         <DeliveryForm
           order={order}
           mode={mode}
-          selectedDate={selectedDate}
           onSave={handleSave}
           onClose={() => setShowModal(false)}
           onChange={(e) =>

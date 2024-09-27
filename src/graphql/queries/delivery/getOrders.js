@@ -10,6 +10,11 @@ export const GET_ORDERS = gql`
         completedAt
         cancelledAt
         parentOrderId
+        recurring {
+          frequency
+          startedAt
+          endAt
+        }
         customer {
           id
           name

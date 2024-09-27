@@ -346,6 +346,7 @@ const DeliveryDetails = ({ order, onClose, onSave, onChange }) => {
               name="status"
               onChange={handleStatusChange}
               options={["pending", "completed", "cancelled"]}
+              isDisabled={order.recurring === null ? false : true}
             />
             <Text
               color="cyan.300"

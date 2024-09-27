@@ -4,13 +4,12 @@ import { logoutUserSuccess } from "../redux/actions/authActions";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@apollo/client";
 import { LOGOUT_USER } from "../graphql/mutation/logout";
-// import SecureLS from "secure-ls";
 import { removeToken } from "../helper/storage";
+import { Box, Spinner, Text } from "@chakra-ui/react";
 
 const Logout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  //   const ls = new SecureLS({ encodingType: "aes" });
 
   const [logout, { error, loading }] = useMutation(LOGOUT_USER, {
     onCompleted: () => {
@@ -32,7 +31,27 @@ const Logout = () => {
     logout();
   }, [logout]);
 
-  if (loading) return <p>Logging out...</p>;
+  if (loading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+      >
+        <Spinner
+          thickness="4px"
+          speed="0.65s"
+          emptyColor="gray.200"
+          color="blue.500"
+          size="xl"
+        />
+        <Text mt={4} fontSize="lg" color="blue.500">
+          Logging Out, please wait...
+        </Text>
+      </Box>
+    );
+  }
   if (error) return <p>Error logging out: {error.message}</p>;
 
   return null;

@@ -39,13 +39,7 @@ const convertToDatetimeLocal = (isoString) => {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
-export default function DeliveryForm({
-  selectedDate,
-  order,
-  onChange,
-  onSave,
-  onClose,
-}) {
+export default function DeliveryForm({ order, onChange, onSave, onClose }) {
   const [step, setStep] = useState(1);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [selectedBranch, setSelectedBranch] = useState(null);
