@@ -1,9 +1,10 @@
 import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 import { getToken } from "../helper/storage.js";
+import { ROUTES } from "../constants/routes.js";
 
 const httpLink = createHttpLink({
-  uri: "https://a660-110-44-126-21.ngrok-free.app/graphql",
+  uri: ROUTES.GRAPHQL_URL,
 });
 
 const authLink = setContext((_, { headers }) => {

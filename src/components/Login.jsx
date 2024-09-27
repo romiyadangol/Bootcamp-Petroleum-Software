@@ -26,6 +26,7 @@ import {
   InputRightElement,
 } from "@chakra-ui/react";
 import { storeToken } from "../helper/storage";
+import { ROUTES } from "../constants/routes";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -93,7 +94,7 @@ const Login = () => {
 
   useEffect(() => {
     if (auth.user) {
-      navigate("/dashboard");
+      navigate(ROUTES.DASHBOARD);
     }
   }, [auth.user, navigate]);
 

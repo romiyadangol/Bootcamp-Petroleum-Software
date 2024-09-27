@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCirclePlus } from "@fortawesome/free-solid-svg-icons";
 
 import Toastify from "../Toastify";
-import AssetForm from "../asset/AssetForm";
+import AssetForm from "../assets/AssetForm";
 import AgGridTable from "../core/AgGridTable";
 import ActionButtons from "../core/ActionButtons";
 import { GET_ASSETS } from "../../graphql/queries/assets/getAssets";

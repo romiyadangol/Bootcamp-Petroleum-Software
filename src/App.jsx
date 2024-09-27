@@ -4,14 +4,15 @@ import Nav from "./components/Nav";
 import "./App.css";
 import ProductList from "./components/products/ProductList";
 import DriverLists from "./components/drivers/DriverLists";
-import AssetLists from "./components/asset/AssetLists";
-import DeliveryList from "./components/delivery/DeliveryList";
+import AssetLists from "./components/assets/AssetLists";
+import DeliveryList from "./components/deliveries/DeliveryList";
 import CustomerLists from "./components/customers/CustomerLists";
-import CustomerBranchList from "./components/customerBranch/CustomerBranchList";
+import CustomerBranchList from "./components/customersBranch/CustomerBranchList";
 import Logout from "./components/Logout";
 import Dashboard from "./components/Dashboard";
-import CategoryList from "./components/category/CategoryList";
+import CategoryList from "./components/categories/CategoryList";
 import PrivateRoute from "./components/privateRoute/PrivateRoute";
+import { ROUTES } from "./constants/routes";
 
 function App() {
   const MainLayout = () => {
@@ -24,15 +25,15 @@ function App() {
   };
   const router = createBrowserRouter([
     {
-      path: "/",
+      path: ROUTES.LOGIN,
       element: <Login />,
     },
     {
-      path: "/logout",
+      path: ROUTES.LOGOUT,
       element: <Logout />,
     },
     {
-      path: "/dashboard",
+      path: ROUTES.DASHBOARD,
       element: (
         <PrivateRoute>
           <MainLayout />
@@ -44,35 +45,31 @@ function App() {
           element: <Dashboard />,
         },
         {
-          path: "products",
+          path: ROUTES.PRODUCTS,
           element: <ProductList />,
         },
-        // {
-        //   path: "users",
-        //   element: <UserLists />,
-        // },
         {
-          path: "drivers",
+          path: ROUTES.DRIVERS,
           element: <DriverLists />,
         },
         {
-          path: "asset",
+          path: ROUTES.ASSETS,
           element: <AssetLists />,
         },
         {
-          path: "customers",
+          path: ROUTES.CUSTOMERS,
           element: <CustomerLists />,
         },
         {
-          path: "customersBranch",
+          path: ROUTES.CUSTOMERS_BRANCH,
           element: <CustomerBranchList />,
         },
         {
-          path: "delivery",
+          path: ROUTES.DELIVERIES,
           element: <DeliveryList />,
         },
         {
-          path: "category",
+          path: ROUTES.CATEGORIES,
           element: <CategoryList />,
         },
       ],
