@@ -31,9 +31,7 @@ const DeliveryDetails = ({ order, onClose, onSave, onChange }) => {
   const [showDetailsForm, setShowDetailsForm] = useState(false);
   const [editingLineItem, setEditingLineItem] = useState(null);
   const [plannedAt, setPlannedAt] = useState(
-    order.deliveryOrder?.plannedAt
-      ? new Date(order.deliveryOrder.plannedAt).toISOString()
-      : null
+    order.startedAt ? new Date(order.startedAt).toISOString() : null
   );
   const [selectedDriver, setSelectedDriver] = useState(
     order.deliveryOrder?.driver?.name || ""
@@ -307,7 +305,7 @@ const DeliveryDetails = ({ order, onClose, onSave, onChange }) => {
     const updatedOrder = {
       id: order.id,
       status: status,
-      startedAt: order.startedAt,
+      startedAt: plannedAt,
       cancelledAt: order.cancelledAt,
       customerId: order.customer?.id || "defaultCustomerId",
       recurring: order.recurring,
@@ -413,10 +411,7 @@ const DeliveryDetails = ({ order, onClose, onSave, onChange }) => {
                   label="CREATED AT"
                   value={formatDate(order.deliveryOrder?.createdAt)}
                 />
-                <InfoItem
-                  label="STARTED AT"
-                  value={formatDate(order.startedAt)}
-                />
+                <InfoItem label="STARTED AT" value={formatDate(plannedAt)} />
                 {status !== "cancelled" && (
                   <InfoItem
                     label="COMPLETED AT"
