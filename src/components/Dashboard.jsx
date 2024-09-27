@@ -1,7 +1,5 @@
-import DeliveryList from "./delivery/DeliveryList";
+import DeliveryList from "./deliveries/DeliveryList";
 
 export default function Dashboard() {
-  return (
-    <DeliveryList/>
-  )
+  return <DeliveryList />;
 }

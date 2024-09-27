@@ -31,6 +31,7 @@ import { faUser } from "@fortawesome/free-regular-svg-icons";
 import { faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
 import logo from "../assets/images/logo.png";
 import UserAvatar from "./UserAvatar";
+import { ROUTES } from "../constants/routes";
 
 export default function Nav() {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -40,7 +41,7 @@ export default function Nav() {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const handleLogout = () => {
-    navigate("/logout");
+    navigate(ROUTES.LOGOUT);
   };
 
   const NavLink = ({ to, children }) => (
@@ -58,12 +59,12 @@ export default function Nav() {
 
   const NavLinks = () => (
     <>
-      <NavLink to="/dashboard/asset">Assets</NavLink>
-      <NavLink to="/dashboard/products">Products</NavLink>
-      <NavLink to="/dashboard/category">Category</NavLink>
-      <NavLink to="/dashboard/drivers">Drivers</NavLink>
-      <NavLink to="/dashboard/customers">Customers</NavLink>
-      <NavLink to="/dashboard/delivery">Orders</NavLink>
+      <NavLink to={ROUTES.ASSETS}>Assets</NavLink>
+      <NavLink to={ROUTES.PRODUCTS}>Products</NavLink>
+      <NavLink to={ROUTES.CATEGORIES}>Category</NavLink>
+      <NavLink to={ROUTES.DRIVERS}>Drivers</NavLink>
+      <NavLink to={ROUTES.CUSTOMERS}>Customers</NavLink>
+      <NavLink to={ROUTES.DELIVERIES}>Orders</NavLink>
     </>
   );
 

@@ -4,7 +4,7 @@ import { useQuery } from "@apollo/client";
 import DatePicker from "../core/DatePicker";
 import AgGridTable from "../core/AgGridTable";
 import ActionButtons from "../core/ActionButtons";
-import DeliveryForm from "../delivery/DeliveryForm";
+import DeliveryForm from "./DeliveryForm";
 import { useColorModeValue } from "@chakra-ui/react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spinner, Box } from "@chakra-ui/react";
@@ -29,7 +29,7 @@ import {
 } from "../../redux/actions/deliveryActions";
 import { SelectField } from "../core/FormFields";
 import { convertFileToBase64 } from "../../helper/utils";
-import DeliveryDetails from "../delivery/DeliveryDetails";
+import DeliveryDetails from "./DeliveryDetails";
 import { format, isSameDay, parseISO } from "date-fns";
 import statusRender from "../core/StatusRender";
 
