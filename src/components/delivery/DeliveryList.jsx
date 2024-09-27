@@ -154,20 +154,20 @@ export default function DeliveryList() {
       // const startedAt = order.startedAt
       //   ? format(parseISO(order.startedAt), "yyyy-MM-dd'T'HH:mm:ss")
       //   : getTodayDate();
-      const completedAt = order.completedAt
-        ? format(parseISO(order.completedAt), "yyyy-MM-dd'T'HH:mm:ss")
-        : null;
-      const cancelledAt = order.cancelledAt
-        ? format(parseISO(order.cancelledAt), "yyyy-MM-dd'T'HH:mm:ss")
-        : getTodayDate();
-
+      // const completedAt = order.completedAt
+      //   ? format(parseISO(order.completedAt), "yyyy-MM-dd'T'HH:mm:ss")
+      //   : null;
+      // const cancelledAt = order.cancelledAt
+      //   ? format(parseISO(order.cancelledAt), "yyyy-MM-dd'T'HH:mm:ss")
+      //   : "";
       console.log(order, "order>>>>>>>>>");
 
+      const startedAt = order.deliveryOrderAttributes?.plannedAt;
       const mappedDeliveryOrderAttributes = {
         status: order.status,
-        startedAt: order.startedAt,
-        completedAt: completedAt,
-        cancelledAt: cancelledAt,
+        startedAt: startedAt,
+        completedAt: order.completedAt,
+        cancelledAt: order.cancelledAt,
         customerId: order.customerId,
         recurring: order.recurring
           ? {

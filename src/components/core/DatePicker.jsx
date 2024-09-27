@@ -28,11 +28,13 @@ export default function DatePicker({ selected, onChange, refetch }) {
   const handlePrevious = () => {
     const newStartDate = subDays(dateRange.startDate, 1);
     handleDateChange(newStartDate);
+    refetch();
   };
 
   const handleNext = () => {
     const newStartDate = addDays(dateRange.startDate, 1);
     handleDateChange(newStartDate);
+    refetch();
   };
 
   const datePickerBg = useColorModeValue("#EDF2F7", "#121212");
