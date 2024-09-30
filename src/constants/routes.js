@@ -1,5 +1,5 @@
 export const ROUTES = {
-  GRAPHQL_URL: "https://a660-110-44-126-21.ngrok-free.app/graphql",
+  GRAPHQL_URL: import.meta.env.VITE_GRAPHQL_URL,
   LOGIN: "/",
   LOGOUT: "/logout",
   DASHBOARD: "/dashboard",
