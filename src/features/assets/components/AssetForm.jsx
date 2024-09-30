@@ -8,7 +8,7 @@ export default function AssetForm({
   onClose,
   mode,
   asset,
-  handleSave,
+  onSave,
   onChange,
 }) {
   const { data, loading, error } = useQuery(GET_ASSET_CATEGORIES, {
@@ -31,7 +31,7 @@ export default function AssetForm({
       isOpen={showModal}
       onClose={onClose}
       title="Asset Details"
-      onSave={handleSave}
+      onSave={onSave}
     >
       {mode === "create" && (
         <InputField
