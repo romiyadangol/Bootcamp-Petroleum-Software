@@ -638,7 +638,9 @@ export default function DeliveryForm({ order, onChange, onSave, onClose }) {
                             label="Asset Category"
                             name="assetCategory"
                             value={
-                              selectedAsset ? selectedAsset.assetCategory : ""
+                              selectedAsset
+                                ? selectedAsset.assetCategory
+                                : "N/A"
                             }
                             onChange={(e) => {
                               const asset = assets.find(

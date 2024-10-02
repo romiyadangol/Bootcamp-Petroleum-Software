@@ -13,7 +13,7 @@ export default function ActionButtons({ onEdit, onDelete }) {
           border: "none",
           borderRadius: "5px",
           padding: "5px",
-          width: "100%",
+          width: "20%",
         }}
       >
         <FontAwesomeIcon
@@ -30,7 +30,7 @@ export default function ActionButtons({ onEdit, onDelete }) {
           border: "none",
           borderRadius: "5px",
           padding: "5px",
-          width: "100%",
+          width: "20%",
         }}
       >
         <FontAwesomeIcon

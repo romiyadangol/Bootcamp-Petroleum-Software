@@ -2,13 +2,16 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCirclePlus } from "@fortawesome/free-solid-svg-icons";
 
 const Header = ({
+  title,
   searchQuery,
   setSearchQuery,
   setShowModal,
-  setAsset,
+  setItem,
   setMode,
   inputbg,
   buttonbg,
+  placeholder,
+  onCreateNewItem,
 }) => (
   <div
     style={{
@@ -18,13 +21,11 @@ const Header = ({
       justifyContent: "space-between",
     }}
   >
-    <h2 style={{ fontSize: 25, fontWeight: "bold", padding: 15 }}>
-      Asset List
-    </h2>
+    <h2 style={{ fontSize: 25, fontWeight: "bold", padding: 15 }}>{title}</h2>
     <div>
       <input
         type="text"
-        placeholder="Search..."
+        placeholder={placeholder}
         style={{
           marginRight: 10,
           padding: 12,
@@ -46,20 +47,22 @@ const Header = ({
           fontWeight: "bold",
           width: 200,
           fontSize: 16,
+          whiteSpace: "nowrap",
         }}
         onClick={() => {
-          setAsset({
+          setItem({
             id: "",
-            assetId: "",
-            assetCategory: "",
-            assetStatus: "",
+            itemId: "",
+            itemCategory: "",
+            itemStatus: "",
           });
           setMode("create");
           setShowModal(true);
+          onCreateNewItem();
         }}
       >
         <FontAwesomeIcon icon={faCirclePlus} color="orange" />
-        &nbsp; Create New Asset
+        &nbsp; Create New {title}
       </button>
     </div>
   </div>

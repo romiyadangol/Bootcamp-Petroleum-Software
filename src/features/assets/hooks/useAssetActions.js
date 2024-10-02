@@ -10,6 +10,7 @@ import {
 import { useCreateAssetMutation } from "./mutation/CreateAssetMutation/useCreateAssetMutation";
 import { useUpdateAssetMutation } from "./mutation/UpdateAssetMutation/useUpdateAssetMutation";
 import { useDeleteAssetMutation } from "./mutation/DeleteAssetMutation/useDeleteAssetMutation";
+import { useAssetData } from "./useAssetData";
 
 export function useAssetActions() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -19,9 +20,11 @@ export function useAssetActions() {
 
   const dispatch = useDispatch();
 
-  const createAssetMutation = useCreateAssetMutation();
-  const updateAssetMutation = useUpdateAssetMutation();
-  const deleteAssetMutation = useDeleteAssetMutation();
+  const { refetch } = useAssetData();
+
+  const createAssetMutation = useCreateAssetMutation(refetch);
+  const updateAssetMutation = useUpdateAssetMutation(refetch);
+  const deleteAssetMutation = useDeleteAssetMutation(refetch);
 
   const handleEdit = (asset) => {
     console.log("Editing asset:", asset);
@@ -36,6 +39,7 @@ export function useAssetActions() {
       onCompleted: () => {
         dispatch(deleteAsset(id));
         toast.success("Asset Deleted");
+        refetch();
       },
       onError: (error) => {
         toast.error(`Failed to delete asset: ${error.message}`);
@@ -64,6 +68,7 @@ export function useAssetActions() {
         onCompleted: (data) => {
           setShowModal(false);
           handleMutationSuccess(data.editAsset.asset, "Asset Updated");
+          refetch();
         },
         onError: (error) => {
           toast.error(`Failed to update asset: ${error.message}`);
@@ -74,6 +79,7 @@ export function useAssetActions() {
         variables: { assetInfo },
         onCompleted: (data) => {
           handleMutationSuccess(data.createAsset.asset, "Asset Created");
+          refetch();
         },
         onError: (error) => {
           toast.error(`Failed to create asset: ${error.message}`);

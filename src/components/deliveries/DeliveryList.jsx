@@ -180,7 +180,7 @@ export default function DeliveryList() {
           plannedAt: order.deliveryOrderAttributes?.plannedAt,
           completedAt: order.deliveryOrderAttributes?.completedAt,
           customerBranchId: order.deliveryOrderAttributes?.customerBranchId,
-          assetId: order.deliveryOrderAttributes?.assetId,
+          assetId: order.deliveryOrderAttributes?.assetId || "N/A",
           driverId: order.deliveryOrderAttributes?.driverId,
           lineItemsAttributes:
             order.deliveryOrderAttributes?.lineItemsAttributes?.map((item) => ({
@@ -342,6 +342,8 @@ export default function DeliveryList() {
       {
         headerName: "Asset Category",
         field: "deliveryOrder.asset.assetCategory",
+        valueGetter: (params) =>
+          params.data.deliveryOrder?.asset?.assetCategory || "N/A",
       },
       { headerName: "Driver Name", field: "deliveryOrder.driver.name" },
       {
