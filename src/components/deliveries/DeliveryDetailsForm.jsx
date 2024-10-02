@@ -51,21 +51,21 @@ export default function DeliveryDetailsForm({
         <SelectField
           label="Name"
           name="name"
-          value={lineItem.name}
+          value={lineItem.name || "N/A"}
           onChange={handleChange}
           options={products.map((product) => product.name)}
         />
         <InputField
           label="Quantity"
           name="quantity"
-          value={lineItem.quantity}
+          value={lineItem.quantity || 0}
           onChange={handleChange}
           type="number"
         />
         <SelectField
           label="Units"
           name="units"
-          value={lineItem.units ? lineItem.units.toLowerCase() : ""}
+          value={lineItem.units ? lineItem.units.toLowerCase() : "N/A"}
           onChange={handleChange}
           options={["gallons", "liters"]}
         />

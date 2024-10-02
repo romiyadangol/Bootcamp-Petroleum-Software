@@ -3,27 +3,27 @@ import { useSelector } from "react-redux";
 import { useColorModeValue } from "@chakra-ui/react";
 import AgGridTable from "../../../components/core/AgGridTable";
 import ActionButtons from "../../../components/core/ActionButtons";
-import { useAssetActions } from "../hooks/useAssetActions";
+import { useProductActions } from "../hooks/useProductActions";
 import StatusCellRenderer from "../../../components/core/StatusCellRenderer";
 import Toastify from "../../../components/Toastify";
 import Header from "../../../components/core/Header";
-import AssetForm from "./AssetForm";
+import ProductForm from "./ProductForm";
 
-export default function AssetList() {
-  const assets = useSelector((state) => state.asset.assets || []);
+export default function ProductList() {
+  const products = useSelector((state) => state.product.products || []);
   const {
     mode,
-    asset,
+    product,
     handleSave,
     searchQuery,
     showModal,
     setSearchQuery,
     setShowModal,
-    setAsset,
+    setProduct,
     setMode,
     handleEdit,
     handleDelete,
-  } = useAssetActions();
+  } = useProductActions();
 
   const inputbg = useColorModeValue("#EDF2F7", "#121212");
   const buttonbg = useColorModeValue("#EDF2F7", "#121212");
@@ -38,13 +38,14 @@ export default function AssetList() {
   );
 
   const colDefs = [
-    { headerName: "Asset Type", field: "assetCategory" },
-    { headerName: "Asset ID", field: "assetId" },
+    { headerName: "Name", field: "name" },
+    { headerName: "Category", field: "productCategory" },
     {
       headerName: "Status",
-      field: "assetStatus",
+      field: "productStatus",
       cellRenderer: StatusCellRenderer,
     },
+    { headerName: "Unit", field: "productUnit" },
     {
       headerName: "Actions",
       cellRenderer: (params) => (
@@ -56,11 +57,13 @@ export default function AssetList() {
     },
   ];
 
-  const filteredRowData = assets.filter((item) => {
+  const filteredRowData = products.filter((item) => {
     const matchSearchQuery =
-      item?.assetId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item?.assetCategory?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item?.assetStatus?.toLowerCase().includes(searchQuery.toLowerCase());
+      item?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item?.productCategory
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      item?.productUnit?.toLowerCase().includes(searchQuery.toLowerCase());
 
     return matchSearchQuery;
   });
@@ -68,16 +71,16 @@ export default function AssetList() {
   return (
     <>
       <Header
-        title="Assets"
+        title="Products"
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         setShowModal={setShowModal}
-        setItem={setAsset}
+        setItem={setProduct}
         setMode={setMode}
         inputbg={inputbg}
         buttonbg={buttonbg}
-        placeholder="Search assets..."
-        onCreateNewItem={() => console.log("Creating new asset")}
+        placeholder="Search products..."
+        onCreateNewItem={() => console.log("Creating new product")}
       />
       <AgGridTable
         rowData={filteredRowData}
@@ -85,12 +88,12 @@ export default function AssetList() {
         defaultColDef={defaultColDef}
       />
       {showModal && (
-        <AssetForm
+        <ProductForm
           showModal={showModal}
           mode={mode}
-          asset={asset || {}}
+          product={product || {}}
           onChange={(e) =>
-            setAsset({ ...asset, [e.target.name]: e.target.value })
+            setProduct({ ...product, [e.target.name]: e.target.value })
           }
           onSave={handleSave}
           onClose={() => setShowModal(false)}

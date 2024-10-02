@@ -1,10 +1,10 @@
 import { useColorModeValue } from "@chakra-ui/react";
-import AssetList from "../components/AssetList";
-import { useAssetData } from "../hooks/useAssetData";
+import ProductList from "../components/ProductList";
+import { useProductData } from "../hooks/useProductData";
 import LoadingSpinner from "../../../components/core/LoadingSpinner";
 
-export default function AssetListPage() {
-  const { loading, error } = useAssetData();
+export default function ProductListPage() {
+  const { loading, error } = useProductData();
   const theme = useColorModeValue("ag-theme-quartz", "ag-theme-quartz-dark");
 
   if (loading) {
@@ -17,7 +17,7 @@ export default function AssetListPage() {
 
   return (
     <div className={theme} style={{ height: 700 }}>
-      <AssetList />
+      <ProductList />
     </div>
   );
 }

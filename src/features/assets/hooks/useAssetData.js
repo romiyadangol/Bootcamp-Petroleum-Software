@@ -18,7 +18,6 @@ export function useAssetData() {
     }
 
     if (data) {
-      console.log("Assets data:", data);
       dispatch(fetchAssetsSuccess(data.getAssets.assets));
     }
 
@@ -26,6 +25,7 @@ export function useAssetData() {
       dispatch(fetchAssetsFailure(error.message));
     }
   }, [data, loading, error, dispatch]);
+  console.log("Assets data:", data);
 
-  return { loading, error, refetch };
+  return { data, loading, error, refetch };
 }

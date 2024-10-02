@@ -402,14 +402,14 @@ const DeliveryDetails = ({ order, onClose, onSave, onChange }) => {
                 ) : (
                   <InfoItem
                     label="PLANNED AT"
-                    value={formatDate(plannedAt)}
+                    value={formatDate(plannedAt) || "N/A"}
                     editable
                     onEdit={() => setEditingField("plannedAt")}
                   />
                 )}
                 <InfoItem
                   label="CREATED AT"
-                  value={formatDate(order.deliveryOrder?.createdAt)}
+                  value={formatDate(order.deliveryOrder?.createdAt) || "N/A"}
                 />
                 <InfoItem label="STARTED AT" value={formatDate(plannedAt)} />
                 {status !== "cancelled" && (
@@ -432,7 +432,7 @@ const DeliveryDetails = ({ order, onClose, onSave, onChange }) => {
                   <SelectField
                     label="Driver"
                     name="driver"
-                    value={selectedDriver}
+                    value={selectedDriver || "N/A"}
                     onChange={(e) => saveDriver(e.target.value)}
                     options={
                       drivers?.length > 0 ? drivers.map((d) => d.name) : []

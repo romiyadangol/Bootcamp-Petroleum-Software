@@ -2,9 +2,9 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Login from "./components/Login";
 import Nav from "./components/Nav";
 import "./App.css";
-import ProductList from "./components/products/ProductList";
+import ProductListPage from "../src/features/products/pages/ProductListPage";
 import DriverLists from "./components/drivers/DriverLists";
-import AssetLists from "../src/features/assets/pages/AssetListPage";
+import AssetListPage from "../src/features/assets/pages/AssetListPage";
 import DeliveryList from "./components/deliveries/DeliveryList";
 import CustomerLists from "./components/customers/CustomerLists";
 import CustomerBranchList from "./components/customersBranch/CustomerBranchList";
@@ -53,7 +53,7 @@ function App() {
       path: ROUTES.PRODUCTS,
       element: (
         <ProtectedLayout>
-          <ProductList />
+          <ProductListPage />
         </ProtectedLayout>
       ),
     },
@@ -69,7 +69,7 @@ function App() {
       path: ROUTES.ASSETS,
       element: (
         <ProtectedLayout>
-          <AssetLists />
+          <AssetListPage />
         </ProtectedLayout>
       ),
     },

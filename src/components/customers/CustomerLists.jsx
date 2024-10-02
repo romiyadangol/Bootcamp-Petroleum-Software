@@ -25,6 +25,7 @@ import {
   fetchCustomersSuccess,
   updateCustomer,
 } from "../../redux/actions/customerActions";
+import { ROUTES } from "../../constants/routes";
 
 export default function CustomerLists() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -59,7 +60,7 @@ export default function CustomerLists() {
 
   const handleRowClicked = (customer) => {
     console.log(customer);
-    navigate(`/dashboard/customersBranch?customerId=${customer.id}`);
+    navigate(`${ROUTES.CUSTOMERS_BRANCH}?customerId=${customer.id}`);
   };
 
   const handleEdit = (customer) => {
