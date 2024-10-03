@@ -5,7 +5,6 @@ import { toast } from "react-toastify";
 export const useUpdateAssetMutation = (refetch) => {
   const [updateAsset] = useMutation(UPDATE_ASSET, {
     onCompleted: () => {
-      toast.success("Asset updated successfully");
       refetch();
     },
     onError: (error) => {

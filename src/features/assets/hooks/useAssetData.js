@@ -13,18 +13,27 @@ export function useAssetData() {
   const { data, loading, error, refetch } = useQuery(GET_ASSETS);
 
   useEffect(() => {
-    if (loading) {
-      dispatch(fetchAssetsRequest());
-    }
+    const fetchData = async () => {
+      try {
+        if (loading) {
+          dispatch(fetchAssetsRequest());
+        }
 
-    if (data) {
-      dispatch(fetchAssetsSuccess(data.getAssets.assets));
-    }
+        if (data) {
+          dispatch(fetchAssetsSuccess(data.getAssets.assets));
+        }
 
-    if (error) {
-      dispatch(fetchAssetsFailure(error.message));
-    }
+        if (error) {
+          throw new Error(error.message);
+        }
+      } catch (err) {
+        dispatch(fetchAssetsFailure(err.message));
+      }
+    };
+
+    fetchData();
   }, [data, loading, error, dispatch]);
+
   console.log("Assets data:", data);
 
   return { data, loading, error, refetch };

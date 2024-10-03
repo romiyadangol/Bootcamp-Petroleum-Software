@@ -26,27 +26,26 @@ export function useProductActions() {
   const deleteProductMutation = useDeleteProductMutation(refetch);
 
   const handleEdit = (product) => {
-    console.log("Editing asset:", product);
+    console.log("Editing product:", product);
     setProduct(product);
     setMode("edit");
     setShowModal(true);
   };
 
-  const handleDelete = (id) => {
-    deleteProductMutation({
-      variables: { id },
-      onCompleted: () => {
-        dispatch(deleteProduct(id));
-        toast.success("Product Deleted");
-        refetch();
-      },
-      onError: (error) => {
-        toast.error(`Failed to delete product: ${error.message}`);
-      },
-    });
+  const handleDelete = async (id) => {
+    try {
+      await deleteProductMutation({
+        variables: { id },
+      });
+      dispatch(deleteProduct(id));
+      toast.success("Product Deleted");
+      refetch();
+    } catch (error) {
+      toast.error(`Failed to delete product: ${error.message}`);
+    }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     console.log("Product:", product);
     const trimmedProduct = {
       ...product,
@@ -63,29 +62,27 @@ export function useProductActions() {
       productUnit: trimmedProduct.productUnit,
     };
 
-    if (mode === "edit") {
-      updateProductMutation({
-        variables: { id: trimmedProduct.id, productInfo },
-        onCompleted: (data) => {
-          setShowModal(false);
-          handleMutationSuccess(data.updateProduct.product, "Product Updated");
-          refetch();
-        },
-        onError: (error) => {
-          toast.error(`Failed to update product: ${error.message}`);
-        },
-      });
-    } else {
-      createProductMutation({
-        variables: { productInfo },
-        onCompleted: (data) => {
-          handleMutationSuccess(data.createProduct.product, "Product Created");
-          refetch();
-        },
-        onError: (error) => {
-          toast.error(`Failed to create product: ${error.message}`);
-        },
-      });
+    try {
+      if (mode === "edit") {
+        const { data } = await updateProductMutation({
+          variables: { id: trimmedProduct.id, productInfo },
+        });
+        setShowModal(false);
+        handleMutationSuccess(data.updateProduct.product, "Product Updated");
+        refetch();
+      } else {
+        const { data } = await createProductMutation({
+          variables: { productInfo },
+        });
+        handleMutationSuccess(data.createProduct.product, "Product Created");
+        refetch();
+      }
+    } catch (error) {
+      toast.error(
+        `Failed to ${mode === "edit" ? "update" : "create"} product: ${
+          error.message
+        }`
+      );
     }
   };
 

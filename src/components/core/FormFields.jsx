@@ -1,10 +1,25 @@
-import { FormControl, FormLabel, Input, Select } from "@chakra-ui/react";
+import {
+  FormControl,
+  FormLabel,
+  Input,
+  Select,
+  FormErrorMessage,
+} from "@chakra-ui/react";
 
-export const InputField = ({ label, type, name, value, onChange }) => {
+export const InputField = ({
+  label,
+  type,
+  name,
+  value,
+  onChange,
+  isInvalid,
+  errorMessage,
+}) => {
   return (
-    <FormControl>
+    <FormControl isInvalid={isInvalid}>
       <FormLabel>{label}</FormLabel>
       <Input type={type} name={name} value={value || ""} onChange={onChange} />
+      {isInvalid && <FormErrorMessage>{errorMessage}</FormErrorMessage>}
     </FormControl>
   );
 };
@@ -17,8 +32,10 @@ export const SelectField = ({
   options,
   width,
   isDisabled,
+  isInvalid,
+  errorMessage,
 }) => (
-  <FormControl mb={4}>
+  <FormControl mb={4} isInvalid={isInvalid}>
     {label && <FormLabel>{label}:</FormLabel>}
     <Select
       name={name}
@@ -34,5 +51,6 @@ export const SelectField = ({
         </option>
       ))}
     </Select>
+    {isInvalid && <FormErrorMessage>{errorMessage}</FormErrorMessage>}
   </FormControl>
 );

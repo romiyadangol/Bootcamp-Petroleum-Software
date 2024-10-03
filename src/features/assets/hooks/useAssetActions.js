@@ -33,21 +33,20 @@ export function useAssetActions() {
     setShowModal(true);
   };
 
-  const handleDelete = (id) => {
-    deleteAssetMutation({
-      variables: { id },
-      onCompleted: () => {
-        dispatch(deleteAsset(id));
-        toast.success("Asset Deleted");
-        refetch();
-      },
-      onError: (error) => {
-        toast.error(`Failed to delete asset: ${error.message}`);
-      },
-    });
+  const handleDelete = async (id) => {
+    try {
+      await deleteAssetMutation({
+        variables: { id },
+      });
+      dispatch(deleteAsset(id));
+      toast.success("Asset Deleted");
+      refetch();
+    } catch (error) {
+      toast.error(`Failed to delete asset: ${error.message}`);
+    }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     console.log("Asset:", asset);
     const trimmedAsset = {
       ...asset,
@@ -62,29 +61,27 @@ export function useAssetActions() {
       assetStatus: trimmedAsset.assetStatus,
     };
 
-    if (mode === "edit") {
-      updateAssetMutation({
-        variables: { id: trimmedAsset.id, assetInfo },
-        onCompleted: (data) => {
-          setShowModal(false);
-          handleMutationSuccess(data.editAsset.asset, "Asset Updated");
-          refetch();
-        },
-        onError: (error) => {
-          toast.error(`Failed to update asset: ${error.message}`);
-        },
-      });
-    } else {
-      createAssetMutation({
-        variables: { assetInfo },
-        onCompleted: (data) => {
-          handleMutationSuccess(data.createAsset.asset, "Asset Created");
-          refetch();
-        },
-        onError: (error) => {
-          toast.error(`Failed to create asset: ${error.message}`);
-        },
-      });
+    try {
+      if (mode === "edit") {
+        const { data } = await updateAssetMutation({
+          variables: { id: trimmedAsset.id, assetInfo },
+        });
+        setShowModal(false);
+        handleMutationSuccess(data.editAsset.asset, "Asset Updated");
+        refetch();
+      } else {
+        const { data } = await createAssetMutation({
+          variables: { assetInfo },
+        });
+        handleMutationSuccess(data.createAsset.asset, "Asset Created");
+        refetch();
+      }
+    } catch (error) {
+      toast.error(
+        `Failed to ${mode === "edit" ? "update" : "create"} asset: ${
+          error.message
+        }`
+      );
     }
   };
 

@@ -5,7 +5,6 @@ import { DELETE_PRODUCT } from "../../../../../graphql/mutation/products/deleteP
 export const useDeleteProductMutation = (refetch) => {
   const [deleteProduct] = useMutation(DELETE_PRODUCT, {
     onCompleted: () => {
-      toast.success("Asset created successfully");
       refetch();
     },
     onError: (error) => {
