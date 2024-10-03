@@ -1,6 +1,7 @@
 import ModalWrapper from "../../../components/core/ModalWrapper";
 import { InputField, SelectField } from "../../../components/core/FormFields";
 import { useQuery } from "@apollo/client";
+import { useState } from "react";
 import { GET_PRODUCT_CATEGORIES } from "../../../graphql/queries/categories/getProductCategories";
 
 export default function ProductForm({
@@ -14,6 +15,8 @@ export default function ProductForm({
     variables: { categoryClass: "product" },
   });
 
+  const [errors, setErrors] = useState({});
+
   if (!showModal) return null;
 
   if (loading) return <p>Loading...</p>;
@@ -24,12 +27,41 @@ export default function ProductForm({
 
   const hardcodedStatuses = ["available", "out_of_stock"];
   const hardcodedUnits = ["liters", "gallons"];
+
+  const validate = () => {
+    const newErrors = {};
+    if (!product.name) {
+      newErrors.name = "Name is required";
+    } else if (!/^[a-zA-Z0-9]+$/.test(product.name)) {
+      newErrors.name = "Name must contain alphanumeric";
+    }
+    if (!product.productCategory) {
+      newErrors.productCategory = "Category is required";
+    }
+    if (!product.productStatus) {
+      newErrors.productStatus = "Status is required";
+    }
+    if (!product.productUnit) {
+      newErrors.productUnit = "Unit is required";
+    }
+    return newErrors;
+  };
+
+  const handleSave = () => {
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+    } else {
+      onSave();
+    }
+  };
+
   return (
     <ModalWrapper
       isOpen={showModal}
       onClose={onClose}
       title="Product Details"
-      onSave={onSave}
+      onSave={handleSave}
       maxWidth={800}
     >
       <InputField
@@ -37,6 +69,8 @@ export default function ProductForm({
         name="name"
         value={product.name}
         onChange={onChange}
+        isInvalid={!!errors.name}
+        errorMessage={errors.name}
       />
       <SelectField
         label="Category"
@@ -44,6 +78,8 @@ export default function ProductForm({
         value={product.productCategory}
         onChange={onChange}
         options={productCategoryOptions}
+        isInvalid={!!errors.productCategory}
+        errorMessage={errors.productCategory}
       />
       <SelectField
         label="Status"
@@ -51,6 +87,8 @@ export default function ProductForm({
         value={product.productStatus}
         onChange={onChange}
         options={hardcodedStatuses}
+        isInvalid={!!errors.productStatus}
+        errorMessage={errors.productStatus}
       />
       <SelectField
         label="Unit"
@@ -58,6 +96,8 @@ export default function ProductForm({
         value={product.productUnit}
         onChange={onChange}
         options={hardcodedUnits}
+        isInvalid={!!errors.productUnit}
+        errorMessage={errors.productUnit}
       />
     </ModalWrapper>
   );

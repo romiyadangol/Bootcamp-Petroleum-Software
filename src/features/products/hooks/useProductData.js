@@ -13,18 +13,26 @@ export function useProductData() {
   const { data, loading, error, refetch } = useQuery(FIND_PRODUCTS);
 
   useEffect(() => {
-    if (loading) {
-      dispatch(fetchProductsRequest());
-    }
+    const fetchData = async () => {
+      try {
+        if (loading) {
+          dispatch(fetchProductsRequest());
+        }
 
-    if (data) {
-      console.log("Products data:", data);
-      dispatch(fetchProductsSuccess(data.findProducts.products));
-    }
+        if (data) {
+          console.log("Products data:", data);
+          dispatch(fetchProductsSuccess(data.findProducts.products));
+        }
 
-    if (error) {
-      dispatch(fetchProductsError(error.message));
-    }
+        if (error) {
+          throw new Error(error.message);
+        }
+      } catch (err) {
+        dispatch(fetchProductsError(err.message));
+      }
+    };
+
+    fetchData();
   }, [data, loading, error, dispatch]);
 
   return { loading, error, refetch };

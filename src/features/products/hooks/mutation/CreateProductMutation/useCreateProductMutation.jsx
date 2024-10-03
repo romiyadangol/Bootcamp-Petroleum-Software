@@ -5,7 +5,6 @@ import { CREATE_PRODUCT } from "../../../../../graphql/mutation/products/createP
 export const useCreateProductMutation = (refetch) => {
   const [createProduct] = useMutation(CREATE_PRODUCT, {
     onCompleted: () => {
-      toast.success("Asset created successfully");
       refetch();
     },
     onError: (error) => {

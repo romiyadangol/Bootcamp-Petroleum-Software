@@ -5,7 +5,6 @@ import { toast } from "react-toastify";
 export const useDeleteAssetMutation = (refetch) => {
   const [deleteAsset] = useMutation(DELETE_ASSET, {
     onCompleted: () => {
-      toast.success("Asset deleted successfully");
       refetch();
     },
     onError: (error) => {

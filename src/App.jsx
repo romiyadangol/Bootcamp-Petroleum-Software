@@ -3,14 +3,14 @@ import Login from "./components/Login";
 import Nav from "./components/Nav";
 import "./App.css";
 import ProductListPage from "../src/features/products/pages/ProductListPage";
-import DriverLists from "./components/drivers/DriverLists";
+import DriverListPage from "../src/features/drivers/pages/DriverListPage";
 import AssetListPage from "../src/features/assets/pages/AssetListPage";
 import DeliveryList from "./components/deliveries/DeliveryList";
 import CustomerLists from "./components/customers/CustomerLists";
 import CustomerBranchList from "./components/customersBranch/CustomerBranchList";
+import CategoryListPage from "../src/features/categories/pages/CategoryListPage";
 import Logout from "./components/Logout";
 import Dashboard from "./components/Dashboard";
-import CategoryList from "./components/categories/CategoryList";
 import PrivateRoute from "./components/privateRoute/PrivateRoute";
 import { ROUTES } from "./constants/routes";
 
@@ -61,7 +61,7 @@ function App() {
       path: ROUTES.DRIVERS,
       element: (
         <ProtectedLayout>
-          <DriverLists />
+          <DriverListPage />
         </ProtectedLayout>
       ),
     },
@@ -101,7 +101,7 @@ function App() {
       path: ROUTES.CATEGORIES,
       element: (
         <ProtectedLayout>
-          <CategoryList />
+          <CategoryListPage />
         </ProtectedLayout>
       ),
     },

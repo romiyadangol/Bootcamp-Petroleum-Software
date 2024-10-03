@@ -5,7 +5,6 @@ import { toast } from "react-toastify";
 export const useCreateAssetMutation = (refetch) => {
   const [createAsset] = useMutation(CREATE_ASSET, {
     onCompleted: () => {
-      toast.success("Asset created successfully");
       refetch();
     },
     onError: (error) => {
