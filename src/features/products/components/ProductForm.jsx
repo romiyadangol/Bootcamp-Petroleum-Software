@@ -3,6 +3,11 @@ import { InputField, SelectField } from "../../../components/core/FormFields";
 import { useQuery } from "@apollo/client";
 import { useState } from "react";
 import { GET_PRODUCT_CATEGORIES } from "../../../graphql/queries/categories/getProductCategories";
+import {
+  productValidationSchema,
+  validateField,
+  validateForm,
+} from "../validation/productValidationUtils";
 
 export default function ProductForm({
   showModal,
@@ -28,30 +33,27 @@ export default function ProductForm({
   const hardcodedStatuses = ["available", "out_of_stock"];
   const hardcodedUnits = ["liters", "gallons"];
 
-  const validate = () => {
-    const newErrors = {};
-    if (!product.name) {
-      newErrors.name = "Name is required";
-    } else if (!/^[a-zA-Z0-9]+$/.test(product.name)) {
-      newErrors.name = "Name must contain alphanumeric";
-    }
-    if (!product.productCategory) {
-      newErrors.productCategory = "Category is required";
-    }
-    if (!product.productStatus) {
-      newErrors.productStatus = "Status is required";
-    }
-    if (!product.productUnit) {
-      newErrors.productUnit = "Unit is required";
-    }
-    return newErrors;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    onChange(e);
+    const fieldErrors = validateField(
+      productValidationSchema,
+      name,
+      value,
+      product
+    );
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: fieldErrors[name] || "",
+    }));
   };
 
   const handleSave = () => {
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
+    const formErrors = validateForm(productValidationSchema, product);
+    if (Object.keys(formErrors).length > 0) {
+      setErrors(formErrors);
     } else {
+      setErrors({});
       onSave();
     }
   };
@@ -68,7 +70,7 @@ export default function ProductForm({
         label="Name"
         name="name"
         value={product.name}
-        onChange={onChange}
+        onChange={handleChange}
         isInvalid={!!errors.name}
         errorMessage={errors.name}
       />
@@ -76,7 +78,7 @@ export default function ProductForm({
         label="Category"
         name="productCategory"
         value={product.productCategory}
-        onChange={onChange}
+        onChange={handleChange}
         options={productCategoryOptions}
         isInvalid={!!errors.productCategory}
         errorMessage={errors.productCategory}
@@ -85,7 +87,7 @@ export default function ProductForm({
         label="Status"
         name="productStatus"
         value={product.productStatus}
-        onChange={onChange}
+        onChange={handleChange}
         options={hardcodedStatuses}
         isInvalid={!!errors.productStatus}
         errorMessage={errors.productStatus}
@@ -94,7 +96,7 @@ export default function ProductForm({
         label="Unit"
         name="productUnit"
         value={product.productUnit}
-        onChange={onChange}
+        onChange={handleChange}
         options={hardcodedUnits}
         isInvalid={!!errors.productUnit}
         errorMessage={errors.productUnit}

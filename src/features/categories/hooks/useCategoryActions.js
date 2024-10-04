@@ -16,53 +16,49 @@ export const useCategoryActions = (refetch) => {
   const updateCategoryMutation = useUpdateCategoryMutation(refetch);
   const deleteCategoryMutation = useDeleteCategoryMutation(refetch);
 
-  const handleSave = (category, mode, setShowModal) => {
-    if (mode === "edit") {
-      updateCategoryMutation({
-        variables: {
-          id: category.id,
-          categoryInfo: {
-            name: category.name,
+  const handleSave = async (category, mode, setShowModal) => {
+    const variables = {
+      categoryInfo: {
+        name: category.name,
+        categoryClass: category.categoryClass,
+      },
+    };
+
+    try {
+      if (mode === "edit") {
+        const { data } = await updateCategoryMutation({
+          variables: {
+            id: category.id,
+            ...variables,
           },
-        },
-        onCompleted: (data) => {
-          dispatch(updateCategory(data.editCategory.category));
-          refetch();
-          toast.success("Category Updated");
-          setShowModal(false);
-        },
-      });
-    } else {
-      createCategoryMutation({
-        variables: {
-          categoryInfo: {
-            name: category.name,
-            categoryClass: category.categoryClass,
-          },
-        },
-        onCompleted: (data) => {
-          dispatch(
-            addCategory({
-              ...data.createCategory.category,
-            })
-          );
-          refetch();
-          toast.success("Category Created");
-          setShowModal(false);
-        },
-      });
+        });
+        dispatch(updateCategory(data.editCategory.category));
+        toast.success("Category Updated");
+      } else {
+        const { data } = await createCategoryMutation({
+          variables,
+        });
+        dispatch(addCategory(data.createCategory.category));
+        toast.success("Category Created");
+      }
+      refetch();
+      setShowModal(false);
+    } catch (error) {
+      toast.error("An error occurred while saving the category" + error);
     }
   };
 
-  const handleDelete = (id) => {
-    deleteCategoryMutation({
-      variables: { id },
-      onCompleted: () => {
-        dispatch(deleteCategory(id));
-        refetch();
-        toast.success("Category Deleted");
-      },
-    });
+  const handleDelete = async (id) => {
+    try {
+      await deleteCategoryMutation({
+        variables: { id },
+      });
+      dispatch(deleteCategory(id));
+      refetch();
+      toast.success("Category Deleted");
+    } catch (error) {
+      toast.error("An error occurred while deleting the category" + error);
+    }
   };
 
   return {

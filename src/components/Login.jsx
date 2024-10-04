@@ -24,18 +24,40 @@ import {
   VStack,
   InputGroup,
   InputRightElement,
+  FormErrorMessage,
 } from "@chakra-ui/react";
 import { storeToken } from "../helper/storage";
 import { ROUTES } from "../constants/routes";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+
+// Define Yup validation schema
+const schema = yup.object().shape({
+  email: yup
+    .string()
+    .email("Invalid email address")
+    .required("Email is required"),
+  password: yup
+    .string()
+    .required("Password is required")
+    .min(6, "Password must be at least 6 characters"),
+});
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const ls = new SecureLS({ encodingType: "aes" });
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
 
   const [login, { error, loading }] = useMutation(LOGIN_USER, {
     onCompleted: (data) => {
@@ -46,7 +68,7 @@ const Login = () => {
         return;
       }
 
-      if ((token, user.roles)) {
+      if (token && user.roles) {
         try {
           const secureUser = {
             id: user.id,
@@ -59,8 +81,6 @@ const Login = () => {
           storeToken(token, user.roles);
 
           dispatch(loginUserSuccess(user));
-          setEmail("");
-          setPassword("");
           navigate("/dashboard");
         } catch (error) {
           console.error("Error storing token:", error);
@@ -75,18 +95,13 @@ const Login = () => {
     },
   });
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (!email || !password) {
-      dispatch(loginUserFailure("Please fill in both email and password."));
-      return;
-    }
+  const onSubmit = (data) => {
     dispatch(loginUser());
     login({
       variables: {
         sessionInfo: {
-          email,
-          password,
+          email: data.email,
+          password: data.password,
         },
       },
     });
@@ -130,27 +145,30 @@ const Login = () => {
           </Text>
         )}
 
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <VStack spacing="4">
-            <FormControl id="email" isRequired>
+            <FormControl id="email" isRequired isInvalid={errors.email}>
               <FormLabel color="#fa6501">Email</FormLabel>
               <Input
                 type="email"
                 placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+                {...register("email")}
               />
+              <FormErrorMessage>{errors.email?.message}</FormErrorMessage>
             </FormControl>
 
-            <FormControl id="password" isRequired mt={4}>
+            <FormControl
+              id="password"
+              isRequired
+              mt={4}
+              isInvalid={errors.password}
+            >
               <FormLabel color="#fa6501">Password</FormLabel>
               <InputGroup>
                 <Input
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  {...register("password")}
                 />
                 <InputRightElement width="4.5rem">
                   <Button
@@ -166,6 +184,7 @@ const Login = () => {
                   </Button>
                 </InputRightElement>
               </InputGroup>
+              <FormErrorMessage>{errors.password?.message}</FormErrorMessage>
             </FormControl>
 
             <Button

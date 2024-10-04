@@ -1,4 +1,9 @@
+const capitalizeFirstLetter = (string) => {
+  return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+};
+
 const StatusCellRenderer = (params) => {
+  const statusValue = capitalizeFirstLetter(params.value);
   let statusColor;
   switch (params.value) {
     case "available":
@@ -27,8 +32,9 @@ const StatusCellRenderer = (params) => {
   return (
     <span>
       <span style={dotStyle}></span>
-      <span>{params.value}</span>
+      <span>{statusValue}</span>
     </span>
   );
 };
+
 export default StatusCellRenderer;
