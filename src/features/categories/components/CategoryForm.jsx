@@ -1,6 +1,11 @@
 import ModalWrapper from "../../../components/core/ModalWrapper";
 import { InputField, SelectField } from "../../../components/core/FormFields";
 import { useEffect, useState } from "react";
+import {
+  categoryValidationSchema,
+  validateField,
+  validateForm,
+} from "../validation/categoryValidationUtils";
 
 export default function CategoryForm({
   mode,
@@ -18,21 +23,27 @@ export default function CategoryForm({
     }
   }, [mode, categoryClass, onChange]);
 
-  const validate = () => {
-    const newErrors = {};
-    if (!category.name) {
-      newErrors.name = "Category Name is required";
-    } else if (!/^[a-zA-Z\s]+$/.test(category.name)) {
-      newErrors.name = "Category Name must contain only alphabetic characters";
-    }
-    return newErrors;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    onChange(e);
+    const fieldErrors = validateField(
+      categoryValidationSchema,
+      name,
+      value,
+      category
+    );
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: fieldErrors[name] || "",
+    }));
   };
 
   const handleSave = () => {
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
+    const formErrors = validateForm(categoryValidationSchema, category);
+    if (Object.keys(formErrors).length > 0) {
+      setErrors(formErrors);
     } else {
+      setErrors({});
       onSave();
     }
   };
@@ -48,7 +59,7 @@ export default function CategoryForm({
         label="Category Name"
         name="name"
         value={category.name || ""}
-        onChange={onChange}
+        onChange={handleChange}
         isInvalid={!!errors.name}
         errorMessage={errors.name}
       />

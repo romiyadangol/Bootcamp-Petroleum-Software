@@ -3,6 +3,11 @@ import { useState } from "react";
 import ModalWrapper from "../../../components/core/ModalWrapper";
 import { InputField, SelectField } from "../../../components/core/FormFields";
 import { GET_ASSET_CATEGORIES } from "../../../graphql/queries/categories/getAssetCategories";
+import {
+  assetValidationSchema,
+  validateField,
+  validateForm,
+} from "../validation/assetValidationUtils";
 
 export default function AssetForm({
   showModal,
@@ -27,33 +32,29 @@ export default function AssetForm({
   const assetCategoryOptions = categories.map((category) => category.name);
 
   const hardcodedStatuses = ["active", "inactive"];
-  console.log(showModal, "showModal>>>>>");
 
-  const validate = () => {
-    const newErrors = {};
-    if (mode === "create") {
-      if (!asset?.assetId) {
-        newErrors.assetId = "Asset ID is required";
-      } else if (!/^[a-zA-Z0-9]+$/.test(asset.assetId)) {
-        newErrors.assetId = "Asset ID must be alphanumeric";
-      }
-      return newErrors;
-    }
-    if (!asset?.assetCategory) {
-      newErrors.assetCategory = "Category is required";
-    }
-    if (!asset?.assetStatus) {
-      newErrors.assetStatus = "Status is required";
-    }
-    return newErrors;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    onChange(e);
+    const fieldErrors = validateField(
+      assetValidationSchema,
+      name,
+      value,
+      asset
+    );
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: fieldErrors[name] || "",
+    }));
   };
 
   const handleSave = () => {
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
+    const formErrors = validateForm(assetValidationSchema, asset);
+    if (Object.keys(formErrors).length > 0) {
+      setErrors(formErrors);
     } else {
-      onSave();
+      setErrors({});
+      onSave(asset);
     }
   };
 
@@ -69,7 +70,7 @@ export default function AssetForm({
           label="Asset ID"
           name="assetId"
           value={asset?.assetId ?? ""}
-          onChange={onChange}
+          onChange={handleChange}
           isInvalid={!!errors.assetId}
           errorMessage={errors.assetId}
         />
@@ -78,7 +79,7 @@ export default function AssetForm({
         label="Category"
         name="assetCategory"
         value={asset?.assetCategory ?? ""}
-        onChange={onChange}
+        onChange={handleChange}
         options={assetCategoryOptions}
         isInvalid={!!errors.assetCategory}
         errorMessage={errors.assetCategory}
@@ -87,7 +88,7 @@ export default function AssetForm({
         label="Status"
         name="assetStatus"
         value={asset?.assetStatus ?? ""}
-        onChange={onChange}
+        onChange={handleChange}
         options={hardcodedStatuses}
         isInvalid={!!errors.assetStatus}
         errorMessage={errors.assetStatus}

@@ -8,6 +8,7 @@ import DriverForm from "./DriverForm";
 import Toastify from "../../../components/Toastify";
 import { useDriverData } from "../hooks/useDriverData";
 import { useDriverActions } from "../hooks/useDriverActions";
+import StatusCellRenderer from "../../../components/core/StatusCellRenderer";
 
 export default function DriverList() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -27,26 +28,6 @@ export default function DriverList() {
     []
   );
 
-  const statusCellRenderer = (params) => {
-    const status = params.value === "active" ? "success" : "danger";
-    const dotStyle = {
-      display: "inline-block",
-      width: "10px",
-      height: "10px",
-      borderRadius: "50%",
-      marginRight: "8px",
-      backgroundColor: status === "success" ? "green" : "red",
-    };
-    return (
-      <span>
-        <span style={dotStyle}></span>
-        <span className={`badge rounded-pill bg-${status}`}>
-          {params.value}
-        </span>
-      </span>
-    );
-  };
-
   const colDefs = useMemo(
     () => [
       { headerName: "Name", field: "name" },
@@ -55,7 +36,7 @@ export default function DriverList() {
       {
         headerName: "Status",
         field: "status",
-        cellRenderer: statusCellRenderer,
+        cellRenderer: StatusCellRenderer,
         cellEditor: "agSelectCellEditor",
         cellEditorParams: { values: ["Active", "Inactive"] },
       },
